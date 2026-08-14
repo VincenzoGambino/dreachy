@@ -1,0 +1,36 @@
+name: Sync to Hugging Face Space
+
+# GitHub is the primary repo; this mirrors it to a Hugging Face Space purely
+# for marketplace discovery (same pattern reachy_mini_conversation_app uses).
+# Fires on a version tag, so a push to main doesn't sync a half-finished state.
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+
+concurrency:
+  group: hf-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          lfs: true
+      - name: Sync GitHub to Hugging Face Hub
+        uses: huggingface/hub-sync@64269e310f79686d68ea78fd189cd1dd7d5ce427  # v0.2.0
+        with:
+          # Assumes an HF Space named "dreachy" under the same account as the
+          # HF_TOKEN secret — create it once on huggingface.co if it doesn't
+          # already exist, then adjust huggingface_repo_id here if it differs.
+          github_repo_id: VincenzoGambino/dreachy
+          huggingface_repo_id: VincenzoGambino/dreachy
+          hf_token: ${{ secrets.HF_TOKEN }}
+          repo_type: space
+          space_sdk: static

@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "dreachy"
+version = "0.1.0"
+description = "Reachy Mini becomes the embodiment of a Drupal site — answers questions about published content, reads it aloud, reports its own \"pulse\", and reacts physically to new posts."
+authors = [{ name = "Vincenzo Gambino" }]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.12"
+dependencies = [
+    "reachy-mini>=1.9.0",
+    "reachy-mini-conversation-app",
+    "httpx>=0.28.1",
+    "drupal-api-client>=0.3.0",
+    "drupal-jsonapi-params>=0.1.0",
+    "python-dotenv",
+]
+keywords = ["reachy-mini-app"]
+
+[project.entry-points."reachy_mini_apps"]
+dreachy = "dreachy.main:Dreachy"
+
+[tool.uv.sources]
+# Not published on PyPI — installed straight from Pollen Robotics' upstream repo.
+# Pinned to the exact commit Dreachy was built and rehearsed against (0.9.0
+# series, three-file profile format: instructions.txt/tools.txt/greeting.txt).
+# Upstream's main branch has since moved to 1.0.0, a breaking change (profile
+# format becomes a single profile.md) — do not float this to "main" without
+# migrating dreachy/profile/dreachy/ first (see plans/dreachy.md Open items
+# in the reachy-demos workspace).
+reachy-mini-conversation-app = { git = "https://github.com/pollen-robotics/reachy_mini_conversation_app", rev = "d44fc7191e34fd293e37d45f8a84b5a986e38a58" }
+
+[dependency-groups]
+dev = ["pytest>=9.1.1"]
+
+[tool.setuptools]
+package-dir = { "" = "." }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+dreachy = ["**/*"] # Also include all non-.py files

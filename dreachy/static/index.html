@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Dreachy — Settings</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+			max-width: 640px;
+			margin: 40px auto;
+			padding: 0 20px;
+			color: #1e293b;
+			background: #f8fafc;
+		}
+
+		h1 {
+			font-size: 1.5rem;
+			margin-bottom: 0.25rem;
+		}
+
+		p.subtitle {
+			color: #64748b;
+			margin-top: 0;
+			margin-bottom: 2rem;
+		}
+
+		label {
+			display: block;
+			font-weight: 600;
+			margin-bottom: 0.4rem;
+		}
+
+		.hint {
+			font-weight: 400;
+			color: #64748b;
+			font-size: 0.85rem;
+			margin-top: 0.3rem;
+		}
+
+		input[type="url"],
+		textarea {
+			width: 100%;
+			padding: 0.6rem 0.75rem;
+			border: 2px solid #e2e8f0;
+			border-radius: 8px;
+			font-size: 0.95rem;
+			font-family: inherit;
+		}
+
+		input[type="url"]:focus,
+		textarea:focus {
+			outline: none;
+			border-color: #667eea;
+		}
+
+		textarea {
+			min-height: 120px;
+			resize: vertical;
+		}
+
+		fieldset {
+			border: none;
+			padding: 0;
+			margin: 0 0 1.5rem 0;
+		}
+
+		button {
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			color: white;
+			border: none;
+			padding: 0.7rem 1.5rem;
+			border-radius: 8px;
+			font-size: 1rem;
+			font-weight: 600;
+			cursor: pointer;
+		}
+
+		button:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+
+		#status {
+			margin-top: 1rem;
+			padding: 0.75rem 1rem;
+			border-radius: 8px;
+			font-size: 0.9rem;
+			display: none;
+		}
+
+		#status.success {
+			display: block;
+			background: #dcfce7;
+			color: #166534;
+			border: 1px solid #bbf7d0;
+		}
+
+		#status.error {
+			display: block;
+			background: #fef2f2;
+			color: #dc2626;
+			border: 1px solid #fecaca;
+		}
+	</style>
+</head>
+
+<body>
+	<h1>Dreachy — Settings</h1>
+	<p class="subtitle">Configure the Drupal site Dreachy embodies, and optionally tune its persona.</p>
+
+	<form id="config-form">
+		<fieldset>
+			<label for="base_url">Drupal site URL</label>
+			<input type="url" id="base_url" placeholder="https://your-drupal-site.example" required />
+			<p class="hint">Must expose JSON:API with anonymous read access. Takes effect immediately — no restart
+				needed.</p>
+		</fieldset>
+
+		<fieldset>
+			<label for="extra_instructions">Extra instructions (optional)</label>
+			<textarea id="extra_instructions"
+				placeholder="e.g. Respond in Italian. Keep answers even shorter than usual."></textarea>
+			<p class="hint">Appended to Dreachy's built-in persona — doesn't replace it. Only takes effect the next
+				time the app starts.</p>
+		</fieldset>
+
+		<button type="submit" id="save-btn">Save</button>
+	</form>
+
+	<div id="status"></div>
+
+	<script>
+		const form = document.getElementById("config-form");
+		const baseUrlInput = document.getElementById("base_url");
+		const extraInstructionsInput = document.getElementById("extra_instructions");
+		const statusEl = document.getElementById("status");
+		const saveBtn = document.getElementById("save-btn");
+
+		function showStatus(message, isError) {
+			statusEl.textContent = message;
+			statusEl.className = isError ? "error" : "success";
+		}
+
+		async function loadConfig() {
+			try {
+				const resp = await fetch("/api/config");
+				const data = await resp.json();
+				baseUrlInput.value = data.base_url || "";
+				extraInstructionsInput.value = data.extra_instructions || "";
+			} catch (e) {
+				showStatus("Couldn't load current settings.", true);
+			}
+		}
+
+		form.addEventListener("submit", async (e) => {
+			e.preventDefault();
+			saveBtn.disabled = true;
+			try {
+				const resp = await fetch("/api/config", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						base_url: baseUrlInput.value,
+						extra_instructions: extraInstructionsInput.value,
+					}),
+				});
+				const data = await resp.json();
+				if (!resp.ok) throw new Error(data.detail || "Save failed");
+				showStatus(
+					"Saved. Site URL is active immediately; instruction changes apply next time Dreachy starts.",
+					false
+				);
+			} catch (e) {
+				showStatus("Couldn't save settings: " + e.message, true);
+			} finally {
+				saveBtn.disabled = false;
+			}
+		});
+
+		loadConfig();
+	</script>
+</body>
+
+</html>
