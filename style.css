@@ -34,8 +34,8 @@ body {
 h1,
 h2,
 h3 {
-	font-family: Fraunces, Georgia, serif;
-	font-weight: 600;
+	font-family: "Public Sans", system-ui, sans-serif;
+	font-weight: 700;
 	color: var(--navy);
 	letter-spacing: -0.015em;
 	margin: 0;
@@ -87,7 +87,7 @@ a:hover {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5rem;
-	font-family: Fraunces, Georgia, serif;
+	font-family: "Public Sans", system-ui, sans-serif;
 	font-size: 1.25rem;
 	font-weight: 700;
 	color: var(--navy);
@@ -147,19 +147,21 @@ section h2 {
 /* --- hero ------------------------------------------------------------ */
 
 .hero {
-	padding-top: 4.5rem;
+	padding: 4.5rem 0 4rem;
+	border-bottom: 1px solid var(--rule);
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: 3.5rem;
 	align-items: center;
 }
 
-/* The marks lead; the headline follows. DOM order keeps the h1 first for
-   screen readers and search engines. */
-.hero-panel {
-	order: -1;
+.hero-mark {
+	padding-bottom: 1.75rem;
+	border-bottom: 1px solid var(--rule);
 }
 
+/* The marks lead; the headline follows. DOM order keeps the h1 first for
+   screen readers and search engines. */
 .hero-panel {
 	padding: 0;
 }
@@ -191,9 +193,13 @@ section h2 {
 }
 
 .hero-exchange {
-	margin: 1.25rem 0 0.5rem;
-	border-left-color: var(--blue);
+	margin: 1.75rem 0 0;
 	max-width: none;
+	background: #f6f9fb;
+	border: 0;
+	border-left: 3px solid var(--blue);
+	border-radius: 4px;
+	padding: 0.5rem 1rem 0.5rem 0;
 }
 
 .turn {
@@ -204,7 +210,7 @@ section h2 {
 }
 
 .who {
-	flex: 0 0 3.25rem;
+	flex: 0 0 4.5rem;
 	display: inline-flex;
 	align-items: center;
 	gap: 0.3rem;
@@ -232,7 +238,7 @@ section h2 {
 }
 
 .hero-exchange .turn.it .said {
-	font-family: Fraunces, Georgia, serif;
+	font-weight: 500;
 	color: var(--navy);
 }
 
@@ -240,14 +246,13 @@ section h2 {
 
 .equation {
 	margin: 0;
-	padding: 0 0 1.5rem;
-	border-bottom: 1px solid var(--rule);
+	padding: 0;
 }
 
 .equation-row {
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: flex-start;
 	gap: clamp(0.6rem, 2vw, 1.25rem);
 }
 
@@ -261,14 +266,14 @@ section h2 {
 }
 
 .term img {
-	height: 5.25rem;
+	height: 6rem;
 	width: auto;
 }
 
 /* The Drupal lockup is wide, not square — match its cap height to the
    robot's rather than its bounding box. */
 .term img.lockup {
-	height: 3.1rem;
+	height: 3.6rem;
 }
 
 .term figcaption {
@@ -278,18 +283,20 @@ section h2 {
 }
 
 .operator {
-	font-family: Fraunces, Georgia, serif;
-	font-size: 1.9rem;
+	font-family: "Public Sans", system-ui, sans-serif;
+	font-size: 2rem;
+	font-weight: 300;
 	color: var(--muted);
 }
 
 .result-mark {
 	display: flex;
 	align-items: center;
-	height: 5.25rem;
-	font-family: Fraunces, Georgia, serif;
-	font-size: 2.35rem;
-	font-weight: 700;
+	height: 6rem;
+	font-family: "Public Sans", system-ui, sans-serif;
+	font-size: 2.6rem;
+	font-weight: 800;
+	letter-spacing: -0.02em;
 	color: var(--navy);
 }
 
@@ -391,7 +398,6 @@ section h2 {
 
 .numbered h3 {
 	font-size: 1.05rem;
-	font-family: "Public Sans", system-ui, sans-serif;
 	font-weight: 600;
 }
 
@@ -413,7 +419,7 @@ section h2 {
 }
 
 .flow .node rect {
-	fill: #f7fafc;
+	fill: #fff;
 	stroke: var(--rule);
 }
 
@@ -478,7 +484,8 @@ section h2 {
 .steps li::before {
 	content: counter(step);
 	grid-row: span 2;
-	font-family: Fraunces, Georgia, serif;
+	font-family: "Public Sans", system-ui, sans-serif;
+	font-weight: 700;
 	font-size: 1.75rem;
 	color: var(--blue);
 	line-height: 1.1;
@@ -653,7 +660,7 @@ code {
 	}
 
 	.who {
-		flex-basis: 2.25rem;
+		flex-basis: 4rem;
 	}
 
 	.fork-grid {
@@ -661,21 +668,26 @@ code {
 	}
 
 	.hero {
+		gap: 2rem;
+		padding-top: 2.5rem;
+		padding-bottom: 2.5rem;
+	}
+
+	.hero {
 		grid-template-columns: minmax(0, 1fr);
-		gap: 2.25rem;
 	}
 
 	.term img {
-		height: 3.4rem;
+		height: 3.6rem;
 	}
 
 	.term img.lockup {
-		height: 2rem;
+		height: 2.1rem;
 	}
 
 	.result-mark {
-		height: 3.4rem;
-		font-size: 1.5rem;
+		height: 3.6rem;
+		font-size: 1.6rem;
 	}
 
 	.panel {
