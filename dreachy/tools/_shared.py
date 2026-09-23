@@ -20,6 +20,11 @@ def get_client() -> DrupalClient:
         config = Config()
         if base_url := os.environ.get("DREACHY_BASE_URL"):
             config.base_url = base_url
+        # Deliberately not `if locale :=` — an empty DREACHY_LOCALE is a real
+        # setting ("this site has no language prefix"), not an absent one.
+        locale = os.environ.get("DREACHY_LOCALE")
+        if locale is not None:
+            config.default_locale = locale or None
         _client = DrupalClient(config)
     return _client
 

@@ -280,3 +280,35 @@ def test_connection_error_raises_dreachy_site_error() -> None:
     with _make_client(handler) as client:
         with pytest.raises(DreachySiteError):
             client.get_recent_nodes()
+
+
+# ---------------------------------------------------------------------------
+# Language prefix: multilingual sites serve JSON:API under /<langcode>/, but a
+# single-language site has no prefix at all and 404s on /en/jsonapi/...
+# ---------------------------------------------------------------------------
+
+
+def _record_paths(config: Config) -> list[str]:
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request.url.path)
+        return httpx.Response(200, json={"data": []})
+
+    client = DrupalClient(config, http_client=httpx.Client(transport=httpx.MockTransport(handler)))
+    client.get_recent_nodes(limit=1)
+    return seen
+
+
+def test_client_omits_the_language_prefix_when_no_locale_is_set() -> None:
+    seen = _record_paths(Config(default_locale=None))
+
+    assert seen, "expected at least one request"
+    assert all(path.startswith("/jsonapi/") for path in seen), seen
+
+
+def test_client_uses_the_language_prefix_when_a_locale_is_set() -> None:
+    seen = _record_paths(Config(default_locale="en"))
+
+    assert seen, "expected at least one request"
+    assert all(path.startswith("/en/jsonapi/") for path in seen), seen

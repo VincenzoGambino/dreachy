@@ -123,6 +123,14 @@
 		</fieldset>
 
 		<fieldset>
+			<label for="language_prefix">Language prefix</label>
+			<input type="text" id="language_prefix" placeholder="en" />
+			<p class="hint">Multilingual sites serve JSON:API under a language code, e.g.
+				<code>/en/jsonapi/…</code> — enter that code. Leave blank for a single-language site, which
+				has no prefix. Takes effect immediately — no restart needed.</p>
+		</fieldset>
+
+		<fieldset>
 			<label for="extra_instructions">Extra instructions (optional)</label>
 			<textarea id="extra_instructions"
 				placeholder="e.g. Respond in Italian. Keep answers even shorter than usual."></textarea>
@@ -139,6 +147,7 @@
 		const form = document.getElementById("config-form");
 		const baseUrlInput = document.getElementById("base_url");
 		const extraInstructionsInput = document.getElementById("extra_instructions");
+		const languagePrefixInput = document.getElementById("language_prefix");
 		const statusEl = document.getElementById("status");
 		const saveBtn = document.getElementById("save-btn");
 
@@ -153,6 +162,8 @@
 				const data = await resp.json();
 				baseUrlInput.value = data.base_url || "";
 				extraInstructionsInput.value = data.extra_instructions || "";
+				// Empty is a real setting (no prefix), so don't fall back to a default here.
+				languagePrefixInput.value = data.locale ?? "";
 			} catch (e) {
 				showStatus("Couldn't load current settings.", true);
 			}
@@ -168,6 +179,7 @@
 					body: JSON.stringify({
 						base_url: baseUrlInput.value,
 						extra_instructions: extraInstructionsInput.value,
+						locale: languagePrefixInput.value,
 					}),
 				});
 				const data = await resp.json();

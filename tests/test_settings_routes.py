@@ -31,6 +31,7 @@ def _isolated_paths(tmp_path, monkeypatch):
     monkeypatch.setattr(dreachy_main, "_BUNDLED_PROFILE_DIR", bundled_dir)
 
     monkeypatch.delenv("DREACHY_BASE_URL", raising=False)
+    monkeypatch.delenv("DREACHY_LOCALE", raising=False)
     shared._client = None
     yield
     shared._client = None
@@ -48,7 +49,7 @@ def test_get_config_returns_empty_defaults_when_nothing_saved() -> None:
     resp = client.get("/api/config")
 
     assert resp.status_code == 200
-    assert resp.json() == {"base_url": "", "extra_instructions": ""}
+    assert resp.json() == {"base_url": "", "extra_instructions": "", "locale": "en"}
 
 
 def test_post_config_saves_base_url_and_applies_immediately(monkeypatch) -> None:
@@ -94,7 +95,7 @@ def test_get_config_round_trips_a_previously_saved_value() -> None:
 
     resp = client.get("/api/config")
 
-    assert resp.json() == {"base_url": "https://example.com", "extra_instructions": "Be brief."}
+    assert resp.json() == {"base_url": "https://example.com", "extra_instructions": "Be brief.", "locale": "en"}
 
 
 def test_post_config_appends_extra_instructions_to_the_base_persona() -> None:
@@ -122,3 +123,44 @@ def test_render_profile_with_no_extra_instructions_leaves_base_unchanged() -> No
 
     rendered = (dreachy_main._instance_profile_dir() / "instructions.txt").read_text()
     assert rendered == "BASE INSTRUCTIONS\n"
+
+
+# ---------------------------------------------------------------------------
+# Language prefix setting: blank means "no prefix" (single-language site), so
+# it must be distinguishable from "never configured".
+# ---------------------------------------------------------------------------
+
+
+def test_get_config_reports_the_built_in_language_prefix_before_anything_is_saved() -> None:
+    client = _make_client()
+
+    assert client.get("/api/config").json()["locale"] == "en"
+
+
+def test_post_config_saves_a_blank_locale_as_no_prefix() -> None:
+    client = _make_client()
+
+    resp = client.post("/api/config", json={"base_url": "https://example.com", "extra_instructions": "", "locale": ""})
+
+    assert resp.status_code == 200
+    assert os.environ["DREACHY_LOCALE"] == ""
+    assert client.get("/api/config").json()["locale"] == ""
+    # Same hot-reload path as the site URL: the cached client is dropped.
+    assert shared._client is None
+
+
+def test_post_config_saves_a_non_default_locale() -> None:
+    client = _make_client()
+
+    client.post("/api/config", json={"base_url": "https://example.com", "extra_instructions": "", "locale": "it"})
+
+    assert os.environ["DREACHY_LOCALE"] == "it"
+    env_text = (dreachy_main._instance_path() / ".env").read_text()
+    assert "DREACHY_LOCALE='it'" in env_text or "DREACHY_LOCALE=it" in env_text
+
+
+def test_get_client_builds_a_prefix_free_client_when_locale_is_blank() -> None:
+    client = _make_client()
+    client.post("/api/config", json={"base_url": "https://example.com", "extra_instructions": "", "locale": ""})
+
+    assert shared.get_client().config.default_locale is None

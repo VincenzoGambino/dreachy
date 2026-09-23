@@ -15,7 +15,10 @@ class Config:
     # Placeholder only — every install points at its own Drupal site via
     # DREACHY_BASE_URL in .env at the instance path (see main.py / README.md).
     base_url: str = "https://example.com"
-    default_locale: str = "en"   # Umami is multilingual; path-prefixed (/en/...)
+    # Multilingual sites serve JSON:API under a language prefix (/en/jsonapi/...);
+    # single-language sites have none and 404 on a prefixed path. None means no
+    # prefix. Set per install via DREACHY_LOCALE / the settings page.
+    default_locale: str | None = "en"
     request_timeout: float = 10.0
 
     # ---------------------------------------------------------------------------
