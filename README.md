@@ -1,6 +1,6 @@
 ---
 title: Dreachy
-emoji: 👋
+emoji: 💧
 colorFrom: red
 colorTo: blue
 sdk: static
@@ -34,6 +34,8 @@ Drupal site over JSON:API.
 
 - A Drupal site with:
   - **JSON:API** enabled (core module, no extra configuration needed for read access).
+  - The **language prefix** set correctly for the site (see Configuration): `en` for a
+    multilingual site served at `/en`, blank for a single-language site.
   - **Anonymous read access** to whichever content types you expose (Dreachy doesn't
     authenticate — this is a read-only, publicly-reachable demo companion, not an admin tool).
   - At least one content type among `article`, `page`, `recipe` with a `field_body` (article/page)
@@ -57,7 +59,11 @@ pip install git+https://github.com/VincenzoGambino/dreachy
 Dreachy needs to know which Drupal site to embody. Once installed, open its settings page from
 the Reachy Mini dashboard (the gear/settings icon next to the app) and set:
 
-- **Drupal site URL** — takes effect immediately, no restart needed.
+- **Drupal site URL** — takes effect immediately, no restart needed. It must be reachable
+  *from the robot*, not just from your laptop (see Known issues).
+- **Language prefix** — multilingual sites serve JSON:API under a language code
+  (`/en/jsonapi/…`); enter that code. Leave it blank for a single-language site, which has
+  no prefix. Defaults to `en`, matching the Umami demo profile. Takes effect immediately.
 - **Extra instructions** (optional) — free text appended to Dreachy's built-in persona (tone,
   language, anything else). Built-in guardrails (e.g. "only answer from site content") stay in
   force either way, since this is appended, not a replacement. Takes effect the next time the
@@ -70,6 +76,20 @@ Dreachy's own settings page touches.
 If you'd rather configure it by hand (e.g. scripting a fresh install), both settings are backed
 by a `.env` file at `~/.local/share/dreachy/.env` on the robot — see
 [`.env.example`](.env.example).
+
+## Known issues
+
+- **The site must be reachable from the robot.** Dreachy runs on the Reachy Mini, not on your
+  laptop, so a local development URL (`localhost`, `*.ddev.site`, a private hostname) won't
+  resolve there. Use a publicly reachable site, a tunnel, or a hosting sandbox.
+- **The content model is Umami's.** `article`/`page`/`recipe` and their text fields are what
+  Dreachy knows about, set in [`dreachy/config.py`](dreachy/config.py) and `_TEXT_FIELDS` in
+  [`dreachy/client.py`](dreachy/client.py). Other content models need those two edits. Moving
+  this configuration into the Drupal site itself is the main thing planned next.
+- **`drupal_read_article` occasionally acknowledges without reading.** The model says it will
+  fetch the article and then ends the turn without calling the tool. Asking a second time works.
+- **Site pulse counts are approximate.** Core JSON:API has no collection count, so counts are
+  capped at `pulse_sample_limit` (50) items per content type.
 
 ## Development
 

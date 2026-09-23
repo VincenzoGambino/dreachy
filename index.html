@@ -1,42 +1,133 @@
 <!doctype html>
-<html>
+<html lang="en">
 
 <head>
 	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width" />
-	<title> Dreachy </title>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Dreachy — The site's editorial voice, given a body.</title>
+	<meta name="description"
+		content="Dreachy is a Reachy Mini app that embodies a Drupal site: reads its pulse, answers what's new, reads articles aloud, and reacts the moment something's published." />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+		rel="stylesheet">
 	<link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-	<div class="hero">
-		<div class="hero-content">
-			<div class="app-icon">📰🤖</div>
-			<h1> Dreachy </h1>
-			<p class="tagline">Reachy Mini becomes the voice and body of a Drupal site.</p>
-		</div>
+	<div class="wire-strip">
+		<span class="wire-route">DRUPAL JSON:API <span aria-hidden="true">&rarr;</span> REACHY MINI</span>
+		<span class="wire-status"><span class="dot" aria-hidden="true"></span>ON WATCH</span>
 	</div>
 
-	<div class="container">
-		<div class="main-card">
-			<div class="app-preview">
-				<div class="preview-image">
-					<div class="camera-feed">📰</div>
-					<p>Answers what's new, reads content aloud, reports its own "pulse", and
-						reacts physically the moment something new is published.</p>
-				</div>
+	<header class="hero">
+		<p class="mark">DREACHY</p>
+		<h1>The site's editorial voice,<br>given a body.</h1>
+		<p class="lede">
+			Reachy Mini reads your Drupal site's pulse, answers what's new, reads articles aloud in full, and
+			reacts physically — antennas flare, a small head lift — the moment something goes live.
+		</p>
+		<div class="hero-actions">
+			<a class="btn primary" href="#install">Install on your Reachy Mini</a>
+			<a class="btn ghost" href="https://github.com/VincenzoGambino/dreachy" target="_blank"
+				rel="noopener">View on GitHub</a>
+		</div>
+
+		<figure class="pulse" aria-hidden="true">
+			<svg viewBox="0 0 600 80" preserveAspectRatio="none">
+				<polyline class="pulse-line"
+					points="0,40 60,40 75,15 90,65 105,40 180,40 195,20 205,55 215,40 300,40 315,10 328,68 340,40 420,40 435,22 448,52 460,40 600,40" />
+			</svg>
+			<figcaption>Dreachy checking its own pulse — the same read it gives you when you ask how it's feeling.
+			</figcaption>
+		</figure>
+	</header>
+
+	<section class="capabilities" id="capabilities">
+		<p class="eyebrow">The dispatch</p>
+		<h2>Five tools, one editorial voice</h2>
+		<div class="capability-grid">
+			<article class="capability-card">
+				<p class="tool-tag">drupal_whats_new</p>
+				<h3>What's new</h3>
+				<p>The latest content, newest first — no digging required.</p>
+			</article>
+			<article class="capability-card">
+				<p class="tool-tag">drupal_find_content</p>
+				<h3>Find content</h3>
+				<p>Searches the site by keyword. If it's not published, Dreachy says so honestly.</p>
+			</article>
+			<article class="capability-card">
+				<p class="tool-tag">drupal_site_pulse</p>
+				<h3>Site pulse</h3>
+				<p>Its own mood, drawn from real activity — busy when there's fresh material, quiet when things
+					have been calm.</p>
+			</article>
+			<article class="capability-card">
+				<p class="tool-tag">drupal_read_article</p>
+				<h3>Read aloud</h3>
+				<p>Reads any article, page, or recipe aloud, in full.</p>
+			</article>
+			<article class="capability-card">
+				<p class="tool-tag">drupal_watch_site</p>
+				<h3>Ambient watch</h3>
+				<p>Keeps an eye on the site in the background, and reacts the moment something new is published.
+				</p>
+			</article>
+		</div>
+	</section>
+
+	<section class="dispatch">
+		<div class="dispatch-card">
+			<p class="eyebrow">How it feels</p>
+			<h3>From hello to headline</h3>
+			<ul class="dispatch-list">
+				<li>Say hello, and it greets you in its own editorial voice — never the same line twice.</li>
+				<li>Ask what's new, and it tells you, newest first.</li>
+				<li>Name a topic, and it searches the site — or admits honestly it has nothing on that yet.</li>
+				<li>Ask it to read something, and it reads the whole piece aloud.</li>
+				<li>Leave it watching, and it reacts on its own the moment something new goes live.</li>
+			</ul>
+		</div>
+		<div class="dispatch-card secondary">
+			<p class="eyebrow">Built on</p>
+			<h3>A thin layer over real infrastructure</h3>
+			<p class="dispatch-text">
+				Dreachy is a Level 2 wrapper: it delegates entirely to Pollen Robotics'
+				<code>reachy_mini_conversation_app</code> for voice and hardware, and to your Drupal site's own
+				JSON:API for everything it says. No forked behaviour, nothing invented — just a persona and five
+				tools.
+			</p>
+			<div class="tags">
+				<span class="tag">MIT licensed</span>
+				<span class="tag">Drupal JSON:API</span>
+				<span class="tag">Open source</span>
+				<span class="tag">GitHub-primary</span>
 			</div>
 		</div>
-	</div>
+	</section>
 
-	<div class="footer">
+	<section class="get-started" id="install">
+		<p class="eyebrow">Get started</p>
+		<h2>Install from the dashboard, or the CLI</h2>
+		<p class="intro">Search for Dreachy in your Reachy Mini's app store, or install it directly:</p>
+		<pre class="wire-block"><code>pip install git+https://github.com/VincenzoGambino/dreachy</code></pre>
+		<p class="note">Then open its settings page from the dashboard to point it at your Drupal site — no SSH
+			required.</p>
+	</section>
+
+	<footer class="footer">
 		<p>
-			🤖 Dreachy •
-			<a href="https://github.com/pollen-robotics" target="_blank">Pollen Robotics</a> •
-			<a href="https://huggingface.co/spaces/pollen-robotics/reachy-mini-landing-page#apps" target="_blank">Browse More
-				Apps</a>
+			Dreachy, built on Pollen Robotics'
+			<a href="https://github.com/pollen-robotics/reachy_mini_conversation_app" target="_blank"
+				rel="noopener">reachy_mini_conversation_app</a>.
+			<a href="https://github.com/VincenzoGambino/dreachy" target="_blank" rel="noopener">Source on
+				GitHub</a> ·
+			<a href="https://huggingface.co/spaces?q=reachy_mini" target="_blank" rel="noopener">Browse more Reachy
+				Mini apps</a>
 		</p>
-	</div>
+	</footer>
 </body>
 
 </html>
