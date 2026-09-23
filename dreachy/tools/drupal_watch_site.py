@@ -27,16 +27,27 @@ logger = logging.getLogger(__name__)
 
 _watch_task: asyncio.Task[None] | None = None
 
+# How often a sleeping watcher checks whether the settings page swapped the
+# client, so a newly saved site URL isn't stuck behind a long backoff sleep.
+_CLIENT_CHECK_SECONDS = 1.0
+
 
 async def _latest_created(client: DrupalClient) -> str | None:
     nodes = await asyncio.to_thread(client.get_recent_nodes, limit=1)
     return nodes[0]["created"] if nodes else None
 
 
+async def _sleep_unless_client_changes(seconds: float, client: DrupalClient) -> None:
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + seconds
+    while (remaining := deadline - loop.time()) > 0:
+        if get_client() is not client:
+            return
+        await asyncio.sleep(min(remaining, _CLIENT_CHECK_SECONDS))
+
+
 async def _watch_loop(deps: ToolDependencies) -> None:
     client = get_client()
-    interval = client.config.poll_interval_seconds
-    max_backoff = client.config.watch_max_backoff_seconds
     consecutive_failures = 0
 
     try:
@@ -48,8 +59,20 @@ async def _watch_loop(deps: ToolDependencies) -> None:
         baseline_established = False
 
     while True:
+        interval = client.config.poll_interval_seconds
         sleep_for = interval * (2**consecutive_failures) if consecutive_failures else interval
-        await asyncio.sleep(min(sleep_for, max_backoff))
+        await _sleep_unless_client_changes(min(sleep_for, client.config.watch_max_backoff_seconds), client)
+
+        current = get_client()
+        if current is not client:
+            # The settings page saved a new site URL. A different site's
+            # newest content isn't news, so re-baseline silently against it
+            # (the same path as recovering from a failed baseline).
+            logger.info("drupal_watch_site: site URL changed to %s, re-baselining", current.config.base_url)
+            client = current
+            consecutive_failures = 0
+            last_seen_created = None
+            baseline_established = False
 
         try:
             newest = await _latest_created(client)
