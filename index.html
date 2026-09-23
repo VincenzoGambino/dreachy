@@ -4,128 +4,276 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Dreachy — The site's editorial voice, given a body.</title>
+	<title>Dreachy — ask your Drupal site how it's doing</title>
 	<meta name="description"
-		content="Dreachy is a Reachy Mini app that embodies a Drupal site: reads its pulse, answers what's new, reads articles aloud, and reacts the moment something's published." />
+		content="Dreachy gives a Drupal site a voice and a body on a Reachy Mini robot: ask what's new, have an article read aloud, and watch it react the moment something is published." />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link
-		href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+		href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600&display=swap"
 		rel="stylesheet">
+	<link rel="icon"
+		href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 32'%3E%3Cpath fill='%230678be' d='M12 1C12 1 3 12.4 3 19.6A9 9 0 0 0 21 19.6C21 12.4 12 1 12 1Z'/%3E%3C/svg%3E" />
 	<link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-	<div class="wire-strip">
-		<span class="wire-route">DRUPAL JSON:API <span aria-hidden="true">&rarr;</span> REACHY MINI</span>
-		<span class="wire-status"><span class="dot" aria-hidden="true"></span>ON WATCH</span>
-	</div>
+	<a class="skip" href="#main">Skip to content</a>
 
-	<header class="hero">
-		<p class="mark">DREACHY</p>
-		<h1>The site's editorial voice,<br>given a body.</h1>
-		<p class="lede">
-			Reachy Mini reads your Drupal site's pulse, answers what's new, reads articles aloud in full, and
-			reacts physically — antennas flare, a small head lift — the moment something goes live.
-		</p>
-		<div class="hero-actions">
-			<a class="btn primary" href="#install">Install on your Reachy Mini</a>
-			<a class="btn ghost" href="https://github.com/VincenzoGambino/dreachy" target="_blank"
-				rel="noopener">View on GitHub</a>
-		</div>
-
-		<figure class="pulse" aria-hidden="true">
-			<svg viewBox="0 0 600 80" preserveAspectRatio="none">
-				<polyline class="pulse-line"
-					points="0,40 60,40 75,15 90,65 105,40 180,40 195,20 205,55 215,40 300,40 315,10 328,68 340,40 420,40 435,22 448,52 460,40 600,40" />
+	<header class="masthead">
+		<a class="wordmark" href="#main">
+			<svg class="drop" viewBox="0 0 24 32" aria-hidden="true" focusable="false">
+				<path d="M12 1C12 1 3 12.4 3 19.6A9 9 0 0 0 21 19.6C21 12.4 12 1 12 1Z" />
 			</svg>
-			<figcaption>Dreachy checking its own pulse — the same read it gives you when you ask how it's feeling.
-			</figcaption>
-		</figure>
+			<span>Dreachy</span>
+		</a>
+		<nav aria-label="Primary">
+			<a href="#how">How it works</a>
+			<a href="#ask">What you can ask</a>
+			<a href="#setup">Set it up</a>
+			<a href="#fork">Fork it</a>
+		</nav>
 	</header>
 
-	<section class="capabilities" id="capabilities">
-		<p class="eyebrow">The dispatch</p>
-		<h2>Five tools, one editorial voice</h2>
-		<div class="capability-grid">
-			<article class="capability-card">
-				<p class="tool-tag">drupal_whats_new</p>
-				<h3>What's new</h3>
-				<p>The latest content, newest first — no digging required.</p>
-			</article>
-			<article class="capability-card">
-				<p class="tool-tag">drupal_find_content</p>
-				<h3>Find content</h3>
-				<p>Searches the site by keyword. If it's not published, Dreachy says so honestly.</p>
-			</article>
-			<article class="capability-card">
-				<p class="tool-tag">drupal_site_pulse</p>
-				<h3>Site pulse</h3>
-				<p>Its own mood, drawn from real activity — busy when there's fresh material, quiet when things
-					have been calm.</p>
-			</article>
-			<article class="capability-card">
-				<p class="tool-tag">drupal_read_article</p>
-				<h3>Read aloud</h3>
-				<p>Reads any article, page, or recipe aloud, in full.</p>
-			</article>
-			<article class="capability-card">
-				<p class="tool-tag">drupal_watch_site</p>
-				<h3>Ambient watch</h3>
-				<p>Keeps an eye on the site in the background, and reacts the moment something new is published.
+	<main id="main">
+		<section class="hero">
+			<div class="hero-copy">
+				<h1>Ask your Drupal site how it's doing.</h1>
+				<p class="lede">
+					Dreachy turns a Reachy Mini into the voice and body of one Drupal site. It answers in the
+					first person, reads its own articles aloud, and looks up when an editor publishes.
 				</p>
-			</article>
-		</div>
-	</section>
 
-	<section class="dispatch">
-		<div class="dispatch-card">
-			<p class="eyebrow">How it feels</p>
-			<h3>From hello to headline</h3>
-			<ul class="dispatch-list">
-				<li>Say hello, and it greets you in its own editorial voice — never the same line twice.</li>
-				<li>Ask what's new, and it tells you, newest first.</li>
-				<li>Name a topic, and it searches the site — or admits honestly it has nothing on that yet.</li>
-				<li>Ask it to read something, and it reads the whole piece aloud.</li>
-				<li>Leave it watching, and it reacts on its own the moment something new goes live.</li>
-			</ul>
-		</div>
-		<div class="dispatch-card secondary">
-			<p class="eyebrow">Built on</p>
-			<h3>A thin layer over real infrastructure</h3>
-			<p class="dispatch-text">
-				Dreachy is a Level 2 wrapper: it delegates entirely to Pollen Robotics'
-				<code>reachy_mini_conversation_app</code> for voice and hardware, and to your Drupal site's own
-				JSON:API for everything it says. No forked behaviour, nothing invented — just a persona and five
-				tools.
-			</p>
-			<div class="tags">
-				<span class="tag">MIT licensed</span>
-				<span class="tag">Drupal JSON:API</span>
-				<span class="tag">Open source</span>
-				<span class="tag">GitHub-primary</span>
+				<div class="actions">
+					<a class="button primary" href="https://huggingface.co/spaces/VincenzoGambino/dreachy">Install on
+						your Reachy Mini</a>
+					<a class="button" href="https://github.com/VincenzoGambino/dreachy">Read the source</a>
+				</div>
+				<p class="fineprint">MIT licensed · works with any Drupal site that exposes JSON:API</p>
 			</div>
-		</div>
-	</section>
 
-	<section class="get-started" id="install">
-		<p class="eyebrow">Get started</p>
-		<h2>Install from the dashboard, or the CLI</h2>
-		<p class="intro">Search for Dreachy in your Reachy Mini's app store, or install it directly:</p>
-		<pre class="wire-block"><code>pip install git+https://github.com/VincenzoGambino/dreachy</code></pre>
-		<p class="note">Then open its settings page from the dashboard to point it at your Drupal site — no SSH
-			required.</p>
-	</section>
+			<aside class="hero-panel">
+				<div class="equation">
+					<div class="equation-row">
+						<div class="term">
+							<img class="lockup" src="assets/drupal-logo.svg" alt="The Drupal logo" width="150"
+								height="53" />
+						</div>
+						<span class="operator" aria-hidden="true">+</span>
+						<div class="term">
+							<img src="assets/reachy-mini-head.svg" alt="A Reachy Mini robot" width="96" height="96" />
+						</div>
+						<span class="operator" aria-hidden="true">=</span>
+						<div class="term result">
+							<span class="result-mark">Dreachy</span>
+						</div>
+					</div>
+				</div>
 
-	<footer class="footer">
+				<div class="exchange hero-exchange">
+					<p class="turn you"><span class="who">you</span><span class="said">What's new?</span></p>
+					<p class="turn it reveal"><span class="who">it</span><span class="said">Three things since
+							yesterday. The carrots piece went up an hour ago — want me to read it?</span></p>
+				</div>
+			</aside>
+		</section>
+
+		<section id="how" class="panel">
+			<div class="panel-inner">
+				<div class="panel-lead">
+					<h2>Nothing to install in Drupal.</h2>
+					<p class="intro">
+						Dreachy reads your site the way any decoupled front end would, then hands what it finds to
+						the robot's own voice and movement.
+					</p>
+				</div>
+
+				<ol class="numbered">
+					<li>
+						<h3>It reads your site</h3>
+						<p>Core JSON:API, anonymous read access. No module, no API key, no write access.</p>
+					</li>
+					<li>
+						<h3>You ask, it answers</h3>
+						<p>Five tools stand behind the conversation: what's new, search, read aloud, site pulse,
+							and keep watch.</p>
+					</li>
+					<li>
+						<h3>It keeps watching</h3>
+						<p>Left watching, it polls quietly. When something is published it doesn't announce it —
+							the antennas flare and the head lifts.</p>
+					</li>
+				</ol>
+			</div>
+
+			<figure class="flow">
+				<svg viewBox="0 0 880 150" role="img"
+					aria-label="A Drupal site is read over JSON:API by five Dreachy tools, which drive the robot's speech and movement.">
+					<defs>
+						<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+							orient="auto-start-reverse">
+							<path d="M0 0 L10 5 L0 10 z" />
+						</marker>
+					</defs>
+
+					<g class="node">
+						<rect x="1" y="34" width="176" height="72" rx="4" />
+						<text x="89" y="64">Your Drupal site</text>
+						<text x="89" y="85" class="sub">articles, pages, recipes</text>
+					</g>
+					<line x1="182" y1="70" x2="228" y2="70" marker-end="url(#arrow)" />
+
+					<g class="node">
+						<rect x="233" y="34" width="150" height="72" rx="4" />
+						<text x="308" y="64">JSON:API</text>
+						<text x="308" y="85" class="sub">anonymous read</text>
+					</g>
+					<line x1="388" y1="70" x2="434" y2="70" marker-end="url(#arrow)" />
+
+					<g class="node accent">
+						<rect x="439" y="16" width="186" height="108" rx="4" />
+						<text x="532" y="46">Dreachy</text>
+						<text x="532" y="68" class="sub">five tools + a persona</text>
+						<text x="532" y="90" class="sub">on the robot</text>
+					</g>
+					<line x1="630" y1="70" x2="676" y2="70" marker-end="url(#arrow)" />
+
+					<g class="node">
+						<rect x="681" y="34" width="198" height="72" rx="4" />
+						<text x="780" y="64">Speech and movement</text>
+						<text x="780" y="85" class="sub">Reachy Mini</text>
+					</g>
+				</svg>
+
+				<ol class="flow-stack">
+					<li><strong>Your Drupal site</strong><span>articles, pages, recipes</span></li>
+					<li><strong>JSON:API</strong><span>anonymous read</span></li>
+					<li class="accent"><strong>Dreachy</strong><span>five tools + a persona, on the robot</span></li>
+					<li><strong>Speech and movement</strong><span>Reachy Mini</span></li>
+				</ol>
+
+				<figcaption>
+					The robot half is borrowed: Dreachy delegates voice, hearing and motion to Pollen Robotics'
+					<a href="https://github.com/pollen-robotics/reachy_mini_conversation_app">conversation app</a>.
+					What's new here is a persona and five tools, about two hundred lines.
+				</figcaption>
+			</figure>
+		</section>
+
+		<section id="ask">
+			<h2>What you can ask</h2>
+			<p class="intro">Five tools, phrased the way you'd actually say them out loud.</p>
+
+			<div class="exchange">
+				<p class="turn you"><span class="who">you</span><span class="said">What's new on the site?</span></p>
+				<p class="turn it"><span class="who">it</span><span class="said">The latest content, newest first,
+						with how long ago each one went up.</span></p>
+			</div>
+
+			<div class="exchange">
+				<p class="turn you"><span class="who">you</span><span class="said">Do we have anything on
+						mushrooms?</span></p>
+				<p class="turn it"><span class="who">it</span><span class="said">A keyword search across articles,
+						pages and recipes — and an honest "nothing yet" when there isn't.</span></p>
+			</div>
+
+			<div class="exchange">
+				<p class="turn you"><span class="who">you</span><span class="said">Read me the carrots
+						article.</span></p>
+				<p class="turn it"><span class="who">it</span><span class="said">The whole piece, aloud, in natural
+						chunks rather than one breathless block.</span></p>
+			</div>
+
+			<div class="exchange">
+				<p class="turn you"><span class="who">you</span><span class="said">How are you feeling?</span></p>
+				<p class="turn it"><span class="who">it</span><span class="said">Its pulse: how much has been
+						published lately, and how quiet or busy that makes it.</span></p>
+			</div>
+
+			<div class="exchange">
+				<p class="turn you"><span class="who">you</span><span class="said">Keep an eye on things.</span></p>
+				<p class="turn it"><span class="who">it</span><span class="said">It watches in the background. When
+						something is published, it doesn't announce it — the antennas flare and the head
+						lifts.</span></p>
+			</div>
+		</section>
+
+		<section id="setup" class="band">
+			<h2>Set it up</h2>
+			<ol class="steps">
+				<li>
+					<h3>Point it at a site it can reach</h3>
+					<p>
+						Any Drupal site with JSON:API on and anonymous read access. It has to be reachable from
+						the robot, so a local development URL won't do. The Umami demo profile works as-is; other
+						content models need two small edits, noted in the README.
+					</p>
+				</li>
+				<li>
+					<h3>Install from the robot's dashboard</h3>
+					<p>
+						Search the app store for Dreachy. Or install it by hand:
+					</p>
+					<pre><code>pip install git+https://github.com/VincenzoGambino/dreachy</code></pre>
+				</li>
+				<li>
+					<h3>Give it the site URL</h3>
+					<p>
+						Open Dreachy's settings page from the dashboard and enter the site URL, plus the language
+						prefix if the site is multilingual. It takes effect immediately, and there's no SSH
+						involved. Then say hello.
+					</p>
+				</li>
+			</ol>
+		</section>
+
+		<section id="fork" class="dark">
+			<h2>Fork it — it's meant to be a starting point</h2>
+			<div class="fork-grid">
+				<div>
+					<p>
+						Every tool is one file that asks the site a question and hands back an answer. Copy one,
+						change the query, and the robot can do something new. The test suite runs with no robot and
+						no live site, so you can work on it from a laptop on a train.
+					</p>
+					<p>
+						What it knows about a site — content types and which fields to read aloud — lives in two
+						files today. Moving that into the Drupal site itself is the next thing planned.
+					</p>
+					<p class="fork-actions">
+						<a class="button primary" href="https://github.com/VincenzoGambino/dreachy">Clone it on
+							GitHub</a>
+					</p>
+				</div>
+				<pre class="tree"><code>dreachy/
+├─ main.py            the whole wrapper
+├─ client.py          questions for a Drupal site
+├─ config.py          what it expects to find
+├─ profile/dreachy/   who it thinks it is
+└─ tools/
+   ├─ drupal_whats_new.py
+   ├─ drupal_find_content.py
+   ├─ drupal_read_article.py
+   ├─ drupal_site_pulse.py
+   └─ drupal_watch_site.py
+
+$ uv run pytest
+44 passed</code></pre>
+			</div>
+		</section>
+	</main>
+
+	<footer class="colophon">
 		<p>
-			Dreachy, built on Pollen Robotics'
-			<a href="https://github.com/pollen-robotics/reachy_mini_conversation_app" target="_blank"
-				rel="noopener">reachy_mini_conversation_app</a>.
-			<a href="https://github.com/VincenzoGambino/dreachy" target="_blank" rel="noopener">Source on
-				GitHub</a> ·
-			<a href="https://huggingface.co/spaces?q=reachy_mini" target="_blank" rel="noopener">Browse more Reachy
-				Mini apps</a>
+			Built by <a href="https://www.gambinovincenzo.com/">Vincenzo Gambino</a>, on Pollen Robotics'
+			<a href="https://github.com/pollen-robotics/reachy_mini_conversation_app">reachy_mini_conversation_app</a>.
+			<a href="https://github.com/VincenzoGambino/dreachy">Source</a> ·
+			<a href="https://huggingface.co/spaces/VincenzoGambino/dreachy">Hugging Face Space</a>
+		</p>
+		<p class="legal">
+			Robot illustration from the Reachy Mini SDK, © Pollen Robotics, Apache 2.0.
+			Drupal is a registered trademark of Dries Buytaert. This project is not affiliated with or
+			endorsed by the Drupal Association or Pollen Robotics.
 		</p>
 	</footer>
 </body>
