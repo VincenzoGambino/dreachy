@@ -92,6 +92,9 @@ Noted for later releases (not planned here):
 - The secret-handling invariant becomes: "confined to the client/auth layer,
   never logged or in the profile". Amend the spec's Invariants when R2 is
   planned.
+- R2's OAuth covers Dreachy's requests to Drupal only. Settings-page
+  authentication is a separate tracked item (spec: "Tracked separately"), not
+  part of R2.
 
 ## Review Focus
 

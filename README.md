@@ -92,8 +92,12 @@ by a `.env` file at `~/.local/share/dreachy/.env` on the robot — see
   definitions, so Dreachy finds a type's text by looking at its five most recent nodes. It takes
   a formatted text field as the body (`body` preferred, then `field_body`, then any other) and a
   field named like `summary` or `teaser` as the teaser. A type with no content yet gets a best
-  guess (`body`/`field_body`) until the next save or restart. Plain (unformatted) long-text
-  fields aren't read.
+  guess (`body`/`field_body`) until the next save or restart.
+- **Paragraphs-based and plain-text bodies aren't read yet.** A type whose text lives in
+  Paragraphs, or in a plain (unformatted) long-text field, is skipped; a site where no type has
+  formatted text falls back to the Umami `article`/`page`/`recipe` mapping. Paragraphs support
+  is planned as its own future release (R5 in
+  [`specs/backend-and-auth.md`](specs/backend-and-auth.md)).
 - **If the site can't be read at start**, Dreachy falls back to the Umami
   `article`/`page`/`recipe` mapping and retries discovery, at most once a minute, as it's used.
 - **`drupal_read_article` occasionally acknowledges without reading.** The model says it will

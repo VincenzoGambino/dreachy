@@ -13,6 +13,7 @@ This spec upgrades Dreachy in four releases:
 - **R2** — backend seam + `AuthProvider` (OAuth2 client credentials)
 - **R3** — authenticated editorial tools + confirmation-gated write-back
 - **R4** — `McpBackend` (Drupal MCP module as alternative transport)
+- **R5** — Paragraphs support *(future; added 2026-09-30, not yet specified)*
 
 Each release ships independently. Do them in order; stop at release boundaries
 for review. Before writing any code, **read the actual modules** (`client.py`,
@@ -146,6 +147,21 @@ Goal: same five tools over the Drupal MCP module; discovered extras optional.
 5. ✅ Checks: five tools green against a mocked MCP session; live test against
    the DrupalForge sandbox with the MCP module; document in the README what
    MCP mode adds and requires.
+
+## R5 — Paragraphs support (future)
+
+Goal: a site whose body text lives in Paragraphs is read aloud and searched
+like any other. Today R1's discovery doesn't see Paragraphs (they are
+relationships, not attributes): such types are skipped, and a site where no
+type has formatted text falls back to the Umami mapping. To be specified and
+planned after R4; added to the roadmap 2026-09-30.
+
+## Tracked separately
+
+- **Settings-page authentication.** The settings endpoints (`/api/config`,
+  `/api/schema`) are unauthenticated on the robot's network — a pre-existing
+  gap. R2's OAuth covers Dreachy's requests *to Drupal* only; it doesn't
+  protect the settings page. Separate item, not part of any release above.
 
 ## Out of scope
 
