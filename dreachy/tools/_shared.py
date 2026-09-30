@@ -32,3 +32,15 @@ def reset_client() -> None:
     """
     global _client
     _client = None
+
+
+def type_choices() -> list[str]:
+    """Machine names of the types Dreachy talks about, for tool specs. No network."""
+    return list(get_client().schema)
+
+
+def or_list(names: list[str]) -> str:
+    """``["article", "page", "recipe"]`` -> ``"article, page, or recipe"``."""
+    if len(names) <= 2:
+        return " or ".join(names)
+    return f"{', '.join(names[:-1])}, or {names[-1]}"

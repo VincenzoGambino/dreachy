@@ -17,8 +17,8 @@ class DrupalWhatsNew(Tool):
 
     name = "drupal_whats_new"
     description = (
-        "Get the latest content published on the site (articles, pages, recipes), newest "
-        "first. Use when asked what's new, what's recent, or what's been posted lately."
+        "Get the latest content published on the site, newest first. Use when asked what's "
+        "new, what's recent, or what's been posted lately."
     )
     parameters_schema = {
         "type": "object",
