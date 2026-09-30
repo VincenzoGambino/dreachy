@@ -75,13 +75,20 @@ Enable no broader scope for the client-credentials grant.
    **Is Confidential?** on, with a long random **secret**.
 3. Under grant types, enable **Client Credentials**. Under the Client
    Credentials settings, choose the **`dreachy` user**.
-4. Set the consumer's **scopes** to `dreachy`. This is required: Dreachy
-   doesn't name a scope when it asks for a token, and with no default scope on
-   the consumer the site refuses the request.
+4. Set the consumer's **scopes** to `dreachy`. This is required: by default
+   Dreachy doesn't name a scope when it asks for a token, and with no default
+   scope on the consumer the site refuses the request.
+
+   *Alternative:* Dreachy's settings page has an optional **Scope** field
+   (`DREACHY_OAUTH_SCOPE`). Filled in, Dreachy asks for that scope by name.
+   The consumer must still allow it, so the default-scope setup above
+   remains the recommended path; the field is for sites that give one
+   consumer several scopes.
 5. Save.
 6. On Dreachy's settings page, open **Advanced: site login**:
    - choose **OAuth client credentials**;
    - enter the client ID;
+   - leave **Scope** blank (the consumer's default applies);
    - paste the secret, then save.
 
    That page is the only place the secret goes. Don't put it in a file in the

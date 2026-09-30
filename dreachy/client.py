@@ -19,11 +19,12 @@ from typing import Any
 from urllib.parse import urljoin
 
 import httpx
-from drupal_api_client import JsonApiClient, ResourceNotFoundError
+from drupal_api_client import AuthenticationError, JsonApiClient, ResourceNotFoundError
 from drupal_jsonapi_params import DrupalJsonApiParams
 from drupal_jsonapi_params.operators import FilterOperator
 
-from .backend import Backend, DreachySiteError
+from .auth import library_authentication
+from .backend import Backend, DreachyAuthError, DreachySiteError
 from .config import Config
 from .schema import Schema, TypeSchema, build_schema
 
@@ -36,6 +37,8 @@ _SUMMARY_FALLBACK_CHARS = 200
 # Statuses that mean "anonymous may not read this type", as opposed to a
 # temporary failure: only these let discovery skip a type and carry on.
 _UNREADABLE_STATUSES = (401, 403, 404)
+# Never includes credentials; the tools prefix it with "I can't reach the site right now: ".
+_CREDENTIALS_REFUSED = "the site refused Dreachy's credentials — check the site login on Dreachy's settings page"
 
 
 def _strip_html(text: str) -> str:
@@ -95,10 +98,26 @@ class JsonApiBackend(Backend):
             timeout=config.request_timeout,
             default_locale=config.default_locale,
             http_client=http_client,
+            # None = anonymous; the refresh margin and scope ride on OAuthAuth.
+            authentication=library_authentication(config),
         )
 
     def close(self) -> None:
         self._client.close()
+
+    def _site_error(self, exc: Exception, context: str) -> DreachySiteError:
+        """The DreachySiteError for *exc*; a refused login becomes DreachyAuthError."""
+        if isinstance(exc, AuthenticationError):
+            return DreachyAuthError(_CREDENTIALS_REFUSED)
+        if isinstance(exc, httpx.HTTPStatusError):
+            status = exc.response.status_code
+            # Logged in and still 401 after the library's one retry: the login is bad.
+            if status == 401 and self.config.uses_oauth:
+                return DreachyAuthError(_CREDENTIALS_REFUSED, status=status)
+            return DreachySiteError(str(exc), status=status)
+        if isinstance(exc, httpx.HTTPError):
+            return DreachySiteError(str(exc))
+        return DreachySiteError(f"Unexpected response for {context}: {exc!r}")
 
     def _get_collection(self, resource_type: str, params: DrupalJsonApiParams) -> list[dict[str, Any]]:
         try:
@@ -106,15 +125,11 @@ class JsonApiBackend(Backend):
                 resource_type, query_string=params, raise_for_status=True, disable_cache=True
             )
             return response["data"]
-        except httpx.HTTPStatusError as exc:
-            raise DreachySiteError(str(exc), status=exc.response.status_code) from exc
-        except httpx.HTTPError as exc:
-            raise DreachySiteError(str(exc)) from exc
-        except (ValueError, KeyError, TypeError) as exc:
-            # A 200 that isn't JSON:API (a captive portal, a maintenance page).
-            # Left raw, it would end the watcher's task and bypass discovery's
-            # retry throttle.
-            raise DreachySiteError(f"Unexpected response for {resource_type}: {exc!r}") from exc
+        # ValueError and friends: a 200 that isn't JSON:API (a captive
+        # portal, a maintenance page). Left raw, it would end the watcher's
+        # task and bypass discovery's retry throttle.
+        except (AuthenticationError, httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
+            raise self._site_error(exc, resource_type) from exc
 
     # -- content model --------------------------------------------------
 
@@ -136,8 +151,11 @@ class JsonApiBackend(Backend):
         try:
             response = self._client.fetch(self._index_url(), raise_for_status=True)
             links = response.json().get("links", {})
-        except (httpx.HTTPError, ValueError, AttributeError) as exc:
-            raise DreachySiteError(f"JSON:API index unavailable: {exc}") from exc
+        except (AuthenticationError, httpx.HTTPError, ValueError, AttributeError) as exc:
+            error = self._site_error(exc, "the JSON:API index")
+            if type(error) is DreachySiteError:  # keep R1's wording for plain site failures
+                error = DreachySiteError(f"JSON:API index unavailable: {exc}", status=error.status)
+            raise error from exc
         return [key.split("--", 1)[1] for key in links if key.startswith("node--")]
 
     def _node_type_labels(self) -> dict[str, str]:
@@ -162,6 +180,8 @@ class JsonApiBackend(Backend):
         try:
             resources = self._get_collection(f"node--{bundle}", params)
         except DreachySiteError as exc:
+            if isinstance(exc, DreachyAuthError):
+                raise  # a bad login fails discovery; it doesn't make a type "unreadable"
             # One unreadable type (e.g. no anonymous view access) mustn't sink
             # the rest. Anything else — a 5xx, a timeout — fails the whole
             # discovery, so the retry picks the type up rather than losing it
@@ -218,8 +238,8 @@ class JsonApiBackend(Backend):
             resource = self._client.get_resource_by_path(path, raise_for_status=True, disable_cache=True)
         except ResourceNotFoundError:
             pass
-        except httpx.HTTPError as exc:
-            raise DreachySiteError(str(exc)) from exc
+        except (AuthenticationError, httpx.HTTPError) as exc:
+            raise self._site_error(exc, title_or_path) from exc
 
         if resource is not None:
             bundle = resource["data"]["type"].split("--")[1]

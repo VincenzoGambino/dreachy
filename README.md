@@ -131,6 +131,7 @@ Everything else lives under `dreachy/`:
   site's content model at start.
 - `backend.py` — the `Backend` interface the tools, watcher and settings page query through;
   `client.py`'s `JsonApiBackend` implements it.
+- `auth.py` — chooses the site login; drupal-api-client (≥0.3.1) handles the tokens.
 - `schema.py` — the content-model heuristics (which types, which fields hold text). `client.py`
   fetches; `schema.py` decides.
 - `tool_queries.py` — the plain-function query logic behind each tool.

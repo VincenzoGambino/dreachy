@@ -40,6 +40,7 @@ def _isolated_paths(tmp_path, monkeypatch):
         "DREACHY_AUTH",
         "DREACHY_OAUTH_CLIENT_ID",
         "DREACHY_OAUTH_CLIENT_SECRET",
+        "DREACHY_OAUTH_SCOPE",
     ):
         monkeypatch.setenv(key, "")
         monkeypatch.delenv(key)
@@ -385,7 +386,7 @@ def _save_login(client, **fields):
 
 def test_get_auth_defaults_to_anonymous() -> None:
     assert _make_client().get("/api/auth").json() == {
-        "auth": "none", "client_id": "", "client_secret_set": False, "active": False,
+        "auth": "none", "client_id": "", "scope": "", "client_secret_set": False, "active": False,
     }
 
 
@@ -397,7 +398,9 @@ def test_get_auth_never_returns_the_secret(monkeypatch) -> None:
     resp = _make_client().get("/api/auth")
 
     assert _SECRET not in resp.text
-    assert resp.json() == {"auth": "oauth", "client_id": "dreachy", "client_secret_set": True, "active": True}
+    assert resp.json() == {
+        "auth": "oauth", "client_id": "dreachy", "scope": "", "client_secret_set": True, "active": True,
+    }
 
 
 def test_saving_a_login_stores_it_and_drops_the_cached_client() -> None:
@@ -443,3 +446,10 @@ def test_get_auth_reports_an_incomplete_login(monkeypatch) -> None:
     monkeypatch.setenv("DREACHY_OAUTH_CLIENT_ID", "dreachy")
 
     assert _make_client().get("/api/auth").json()["active"] is False
+
+
+def test_saving_a_login_can_name_a_scope() -> None:
+    resp = _save_login(_make_client(), client_secret=_SECRET, scope="dreachy")
+
+    assert resp.json()["scope"] == "dreachy"
+    assert os.environ["DREACHY_OAUTH_SCOPE"] == "dreachy"

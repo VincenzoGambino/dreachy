@@ -38,6 +38,9 @@ class Config:
     # repr=False: Configs get logged and passed around; the secret mustn't
     # ride along (spec Invariants: secrets confined to the client/auth layer).
     oauth_client_secret: str = field(default="", repr=False)
+    # Optional: a scope to request by name. Empty = none sent, and the site
+    # applies the consumer's default scope (docs/drupal-setup.md).
+    oauth_scope: str = ""
 
     # ---------------------------------------------------------------------------
     # Content model — discovered from the site (see schema.py)
@@ -94,6 +97,7 @@ class Config:
         config.auth = auth
         config.oauth_client_id = os.environ.get("DREACHY_OAUTH_CLIENT_ID", "").strip()
         config.oauth_client_secret = os.environ.get("DREACHY_OAUTH_CLIENT_SECRET", "").strip()
+        config.oauth_scope = os.environ.get("DREACHY_OAUTH_SCOPE", "").strip()
         if auth == "oauth" and not config.uses_oauth:
             logger.warning("OAuth is selected but the client ID or secret is missing; using anonymous access")
         return config

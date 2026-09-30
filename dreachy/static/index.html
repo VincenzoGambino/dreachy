@@ -198,6 +198,12 @@
 					secret</label>
 				<p class="hint">Write-only: a saved secret is never shown here. Leave the field blank to keep it.</p>
 			</fieldset>
+			<fieldset>
+				<label for="oauth_scope">Scope (optional)</label>
+				<input type="text" id="oauth_scope" autocomplete="off" placeholder="The OAuth client's default scope" />
+				<p class="hint">Leave blank to use the scope set as the default on the site's OAuth client — the
+					usual setup. Fill in only to ask for a specific scope by name.</p>
+			</fieldset>
 			<p class="hint" id="auth_status"></p>
 		</details>
 
@@ -232,6 +238,7 @@
 		const authModeInput = document.getElementById("auth_mode");
 		const clientIdInput = document.getElementById("oauth_client_id");
 		const clientSecretInput = document.getElementById("oauth_client_secret");
+		const scopeInput = document.getElementById("oauth_scope");
 		const clearSecretInput = document.getElementById("oauth_clear_secret");
 		const authStatusEl = document.getElementById("auth_status");
 
@@ -240,6 +247,7 @@
 				const data = await (await fetch("/api/auth")).json();
 				authModeInput.value = data.auth;
 				clientIdInput.value = data.client_id;
+				scopeInput.value = data.scope;
 				clientSecretInput.value = "";
 				clearSecretInput.checked = false;
 				clientSecretInput.placeholder = data.client_secret_set ? "Saved — leave blank to keep it" : "Not set";
@@ -259,6 +267,7 @@
 				body: JSON.stringify({
 					auth: authModeInput.value,
 					client_id: clientIdInput.value,
+					scope: scopeInput.value,
 					client_secret: clientSecretInput.value || null,
 					clear_client_secret: clearSecretInput.checked,
 				}),

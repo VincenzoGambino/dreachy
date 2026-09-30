@@ -150,6 +150,8 @@ class _ConfigPayload(BaseModel):
 class _AuthPayload(BaseModel):
     auth: Literal["none", "oauth"] = "none"
     client_id: str = ""
+    # Optional; empty = request none, and the site applies the consumer's default scope.
+    scope: str = ""
     # None or "" = keep the saved secret. It's never sent back to the page,
     # so a blank field means "unchanged", not "remove".
     client_secret: str | None = None
@@ -159,10 +161,12 @@ class _AuthPayload(BaseModel):
 def _auth_status() -> dict:
     auth = os.environ.get("DREACHY_AUTH", "none") or "none"
     client_id = os.environ.get("DREACHY_OAUTH_CLIENT_ID", "")
+    scope = os.environ.get("DREACHY_OAUTH_SCOPE", "")
     secret_set = bool(os.environ.get("DREACHY_OAUTH_CLIENT_SECRET"))
     return {
         "auth": auth if auth in AUTH_MODES else "none",
         "client_id": client_id,
+        "scope": scope,
         "client_secret_set": secret_set,
         "active": auth == "oauth" and bool(client_id) and secret_set,
     }
@@ -208,7 +212,11 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
     @settings_app.post("/api/auth")
     def save_auth(payload: _AuthPayload) -> dict:
         env_path = _instance_path() / ".env"
-        updates = {"DREACHY_AUTH": payload.auth, "DREACHY_OAUTH_CLIENT_ID": payload.client_id.strip()}
+        updates = {
+            "DREACHY_AUTH": payload.auth,
+            "DREACHY_OAUTH_CLIENT_ID": payload.client_id.strip(),
+            "DREACHY_OAUTH_SCOPE": payload.scope.strip(),
+        }
         if payload.client_secret and not payload.clear_client_secret:
             updates["DREACHY_OAUTH_CLIENT_SECRET"] = payload.client_secret.strip()
         for key, value in updates.items():

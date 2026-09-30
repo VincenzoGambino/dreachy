@@ -13,7 +13,7 @@ _SECRET = "s3cret-value-never-shown"
 
 @pytest.fixture(autouse=True)
 def _clean_env(monkeypatch):
-    for key in ("DREACHY_AUTH", "DREACHY_OAUTH_CLIENT_ID", "DREACHY_OAUTH_CLIENT_SECRET"):
+    for key in ("DREACHY_AUTH", "DREACHY_OAUTH_CLIENT_ID", "DREACHY_OAUTH_CLIENT_SECRET", "DREACHY_OAUTH_SCOPE"):
         monkeypatch.setenv(key, "")
         monkeypatch.delenv(key)
 
@@ -58,3 +58,11 @@ def test_config_repr_never_shows_the_client_secret(monkeypatch) -> None:
     monkeypatch.setenv("DREACHY_OAUTH_CLIENT_SECRET", _SECRET)
 
     assert _SECRET not in repr(Config.from_env())
+
+
+def test_an_oauth_scope_is_optional(monkeypatch) -> None:
+    assert Config.from_env().oauth_scope == ""
+
+    monkeypatch.setenv("DREACHY_OAUTH_SCOPE", " dreachy ")
+
+    assert Config.from_env().oauth_scope == "dreachy"

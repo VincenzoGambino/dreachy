@@ -37,6 +37,15 @@ class DreachySiteError(Exception):
         self.status = status
 
 
+class DreachyAuthError(DreachySiteError):
+    """The site refused Dreachy's login (OAuth client credentials).
+
+    A DreachySiteError, so the tools and the watcher already handle it: the
+    tools report it, and the watcher backs off. The message never includes
+    credentials.
+    """
+
+
 class Backend(ABC):
     """A site Dreachy talks about. Sync: tools call it via asyncio.to_thread()."""
 
