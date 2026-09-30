@@ -13,7 +13,7 @@ _SECRET = "s3cret-value-never-shown"
 
 @pytest.fixture(autouse=True)
 def _clean_env(monkeypatch):
-    for key in ("DREACHY_AUTH", "DREACHY_OAUTH_CLIENT_ID", "DREACHY_OAUTH_CLIENT_SECRET", "DREACHY_OAUTH_SCOPE"):
+    for key in ("DREACHY_BASE_URL", "DREACHY_AUTH", "DREACHY_OAUTH_CLIENT_ID", "DREACHY_OAUTH_CLIENT_SECRET", "DREACHY_OAUTH_SCOPE"):
         monkeypatch.setenv(key, "")
         monkeypatch.delenv(key)
 
@@ -66,3 +66,16 @@ def test_an_oauth_scope_is_optional(monkeypatch) -> None:
     monkeypatch.setenv("DREACHY_OAUTH_SCOPE", " dreachy ")
 
     assert Config.from_env().oauth_scope == "dreachy"
+
+
+def test_a_login_over_plain_http_is_warned_about(monkeypatch, caplog) -> None:
+    monkeypatch.setenv("DREACHY_BASE_URL", "http://intranet.example")
+    monkeypatch.setenv("DREACHY_AUTH", "oauth")
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_ID", "dreachy")
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_SECRET", _SECRET)
+
+    with caplog.at_level(logging.WARNING):
+        Config.from_env()
+
+    assert "plain http" in caplog.text
+    assert _SECRET not in caplog.text

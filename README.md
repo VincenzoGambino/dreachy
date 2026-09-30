@@ -74,6 +74,7 @@ the Reachy Mini dashboard (the gear/settings icon next to the app) and set:
 - **Advanced: site login** (optional) — OAuth client credentials for a site whose content
   isn't public; see [`docs/drupal-setup.md`](docs/drupal-setup.md). The secret is write-only:
   once saved it's never shown again, and a blank field keeps it. Takes effect immediately.
+  Changing the site URL removes the saved login, so it's never sent to a different site.
 - **Extra instructions** (optional) — free text appended to Dreachy's built-in persona (tone,
   language, anything else). Built-in guardrails (e.g. "only answer from site content") stay in
   force either way, since this is appended, not a replacement. Takes effect the next time the

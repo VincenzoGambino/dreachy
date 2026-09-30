@@ -23,6 +23,10 @@ steps' intent still holds.
 Only when the content Dreachy should talk about isn't public. With anonymous
 access, leave Dreachy's settings page on **Login: None** and skip this page.
 
+The site must be served over **https**. Dreachy sends its client secret to
+the site's `/oauth/token` endpoint, and over plain http anyone on the network
+path could read it. Dreachy logs a warning if you try.
+
 Whether it's logged in or not, Dreachy only ever reads **published** content.
 It never reads drafts aloud, searches them or reacts to them.
 
@@ -95,14 +99,20 @@ Enable no broader scope for the client-credentials grant.
    repo, in the profile or in a chat. Once saved, Dreachy stores it in its own
    instance `.env`, readable by its owner only, and never shows it again.
 
+   A login belongs to one site. If you later change Dreachy's site URL,
+   Dreachy removes the saved login rather than send it to the new address;
+   enter the new site's credentials again.
+
 ## 6. Check it works
 
 To see the login make a difference, make the site private:
 
 1. At **`/admin/people/permissions`**, remove **View published content** from
    **Anonymous user**.
-2. With Dreachy's login set to **None**, ask "what's new?": the robot says it
-   can't reach the site.
+2. With Dreachy's login set to **None**, ask "what's new?": the robot finds
+   nothing. Drupal still answers anonymous JSON:API requests, but with every
+   node filtered out, so to Dreachy the site looks empty rather than
+   unreachable.
 3. Switch Dreachy's login to **OAuth client credentials** and save: the same
    question gets a normal answer.
 4. In the web server's access log, Dreachy's requests to `/jsonapi/…` carry
@@ -112,7 +122,11 @@ Restore the anonymous permission afterwards if the site should be public.
 
 ## 7. Revoking
 
-To cut Dreachy off, delete the consumer or give it a new secret. From then on,
-Dreachy tells people it can't get into the site, and keeps watching for the
-site to come back. To reconnect after rotating the secret, paste the new one
-into Dreachy's settings page.
+To cut Dreachy off, delete the consumer or give it a new secret. Once the
+token Dreachy already holds stops working (it may stay valid until it expires,
+typically within minutes), Dreachy tells people it can't get into the site,
+and keeps watching for it to come back. To reconnect after rotating the
+secret, paste the new one into Dreachy's settings page.
+
+To remove Dreachy's copy of the secret too, tick **Remove the saved secret**
+on its settings page and save.

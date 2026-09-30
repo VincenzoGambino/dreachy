@@ -1233,7 +1233,7 @@ Where the 6.x UI and the documentation disagree, the UI on the local DDEV site (
 3. **A dedicated `dreachy` role and user.** Least privilege for R2, which only reads: `access content` and nothing else. Why: the published-only filter means Dreachy never reads drafts even if the role can see them, but R2 doesn't need them, so don't grant them.
 4. **The OAuth client (consumer).** Client-credentials grant, the `dreachy` user and scope, and a secret. The secret goes into Dreachy's settings page (Advanced: site login), and nowhere else.
 5. **Check it works (the R2 live check).** Remove `access content` from Anonymous. Then:
-   - Dreachy with login **None** can't reach the content: the robot says it can't reach the site.
+   - Dreachy with login **None** finds nothing: JSON:API answers anonymously with every node filtered out (corrected after the final review).
    - Dreachy with OAuth answers normally.
    - The site's access log shows `Authorization: Bearer` on Dreachy's requests. The watchdog log shows the `dreachy` user.
 6. **Revoking.** Delete the consumer or rotate its secret. Dreachy then says the site refused its credentials until the settings page has the new secret.
@@ -1615,7 +1615,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - [ ] **Step 8: Live checks (Vincenzo, spec R2.6)**
   - **Anonymous, public Umami sandbox:** unchanged. Run R1's live script again.
   - **Private site** (anonymous without `access content`), following `docs/drupal-setup.md`:
-    - login **None**: the robot can't reach the site;
+    - login **None**: the robot finds nothing (empty answers, not "can't reach");
     - **OAuth**: normal answers;
     - `Authorization: Bearer` shows in the access log.
   - **Revoke** the consumer's secret: the robot says it can't get into the site, and the watcher keeps running.

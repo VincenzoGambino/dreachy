@@ -38,7 +38,12 @@ _SUMMARY_FALLBACK_CHARS = 200
 # temporary failure: only these let discovery skip a type and carry on.
 _UNREADABLE_STATUSES = (401, 403, 404)
 # Never includes credentials; the tools prefix it with "I can't reach the site right now: ".
-_CREDENTIALS_REFUSED = "the site refused Dreachy's credentials — check the site login on Dreachy's settings page"
+# Hedged on purpose: drupal-api-client raises AuthenticationError for any
+# failed grant, a 503 from a site in maintenance mode included.
+_CREDENTIALS_REFUSED = (
+    "couldn't log in to the site: it refused Dreachy's credentials or is unavailable"
+    " — if this keeps happening, check the site login on Dreachy's settings page"
+)
 
 
 def _strip_html(text: str) -> str:

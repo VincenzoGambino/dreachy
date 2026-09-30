@@ -353,6 +353,11 @@
 				if (!resp.ok) throw new Error(data.detail || "Save failed");
 				await saveAuth();
 				await loadAuth();
+				if (data.login_cleared) {
+					authStatusEl.textContent = "The site URL changed, so the previous site's login was removed. "
+						+ "Enter the new site's client ID and secret under Advanced, if it needs one.";
+					document.getElementById("advanced").open = true;
+				}
 				loadedBaseUrl = baseUrlInput.value;
 				loadedLocale = languagePrefixInput.value;
 				showStatus(

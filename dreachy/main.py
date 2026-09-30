@@ -259,6 +259,17 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             # Moving to another site: the page sends no selection then, and one
             # made for the previous site would silently filter this one.
             types = ""
+        login_cleared = False
+        if base_url_changed and previous_base_url and os.environ.get("DREACHY_OAUTH_CLIENT_SECRET"):
+            # Credentials belong to the site that issued them. Kept, the next
+            # token request would POST the secret to whatever the new URL
+            # points at — so moving site means entering the new site's login.
+            dotenv.set_key(str(env_path), "DREACHY_AUTH", "none")
+            os.environ["DREACHY_AUTH"] = "none"
+            dotenv.unset_key(str(env_path), "DREACHY_OAUTH_CLIENT_SECRET")
+            os.environ.pop("DREACHY_OAUTH_CLIENT_SECRET", None)
+            login_cleared = True
+
         types_changed = False
         if types is not None and types != os.environ.get("DREACHY_TYPES", ""):
             dotenv.set_key(str(env_path), "DREACHY_TYPES", types)
@@ -278,6 +289,7 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             "base_url_applied_immediately": base_url_changed,
             "locale_applied_immediately": locale_changed,
             "types_applied_immediately": types_changed,
+            "login_cleared": login_cleared,
             "instructions_require_restart": True,
         }
 

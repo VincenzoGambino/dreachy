@@ -453,3 +453,29 @@ def test_saving_a_login_can_name_a_scope() -> None:
 
     assert resp.json()["scope"] == "dreachy"
     assert os.environ["DREACHY_OAUTH_SCOPE"] == "dreachy"
+
+
+def test_moving_to_another_site_clears_the_previous_sites_login(monkeypatch) -> None:
+    # Credentials belong to the site that issued them. Left in place, the next
+    # token request would POST the secret to whatever the new URL points at.
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://old.example")
+    client = _make_client()
+    _save_login(client, client_secret=_SECRET)
+
+    resp = client.post("/api/config", json={"base_url": "https://new.example", "extra_instructions": ""})
+
+    assert resp.json()["login_cleared"] is True
+    assert os.environ["DREACHY_AUTH"] == "none"
+    assert "DREACHY_OAUTH_CLIENT_SECRET" not in os.environ
+    assert _SECRET not in (dreachy_main._instance_path() / ".env").read_text()
+
+
+def test_setting_the_first_site_url_keeps_a_hand_configured_login(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_AUTH", "oauth")
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_ID", "dreachy")
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_SECRET", _SECRET)
+
+    resp = _make_client().post("/api/config", json={"base_url": "https://site.example", "extra_instructions": ""})
+
+    assert resp.json()["login_cleared"] is False
+    assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == _SECRET

@@ -100,6 +100,8 @@ class Config:
         config.oauth_scope = os.environ.get("DREACHY_OAUTH_SCOPE", "").strip()
         if auth == "oauth" and not config.uses_oauth:
             logger.warning("OAuth is selected but the client ID or secret is missing; using anonymous access")
+        if config.uses_oauth and config.base_url.startswith("http://"):
+            logger.warning("The site login sends Dreachy's client secret over plain http; use https")
         return config
 
 

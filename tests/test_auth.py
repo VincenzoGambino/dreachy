@@ -26,10 +26,12 @@ class PrivateSite:
     """FakeSite behind a login: every JSON:API or router request needs a
     Bearer token from POST /oauth/token (client credentials)."""
 
-    def __init__(self, *, accept: bool = True, expires_in: int = 300) -> None:
+    def __init__(self, *, accept: bool = True, expires_in: int = 300, token_status: int | None = None) -> None:
         self.site = FakeSite(NEWS_NODES, labels=NEWS_LABELS)
         self.accept = accept
         self.expires_in = expires_in
+        # Force this status from the token endpoint (e.g. 503: maintenance mode).
+        self.token_status = token_status
         self.grants = 0
         self.valid_tokens: set[str] = set()
         self.seen_auth: list[str | None] = []
@@ -38,6 +40,8 @@ class PrivateSite:
     def handle(self, request: httpx.Request) -> httpx.Response:
         if request.url.path == "/oauth/token":
             self.token_bodies.append(request.content.decode())
+            if self.token_status is not None:
+                return httpx.Response(self.token_status, text="<html>Site under maintenance</html>")
             if not self.accept or _SECRET not in request.content.decode():
                 return httpx.Response(401, json={"error": "invalid_client"})
             self.grants += 1
@@ -184,3 +188,14 @@ def test_the_watcher_survives_a_refused_login() -> None:
     # DreachyAuthError is a DreachySiteError, which the watcher's loop
     # already catches and backs off on.
     assert issubclass(DreachyAuthError, DreachySiteError)
+
+
+def test_an_unavailable_token_endpoint_is_not_blamed_on_the_credentials() -> None:
+    # drupal-api-client raises AuthenticationError for any failed grant,
+    # including a 503 from a site in maintenance mode, so Dreachy mustn't
+    # claim the credentials were refused.
+    with PrivateSite(token_status=503).backend() as backend:
+        with pytest.raises(DreachyAuthError) as excinfo:
+            backend.get_recent_nodes()
+
+    assert "or is unavailable" in str(excinfo.value)
