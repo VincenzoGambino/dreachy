@@ -479,3 +479,17 @@ def test_setting_the_first_site_url_keeps_a_hand_configured_login(monkeypatch) -
 
     assert resp.json()["login_cleared"] is False
     assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == _SECRET
+
+
+def test_a_save_without_login_fields_leaves_the_login_alone() -> None:
+    # The page's main Save also posts the login section. If that section never
+    # loaded, it must not send blank defaults that wipe a working login.
+    client = _make_client()
+    _save_login(client, client_secret=_SECRET, scope="dreachy")
+
+    resp = client.post("/api/auth", json={})
+
+    assert resp.json() == {
+        "auth": "oauth", "client_id": "dreachy", "scope": "dreachy", "client_secret_set": True, "active": True,
+    }
+    assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == _SECRET

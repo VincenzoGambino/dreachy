@@ -148,10 +148,12 @@ class _ConfigPayload(BaseModel):
 
 
 class _AuthPayload(BaseModel):
-    auth: Literal["none", "oauth"] = "none"
-    client_id: str = ""
+    # None = field absent from the request: leave the saved value alone, so a
+    # page whose login section never loaded can't wipe a working login.
+    auth: Literal["none", "oauth"] | None = None
+    client_id: str | None = None
     # Optional; empty = request none, and the site applies the consumer's default scope.
-    scope: str = ""
+    scope: str | None = None
     # None or "" = keep the saved secret. It's never sent back to the page,
     # so a blank field means "unchanged", not "remove".
     client_secret: str | None = None
@@ -212,11 +214,12 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
     @settings_app.post("/api/auth")
     def save_auth(payload: _AuthPayload) -> dict:
         env_path = _instance_path() / ".env"
-        updates = {
+        fields = {
             "DREACHY_AUTH": payload.auth,
-            "DREACHY_OAUTH_CLIENT_ID": payload.client_id.strip(),
-            "DREACHY_OAUTH_SCOPE": payload.scope.strip(),
+            "DREACHY_OAUTH_CLIENT_ID": payload.client_id,
+            "DREACHY_OAUTH_SCOPE": payload.scope,
         }
+        updates = {key: value.strip() for key, value in fields.items() if value is not None}
         if payload.client_secret and not payload.clear_client_secret:
             updates["DREACHY_OAUTH_CLIENT_SECRET"] = payload.client_secret.strip()
         for key, value in updates.items():

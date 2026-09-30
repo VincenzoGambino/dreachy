@@ -241,8 +241,12 @@
 		const scopeInput = document.getElementById("oauth_scope");
 		const clearSecretInput = document.getElementById("oauth_clear_secret");
 		const authStatusEl = document.getElementById("auth_status");
+		// True only once the login section shows what's saved. Until then its
+		// fields hold blank defaults, and saving them would wipe a working login.
+		let authLoaded = false;
 
 		async function loadAuth() {
+			authLoaded = false;
 			try {
 				const data = await (await fetch("/api/auth")).json();
 				authModeInput.value = data.auth;
@@ -255,12 +259,14 @@
 					? "OAuth is selected but the client ID or secret is missing, so Dreachy is using anonymous access."
 					: "";
 				if (data.auth === "oauth") document.getElementById("advanced").open = true;
+				authLoaded = true;
 			} catch (e) {
 				authStatusEl.textContent = "Couldn't load the login settings.";
 			}
 		}
 
 		async function saveAuth() {
+			if (!authLoaded) return; // never send fields that didn't load
 			const resp = await fetch("/api/auth", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
