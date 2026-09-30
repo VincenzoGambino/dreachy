@@ -120,3 +120,14 @@ def test_watcher_reacts_to_new_content_on_any_backend(monkeypatch) -> None:
 
     asyncio.run(run())
     assert played == ["perk_up"]
+
+
+def test_no_tool_asks_for_unpublished_content() -> None:
+    backend = shared._client
+    _call(DrupalWhatsNew())
+    _call(DrupalFindContent(), keyword="park")
+    _call(DrupalSitePulse())
+    _call(DrupalReadArticle(), title_or_path="Harvest fair")
+    asyncio.run(watch_module._latest_created(backend))
+
+    assert backend.unpublished_requests and not any(backend.unpublished_requests)

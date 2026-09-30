@@ -69,6 +69,16 @@ def _node_to_dict(bundle: str, type_schema: TypeSchema, resource: dict[str, Any]
     }
 
 
+def _published(params: DrupalJsonApiParams, include_unpublished: bool = False) -> DrupalJsonApiParams:
+    """Published content only, unless a caller explicitly opts in.
+
+    Anonymous access sees only published nodes anyway; a logged-in Dreachy
+    (R2) may be able to view drafts, and no tool may read them aloud, search
+    them or react to them. R3's editorial tools opt in deliberately.
+    """
+    return params if include_unpublished else params.add_filter("status", 1)
+
+
 class JsonApiBackend(Backend):
     """The Backend over JSON:API: anonymous by default."""
 
@@ -146,7 +156,9 @@ class JsonApiBackend(Backend):
 
     def _sample_attributes(self, bundle: str) -> list[dict[str, Any]] | None:
         """Recent nodes' attributes, or None if this type can't be read at all."""
-        params = DrupalJsonApiParams().add_sort("created", "DESC").add_page_limit(self.config.schema_sample_size)
+        params = _published(
+            DrupalJsonApiParams().add_sort("created", "DESC").add_page_limit(self.config.schema_sample_size)
+        )
         try:
             resources = self._get_collection(f"node--{bundle}", params)
         except DreachySiteError as exc:
@@ -162,18 +174,20 @@ class JsonApiBackend(Backend):
 
     # -- queries --------------------------------------------------------
 
-    def get_recent_nodes(self, limit: int | None = None) -> list[dict[str, Any]]:
+    def get_recent_nodes(self, limit: int | None = None, *, include_unpublished: bool = False) -> list[dict[str, Any]]:
         limit = limit or self.config.whats_new_limit
         nodes: list[dict[str, Any]] = []
         for bundle, type_schema in self._types().items():
-            params = DrupalJsonApiParams().add_sort("created", "DESC").add_page_limit(limit)
+            params = _published(
+                DrupalJsonApiParams().add_sort("created", "DESC").add_page_limit(limit), include_unpublished
+            )
             for resource in self._get_collection(f"node--{bundle}", params):
                 nodes.append(_node_to_dict(bundle, type_schema, resource))
         nodes.sort(key=lambda n: n["created"], reverse=True)
         return nodes[:limit]
 
     def find_content(
-        self, keyword: str, content_type: str | None = None
+        self, keyword: str, content_type: str | None = None, *, include_unpublished: bool = False
     ) -> list[dict[str, Any]]:
         limit = self.config.find_content_limit
         types = self._types()
@@ -184,18 +198,19 @@ class JsonApiBackend(Backend):
             types = {content_type: types[content_type]}
         matches: list[dict[str, Any]] = []
         for bundle, type_schema in types.items():
-            params = (
+            params = _published(
                 DrupalJsonApiParams()
                 .add_filter(type_schema.label_field, keyword, operator=FilterOperator.CONTAINS)
                 .add_sort("created", "DESC")
-                .add_page_limit(limit)
+                .add_page_limit(limit),
+                include_unpublished,
             )
             for resource in self._get_collection(f"node--{bundle}", params):
                 matches.append(_node_to_dict(bundle, type_schema, resource))
         matches.sort(key=lambda n: n["created"], reverse=True)
         return matches[:limit]
 
-    def get_article(self, title_or_path: str) -> dict[str, Any] | None:
+    def get_article(self, title_or_path: str, *, include_unpublished: bool = False) -> dict[str, Any] | None:
         types = self._types()
         path = title_or_path if title_or_path.startswith("/") else f"/{title_or_path}"
         resource = None
@@ -208,16 +223,19 @@ class JsonApiBackend(Backend):
 
         if resource is not None:
             bundle = resource["data"]["type"].split("--")[1]
-            if bundle in types:
+            published = resource["data"]["attributes"].get("status", True)
+            if bundle in types and (published or include_unpublished):
                 return _node_to_dict(bundle, types[bundle], resource["data"])
             # A path to something Dreachy doesn't talk about (a disabled
-            # type, a taxonomy term): fall through to the title search.
+            # type, a taxonomy term, an unpublished node): fall through to
+            # the title search.
 
         for bundle, type_schema in types.items():
-            params = (
+            params = _published(
                 DrupalJsonApiParams()
                 .add_filter(type_schema.label_field, title_or_path, operator=FilterOperator.EQUAL)
-                .add_page_limit(1)
+                .add_page_limit(1),
+                include_unpublished,
             )
             found = self._get_collection(f"node--{bundle}", params)
             if found:

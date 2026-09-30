@@ -129,22 +129,29 @@ class Backend(ABC):
     # -- queries ----------------------------------------------------------
 
     @abstractmethod
-    def get_recent_nodes(self, limit: int | None = None) -> list[dict[str, Any]]:
+    def get_recent_nodes(self, limit: int | None = None, *, include_unpublished: bool = False) -> list[dict[str, Any]]:
         """Newest content across the enabled types, newest first.
 
-        The watcher polls this with limit=1.
+        The watcher polls this with limit=1. Published content only unless
+        include_unpublished — which no tool sets (R3's editorial tools will).
         """
 
     @abstractmethod
-    def find_content(self, keyword: str, content_type: str | None = None) -> list[dict[str, Any]]:
+    def find_content(
+        self, keyword: str, content_type: str | None = None, *, include_unpublished: bool = False
+    ) -> list[dict[str, Any]]:
         """Title keyword search across the enabled types, newest first.
 
         An unknown or disabled content_type searches every enabled type.
+        Published content only unless include_unpublished.
         """
 
     @abstractmethod
-    def get_article(self, title_or_path: str) -> dict[str, Any] | None:
-        """One node, by URL path alias or exact title; None if nothing matches."""
+    def get_article(self, title_or_path: str, *, include_unpublished: bool = False) -> dict[str, Any] | None:
+        """One node, by URL path alias or exact title; None if nothing matches.
+
+        Published content only unless include_unpublished.
+        """
 
     def get_site_pulse(self) -> dict[str, Any]:
         """Node counts and latest activity timestamp.
