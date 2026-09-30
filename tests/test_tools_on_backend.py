@@ -11,6 +11,7 @@ import pytest
 from _fake_backend import FakeBackend, fake_node
 
 import dreachy.tools._shared as shared
+from dreachy.config import Config
 from dreachy.tools import drupal_watch_site as watch_module
 from dreachy.tools.drupal_find_content import DrupalFindContent
 from dreachy.tools.drupal_read_article import DrupalReadArticle
@@ -131,3 +132,103 @@ def test_no_tool_asks_for_unpublished_content() -> None:
     asyncio.run(watch_module._latest_created(backend))
 
     assert backend.unpublished_requests and not any(backend.unpublished_requests)
+
+
+# ---------------------------------------------------------------------------
+# Editorial tools (R3)
+# ---------------------------------------------------------------------------
+
+# content_types: the fake has no discovery, so this order decides "the first enabled type" (news_item).
+_LOGGED_IN = dict(
+    auth="oauth", oauth_client_id="dreachy", oauth_client_secret="s3cret", content_types=("news_item", "event")
+)
+_EDITORIAL = [
+    *NODES,
+    fake_node("d1", "Park opening hours", "news_item", _iso(0.5), status=False, moderation_state="draft"),
+    fake_node("r1", "Budget report", "news_item", _iso(2), status=False, moderation_state="review"),
+    fake_node("x1", "Old fair", "news_item", _iso(90), status=False, moderation_state="archived"),
+    fake_node("e2", "Winter market", "event", _iso(4), status=False),
+]
+
+
+def _editor(**config) -> FakeBackend:
+    backend = FakeBackend(list(_EDITORIAL), Config(**{**_LOGGED_IN, **config}), editable=True)
+    shared._client = backend
+    return backend
+
+
+def test_pending_content_summarises_counts_and_latest_titles() -> None:
+    from dreachy.tools.drupal_pending_content import DrupalPendingContent
+
+    _editor()
+
+    assert _call(DrupalPendingContent()) == {
+        "count": 3,
+        "by_state": {"draft": 1, "review": 1, "unpublished": 1},
+        "latest": [
+            {"title": "Park opening hours", "type": "news_item", "state": "draft", "age": "today"},
+            {"title": "Budget report", "type": "news_item", "state": "review", "age": "2 days ago"},
+            {"title": "Winter market", "type": "event", "state": "unpublished", "age": "4 days ago"},
+        ],
+    }
+
+
+@pytest.mark.parametrize("confirmed", [None, False, "true", 1])
+def test_create_note_refuses_anything_but_confirmed_true(confirmed) -> None:
+    from dreachy.tools.drupal_create_note import DrupalCreateNote
+
+    backend = _editor()
+    kwargs = {"title": "Park bench", "body": "Needs painting."}
+    if confirmed is not None:
+        kwargs["confirmed"] = confirmed
+
+    result = _call(DrupalCreateNote(), **kwargs)
+
+    assert "error" in result and "shall I save it as a draft?" in result["error"]
+    assert backend.created == []
+
+
+def test_create_note_saves_a_draft_once_confirmed() -> None:
+    from dreachy.tools.drupal_create_note import DrupalCreateNote
+
+    backend = _editor()
+
+    result = _call(DrupalCreateNote(), title="Park bench", body="Needs painting.", confirmed=True)
+
+    assert result == {"saved": "draft", "title": "Park bench", "type": "news_item"}
+    assert backend.created == [("news_item", "Park bench", "Needs painting.")]
+
+
+def test_create_note_uses_the_configured_note_type() -> None:
+    from dreachy.tools.drupal_create_note import DrupalCreateNote
+
+    backend = _editor(note_type="event")
+
+    _call(DrupalCreateNote(), title="T", body="B", confirmed=True)
+
+    assert backend.created[0][0] == "event"
+
+
+def test_create_note_needs_a_title_and_a_body() -> None:
+    from dreachy.tools.drupal_create_note import DrupalCreateNote
+
+    backend = _editor()
+
+    assert "error" in _call(DrupalCreateNote(), title="", body="B", confirmed=True)
+    assert backend.created == []
+
+
+def test_editorial_tools_refuse_without_a_login() -> None:
+    from dreachy.tools.drupal_create_note import DrupalCreateNote
+    from dreachy.tools.drupal_pending_content import DrupalPendingContent
+
+    # Anonymous config, and a backend that fails on any call: had a tool
+    # touched the site, the answer would be a site error, not this refusal.
+    backend = FakeBackend(list(_EDITORIAL), fail=True)
+    shared._client = backend
+
+    assert _call(DrupalPendingContent()) == {"error": "Editing isn't available on this site."}
+    assert _call(DrupalCreateNote(), title="T", body="B", confirmed=True) == {
+        "error": "Editing isn't available on this site."
+    }
+    assert backend.created == []
