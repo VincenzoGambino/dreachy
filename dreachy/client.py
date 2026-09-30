@@ -75,6 +75,8 @@ def _node_to_dict(bundle: str, type_schema: TypeSchema, resource: dict[str, Any]
         "path": path.get("alias"),
         "body": body,
         "summary": summary,
+        "status": bool(attributes.get("status", True)),
+        "moderation_state": attributes.get("moderation_state"),
     }
 
 

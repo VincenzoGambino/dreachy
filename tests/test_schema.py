@@ -109,3 +109,13 @@ def test_a_type_skipped_for_having_no_text_is_logged(caplog) -> None:
         build_schema(NEWS_NODES, NEWS_LABELS, _samples(NEWS_NODES))
 
     assert "node--gallery" in caplog.text
+
+
+def test_a_type_whose_content_carries_a_moderation_state_is_moderated() -> None:
+    samples = [{"title": "t", "body": formatted("b"), "moderation_state": "published"}]
+
+    assert infer_type_schema("News", samples).moderated is True
+
+
+def test_a_type_without_moderation_state_is_not_moderated() -> None:
+    assert infer_type_schema("News", [{"title": "t", "body": formatted("b")}]).moderated is False

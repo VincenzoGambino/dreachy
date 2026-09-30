@@ -43,6 +43,9 @@ class TypeSchema:
     text_fields: tuple[str, ...]
     # A teaser that's a field of its own (Umami's recipe), if the type has one.
     summary_field: str | None = None
+    # Content Moderation governs this type: its content carries a
+    # moderation_state, and it can't be unpublished by setting status (R3).
+    moderated: bool = False
 
 
 Schema = dict[str, TypeSchema]
@@ -72,6 +75,8 @@ def infer_type_schema(label: str, samples: Iterable[Mapping[str, Any]]) -> TypeS
     Samples are unioned, so a field left empty on the newest node is still
     found on an older one. Returns None for a type with no formatted text.
     """
+    samples = list(samples)
+    moderated = any("moderation_state" in attributes for attributes in samples)
     candidates: list[str] = []
     for attributes in samples:
         for name, value in attributes.items():
@@ -87,7 +92,7 @@ def infer_type_schema(label: str, samples: Iterable[Mapping[str, Any]]) -> TypeS
         body, summary = [summary], None
     preferred = [name for name in _BODY_PREFERENCE if name in body]
     rest = [name for name in body if name not in preferred]
-    return TypeSchema(label, LABEL_FIELD, tuple(preferred + rest), summary)
+    return TypeSchema(label, LABEL_FIELD, tuple(preferred + rest), summary, moderated=moderated)
 
 
 def guess_type_schema(bundle: str, label: str) -> TypeSchema:
