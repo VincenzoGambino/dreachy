@@ -84,6 +84,27 @@
 			margin-bottom: 0.3rem;
 		}
 
+		details {
+			margin: 0 0 1.5rem 0;
+		}
+
+		summary {
+			font-weight: 600;
+			cursor: pointer;
+			margin-bottom: 0.8rem;
+		}
+
+		input[type="text"],
+		input[type="password"],
+		select {
+			width: 100%;
+			padding: 0.6rem 0.75rem;
+			border: 2px solid #e2e8f0;
+			border-radius: 8px;
+			font-size: 0.95rem;
+			font-family: inherit;
+		}
+
 		button {
 			background: linear-gradient(135deg, #667eea, #764ba2);
 			color: white;
@@ -155,6 +176,31 @@
 				the site adds later. Saving also re-reads the site's types.</p>
 		</fieldset>
 
+		<details id="advanced">
+			<summary>Advanced: site login</summary>
+			<fieldset>
+				<label for="auth_mode">Login</label>
+				<select id="auth_mode">
+					<option value="none">None — anonymous (default)</option>
+					<option value="oauth">OAuth client credentials</option>
+				</select>
+				<p class="hint">Only needed if the content Dreachy should read isn't public. See
+					<code>docs/drupal-setup.md</code> for creating the OAuth client on the site.</p>
+			</fieldset>
+			<fieldset>
+				<label for="oauth_client_id">Client ID</label>
+				<input type="text" id="oauth_client_id" autocomplete="off" />
+			</fieldset>
+			<fieldset>
+				<label for="oauth_client_secret">Client secret</label>
+				<input type="password" id="oauth_client_secret" autocomplete="new-password" placeholder="Not set" />
+				<label class="type-option"><input type="checkbox" id="oauth_clear_secret" /> Remove the saved
+					secret</label>
+				<p class="hint">Write-only: a saved secret is never shown here. Leave the field blank to keep it.</p>
+			</fieldset>
+			<p class="hint" id="auth_status"></p>
+		</details>
+
 		<fieldset>
 			<label for="extra_instructions">Extra instructions (optional)</label>
 			<textarea id="extra_instructions"
@@ -182,6 +228,43 @@
 		let typesFromSite = false;
 		let loadedBaseUrl = "";
 		let loadedLocale = "";
+
+		const authModeInput = document.getElementById("auth_mode");
+		const clientIdInput = document.getElementById("oauth_client_id");
+		const clientSecretInput = document.getElementById("oauth_client_secret");
+		const clearSecretInput = document.getElementById("oauth_clear_secret");
+		const authStatusEl = document.getElementById("auth_status");
+
+		async function loadAuth() {
+			try {
+				const data = await (await fetch("/api/auth")).json();
+				authModeInput.value = data.auth;
+				clientIdInput.value = data.client_id;
+				clientSecretInput.value = "";
+				clearSecretInput.checked = false;
+				clientSecretInput.placeholder = data.client_secret_set ? "Saved — leave blank to keep it" : "Not set";
+				authStatusEl.textContent = data.auth === "oauth" && !data.active
+					? "OAuth is selected but the client ID or secret is missing, so Dreachy is using anonymous access."
+					: "";
+				if (data.auth === "oauth") document.getElementById("advanced").open = true;
+			} catch (e) {
+				authStatusEl.textContent = "Couldn't load the login settings.";
+			}
+		}
+
+		async function saveAuth() {
+			const resp = await fetch("/api/auth", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					auth: authModeInput.value,
+					client_id: clientIdInput.value,
+					client_secret: clientSecretInput.value || null,
+					clear_client_secret: clearSecretInput.checked,
+				}),
+			});
+			if (!resp.ok) throw new Error("couldn't save the login settings");
+		}
 
 		async function loadTypes() {
 			typesFromSite = false;
@@ -259,6 +342,8 @@
 				});
 				const data = await resp.json();
 				if (!resp.ok) throw new Error(data.detail || "Save failed");
+				await saveAuth();
+				await loadAuth();
 				loadedBaseUrl = baseUrlInput.value;
 				loadedLocale = languagePrefixInput.value;
 				showStatus(
@@ -274,6 +359,7 @@
 		});
 
 		loadConfig();
+		loadAuth();
 		loadTypes();
 	</script>
 </body>
