@@ -8,12 +8,14 @@ JSON:API. Current architecture per README: `tools/` → `tool_queries.py` →
 `client.py`/`config.py`, one reaction (`perk_up`), settings page writing an
 instance-path `.env`, ambient attention polling JSON:API directly.
 
-This spec upgrades Dreachy in four releases:
+This spec upgrades Dreachy in these releases (R5 and R6 not yet planned):
 - **R1** — schema-driven content model (kill the Umami hardcoding)
 - **R2** — backend seam + `AuthProvider` (OAuth2 client credentials)
 - **R3** — authenticated editorial tools + confirmation-gated write-back
 - **R4** — `McpBackend` (Drupal MCP module as alternative transport)
 - **R5** — Paragraphs support *(future; added 2026-09-30, not yet specified)*
+- **R6** — per-user login via the OAuth device authorization grant *(future;
+  added 2026-09-30)*
 
 Each release ships independently. Do them in order; stop at release boundaries
 for review. Before writing any code, **read the actual modules** (`client.py`,
@@ -28,9 +30,10 @@ not the source.
 - Never fork or modify `reachy_mini_conversation_app` — everything stays in
   Dreachy's wrapper layer.
 - The five existing tools keep their names and speech-facing behaviour.
-- Secrets live only in the instance-path `.env` (settings page already manages
-  it); never in the profile, the repo, or logs. Add `client_secret` style
-  fields as password inputs on the settings page.
+- Secrets are confined to the client/auth layer, never logged, never in the
+  profile or repo. They're stored in the instance-path `.env` (the settings
+  page manages it); `client_secret`-style fields are write-only password
+  inputs on the settings page. *(Amended 2026-09-30 — see Amendments.)*
 - New spoken confirmations get a line in the profile instructions, not
   hard-coded English strings — Dreachy may be running an Italian persona.
   Tool results (errors, relative ages) are LLM input rather than verbatim
@@ -77,20 +80,28 @@ Goal: a site with `news_item`/`body` works without editing Python.
 
 Goal: `tool_queries.py` talks to an interface, not to JSON:API; OAuth optional.
 
-1. Define `Backend` (abstract): `search(keyword, types)`, `get_node(type,
-   id_or_uuid)`, `list_recent(types, limit)`, `site_stats(types)`,
-   `get_schema()`. Signatures should be extracted from what `tool_queries.py`
-   actually needs today — read it first, don't invent.
+1. Define `Backend` (abstract) with the methods Dreachy actually calls today
+   *(amended 2026-09-30)*: `get_recent_nodes(limit)`,
+   `find_content(keyword, content_type=None)`, `get_article(title_or_path)`
+   (a URL path alias or an exact title — never a type and id),
+   `get_site_pulse()` and `get_schema()`, plus R1's schema cache (`schema`,
+   `full_schema`, `schema_discovered`, `refresh_schema()`). The enabled types
+   come from the backend's own config (`DREACHY_TYPES`), not a parameter.
+   Reads are published-only by default: the read methods take an explicit
+   `include_unpublished=False`, which no R2 tool sets — R3's editorial tools
+   will, deliberately.
 2. Move current `client.py` logic into `JsonApiBackend(Backend)`. Ambient
    attention's polling goes through the backend too.
-3. `AuthProvider`: `none` (default) and `oauth_client_credentials`. The OAuth
-   provider: POST to `{site}/oauth/token` with client id/secret from config,
-   cache token with expiry, refresh proactively at <60s remaining, retry once
-   on 401 then surface a clear error. Backends request headers from the
-   provider; they never see the secret.
-4. Config/env additions: `DREACHY_BACKEND=jsonapi|mcp`,
-   `DREACHY_AUTH=none|oauth`, `DREACHY_OAUTH_CLIENT_ID`,
-   `DREACHY_OAUTH_CLIENT_SECRET`. Settings page grows a collapsed "Advanced"
+3. `AuthProvider`: `none` (default) and `oauth_client_credentials`. Dreachy
+   selects the provider from config; drupal-api-client (≥0.3.1) handles the
+   token *(amended 2026-09-30)*: POST to `{site}/oauth/token` with the client
+   id/secret, token cached with expiry, proactive refresh at <60 s remaining
+   (`token_refresh_margin`, default 60), one retry on 401. Dreachy turns a
+   refused login into a clear error. Secrets per the Invariants.
+4. Config/env additions: `DREACHY_AUTH=none|oauth`,
+   `DREACHY_OAUTH_CLIENT_ID`, `DREACHY_OAUTH_CLIENT_SECRET`.
+   `DREACHY_BACKEND` is deferred to R4, which has a second backend to select
+   *(amended 2026-09-30)*. Settings page grows a collapsed "Advanced"
    section for these; secret field is write-only (shows set/unset, never the
    value).
 5. Drupal-side doc: add `docs/drupal-setup.md` covering `simple_oauth` install,
@@ -143,7 +154,9 @@ Goal: same five tools over the Drupal MCP module; discovered extras optional.
 3. Discovered extra tools: OFF by default. `DREACHY_MCP_EXTRA_TOOLS=allowlist`
    (comma-separated tool names) to expose more; any write-capable discovered
    tool gets the same confirmed-assent rule as R3. Never auto-expose writes.
-4. Settings page: backend selector (JSON:API / MCP), MCP endpoint field.
+4. Settings page: backend selector (JSON:API / MCP), backed by
+   `DREACHY_BACKEND=jsonapi|mcp` (deferred here from R2), and an MCP endpoint
+   field.
 5. ✅ Checks: five tools green against a mocked MCP session; live test against
    the DrupalForge sandbox with the MCP module; document in the README what
    MCP mode adds and requires.
@@ -156,6 +169,30 @@ relationships, not attributes): such types are skipped, and a site where no
 type has formatted text falls back to the Umami mapping. To be specified and
 planned after R4; added to the roadmap 2026-09-30.
 
+## R6 — Per-user login (future)
+
+Goal: "Reachy, log me in" — the robot speaks a code and URL, the person
+approves on their phone (OAuth device authorization grant), and Dreachy acts
+as them until they log out or go idle. Design decisions *(recorded
+2026-09-30)*:
+
+- **Precondition:** verify the installed `simple_oauth` version supports the
+  device authorization grant. If it doesn't, the fallback is the
+  authorization-code grant, started from the settings page.
+- **One active identity at a time**, announced aloud on login.
+- **Session end:** idle timeout (default 30 minutes) and spoken logout. On
+  expiry or logout Dreachy falls back to the service-account consumer (R2
+  behaviour).
+- **Authorship follows identity:** drafts created while someone is logged in
+  are authored by that user; otherwise by the `dreachy` service user.
+- **Confirmation gates survive login:** `confirmed=true` is still required.
+  Authentication raises what the robot *can* do, never what it does
+  unconfirmed.
+- **Secrets:** user tokens live in the same client/auth layer as the consumer
+  credentials, under the same secrecy invariant.
+- **Rejected:** voice/speaker recognition as an identity factor (GDPR:
+  biometric data).
+
 ## Tracked separately
 
 - **Settings-page authentication.** The settings endpoints (`/api/config`,
@@ -165,8 +202,8 @@ planned after R4; added to the roadmap 2026-09-30.
 
 ## Out of scope
 
-Speaker identification, per-user auth, publish/update/delete tools, non-Drupal
-backends, changes to the reaction system, packaging changes beyond version
+Speaker identification (voice is rejected as an identity factor — see R6),
+publish/update/delete tools, non-Drupal backends, changes to the reaction system, packaging changes beyond version
 bumps.
 
 ## Definition of done (per release)
@@ -196,3 +233,23 @@ Explicit changes to this spec, made after reading the source (see
 - **2026-09-30 — Invariants, English strings.** Scoped to new spoken
   confirmations. Existing tool results are already English and are LLM
   input, not verbatim speech.
+- **2026-09-30 — Invariants, secret handling.** Was "secrets live only in the
+  `.env`; backends never see the secret". Now: secrets are confined to the
+  client/auth layer, never logged, never in the profile or repo. drupal-api-client
+  holds the OAuth credentials and does the token handling itself (its 0.3.1
+  release adds a configurable refresh margin and one retry on 401), so the
+  JSON:API backend necessarily passes the secret to it; what matters is that
+  it goes no further.
+- **2026-09-30 — R2.1 Backend methods.** Replaced the invented `search`,
+  `get_node`, `list_recent` and `site_stats` with the methods Dreachy calls
+  (from the R1 review), and made reads published-only behind an explicit
+  `include_unpublished=False`.
+- **2026-09-30 — R2.3 AuthProvider.** Dreachy selects the provider;
+  drupal-api-client 0.3.1 handles the token (refresh margin, default 60 s;
+  one retry on 401). Replaces "backends never see the secret", superseded by
+  the secret-handling invariant above.
+- **2026-09-30 — R2.4 `DREACHY_BACKEND`.** Deferred to R4, which has a second
+  backend to select.
+- **2026-09-30 — R6 per-user login added; per-user auth removed from Out of
+  scope.** Device authorization grant, design decisions recorded in the R6
+  section. Paragraphs support keeps R5.
