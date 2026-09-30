@@ -156,7 +156,9 @@ class JsonApiBackend(Backend):
         try:
             response = self._client.fetch(self._index_url(), raise_for_status=True)
             links = response.json().get("links", {})
-        except (AuthenticationError, httpx.HTTPError, ValueError, AttributeError) as exc:
+        # KeyError/TypeError: e.g. a token response without expires_in, raised
+        # by the library while logging in for this request.
+        except (AuthenticationError, httpx.HTTPError, ValueError, AttributeError, KeyError, TypeError) as exc:
             error = self._site_error(exc, "the JSON:API index")
             if type(error) is DreachySiteError:  # keep R1's wording for plain site failures
                 error = DreachySiteError(f"JSON:API index unavailable: {exc}", status=error.status)
@@ -243,12 +245,16 @@ class JsonApiBackend(Backend):
             resource = self._client.get_resource_by_path(path, raise_for_status=True, disable_cache=True)
         except ResourceNotFoundError:
             pass
-        except (AuthenticationError, httpx.HTTPError) as exc:
+        # ValueError and friends: a router answer that isn't JSON (a captive portal).
+        except (AuthenticationError, httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
             raise self._site_error(exc, title_or_path) from exc
 
         if resource is not None:
             bundle = resource["data"]["type"].split("--")[1]
-            published = resource["data"]["attributes"].get("status", True)
+            # A site that hides `status` (e.g. JSON:API Extras): anonymous
+            # access only ever sees published content, but a logged-in
+            # Dreachy may see drafts, so there a missing status fails closed.
+            published = resource["data"]["attributes"].get("status", not self.config.uses_oauth)
             if bundle in types and (published or include_unpublished):
                 return _node_to_dict(bundle, types[bundle], resource["data"])
             # A path to something Dreachy doesn't talk about (a disabled

@@ -10,7 +10,7 @@ import logging
 
 import httpx
 import pytest
-from _fake_site import NEWS_LABELS, NEWS_NODES, FakeSite
+from _fake_site import NEWS_LABELS, NEWS_NODES, FakeSite, formatted, node
 
 import dreachy.tools._shared as shared
 from dreachy.backend import DreachyAuthError, DreachySiteError
@@ -26,8 +26,18 @@ class PrivateSite:
     """FakeSite behind a login: every JSON:API or router request needs a
     Bearer token from POST /oauth/token (client credentials)."""
 
-    def __init__(self, *, accept: bool = True, expires_in: int = 300, token_status: int | None = None) -> None:
-        self.site = FakeSite(NEWS_NODES, labels=NEWS_LABELS)
+    def __init__(
+        self,
+        *,
+        accept: bool = True,
+        expires_in: int | None = 300,
+        token_status: int | None = None,
+        nodes: dict | None = None,
+        router_html: bool = False,
+    ) -> None:
+        self.site = FakeSite(nodes or NEWS_NODES, labels=NEWS_LABELS)
+        # The router answers 200 with a non-JSON page (a captive portal, say).
+        self.router_html = router_html
         self.accept = accept
         self.expires_in = expires_in
         # Force this status from the token endpoint (e.g. 503: maintenance mode).
@@ -47,13 +57,16 @@ class PrivateSite:
             self.grants += 1
             token = f"token-{self.grants}"
             self.valid_tokens.add(token)
-            return httpx.Response(
-                200, json={"access_token": token, "expires_in": self.expires_in, "token_type": "Bearer"}
-            )
+            grant = {"access_token": token, "token_type": "Bearer"}
+            if self.expires_in is not None:  # RFC 6749 only RECOMMENDS expires_in
+                grant["expires_in"] = self.expires_in
+            return httpx.Response(200, json=grant)
         auth = request.headers.get("Authorization")
         self.seen_auth.append(auth)
         if auth is None or auth.removeprefix("Bearer ") not in self.valid_tokens:
             return httpx.Response(401, json={"errors": [{"status": "401"}]})
+        if self.router_html and request.url.path.endswith("/router/translate-path"):
+            return httpx.Response(200, text="<html>Sign in to the Wi-Fi</html>")
         return self.site.handle(request)
 
     def backend(self, config: Config | None = None) -> JsonApiBackend:
@@ -199,3 +212,31 @@ def test_an_unavailable_token_endpoint_is_not_blamed_on_the_credentials() -> Non
             backend.get_recent_nodes()
 
     assert "or is unavailable" in str(excinfo.value)
+
+
+# ---------------------------------------------------------------------------
+# R3 Task 1 cleanup: library errors that escaped the mapping, and a path read
+# that failed open when a site hides `status`.
+# ---------------------------------------------------------------------------
+
+
+def test_a_token_response_without_expires_in_fails_discovery_quietly() -> None:
+    with PrivateSite(expires_in=None).backend() as backend:
+        assert backend.refresh_schema() is False  # must not raise: through _types() it would end the watcher
+
+
+def test_a_non_json_router_answer_is_a_site_error() -> None:
+    with PrivateSite(router_html=True).backend() as backend:
+        with pytest.raises(DreachySiteError):
+            backend.get_article("/news_item/n2")
+
+
+def test_a_logged_in_path_read_treats_a_missing_status_as_unpublished() -> None:
+    # A site that hides `status` (e.g. JSON:API Extras) mustn't let a draft
+    # through to a logged-in Dreachy that can view drafts.
+    draft = node("news_item", "d9", "Hidden-status draft", "2026-09-29T09:00:00+00:00", body=formatted("<p>Secret.</p>"))
+    del draft["attributes"]["status"]
+    nodes = {"news_item": [*NEWS_NODES["news_item"], draft]}
+
+    with PrivateSite(nodes=nodes).backend() as backend:
+        assert backend.get_article("/news_item/d9") is None
