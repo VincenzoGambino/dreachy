@@ -172,8 +172,8 @@
 			</div>
 			<p class="hint"><strong>Restart to apply</strong> to the search tool's type filter — it's built when
 				Dreachy starts. Everything else applies immediately.</p>
-			<p class="hint">What Dreachy talks about. Leave them all ticked to include every type, including ones
-				the site adds later. Saving also re-reads the site's types.</p>
+			<p class="hint">What Dreachy talks about. Leave them all ticked — or untick them all — to include every
+				type, including ones the site adds later. Saving also re-reads the site's types.</p>
 		</fieldset>
 
 		<details id="advanced">
@@ -299,10 +299,14 @@
 					return row;
 				});
 				if (!data.discovered) {
+					const status = await (await fetch("/api/status")).json();
 					const note = document.createElement("p");
 					note.className = "hint";
-					note.textContent = "Couldn't read content types from the site, so Dreachy is using its "
-						+ "built-in defaults. Check the site URL, then save to try again.";
+					note.textContent = status.problem === "login_refused"
+						? "The site refused Dreachy's login, so it's using its built-in defaults. Check the "
+							+ "client ID and secret under Advanced, then save to try again."
+						: "Couldn't read content types from the site, so Dreachy is using its "
+							+ "built-in defaults. Check the site URL, then save to try again.";
 					rows.unshift(note);
 				}
 				typesEl.replaceChildren(...rows);

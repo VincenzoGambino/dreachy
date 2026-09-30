@@ -9,6 +9,7 @@ from __future__ import annotations
 import os
 import threading
 
+import dotenv
 import pytest
 from _fake_site import NEWS_LABELS, NEWS_NODES, FakeSite
 from fastapi import FastAPI
@@ -516,3 +517,67 @@ def test_concurrent_callers_after_a_reset_share_one_client(monkeypatch) -> None:
 
     assert len(built) == 1
     assert results[0] is results[1]
+
+
+# ---------------------------------------------------------------------------
+# R3 Task 1 cleanup: the login section tells the truth, never loses a secret
+# to stray whitespace, and a refused login is told apart from a down site.
+# ---------------------------------------------------------------------------
+
+
+def test_the_login_status_matches_what_dreachy_does(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_AUTH", "OAuth")  # hand-edited; Config lowercases it
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_ID", "dreachy")
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_SECRET", _SECRET)
+    body = _make_client().get("/api/auth").json()
+    assert (body["auth"], body["active"]) == ("oauth", True)
+
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_SECRET", "   ")  # Config strips it to nothing
+    assert _make_client().get("/api/auth").json()["active"] is False
+
+
+def test_a_whitespace_only_secret_field_keeps_the_saved_secret() -> None:
+    client = _make_client()
+    _save_login(client, client_secret=_SECRET)
+
+    resp = _save_login(client, client_secret="   ")
+
+    assert resp.json()["client_secret_set"] is True
+    assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == _SECRET
+
+
+def test_a_new_secret_wins_over_remove() -> None:
+    client = _make_client()
+    _save_login(client, client_secret=_SECRET)
+
+    _save_login(client, client_secret="the-new-secret", clear_client_secret=True)
+
+    assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == "the-new-secret"
+
+
+def test_a_secret_with_backslashes_and_quotes_survives_a_restart() -> None:
+    tricky = "ab\\\\cd'ef\\"  # two backslashes in a row are what python-dotenv collapses
+    _save_login(_make_client(), client_secret=tricky)
+
+    reloaded = dotenv.dotenv_values(dreachy_main._instance_path() / ".env")
+
+    assert reloaded["DREACHY_OAUTH_CLIENT_SECRET"] == tricky
+
+
+def test_status_tells_a_refused_login_from_an_unreachable_site(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://example.com")
+    client = _make_client()
+
+    # The login is refused: this fake site has no /oauth/token at all.
+    logged_in = Config(auth="oauth", oauth_client_id="dreachy", oauth_client_secret=_SECRET)
+    shared._client = FakeSite(NEWS_NODES, labels=NEWS_LABELS).client(logged_in, auto_discover=True)
+    client.get("/api/schema")  # the page's load: tries discovery
+    assert client.get("/api/status").json() == {"discovered": False, "problem": "login_refused"}
+
+    shared._client = FakeSite(NEWS_NODES, index_status=503).client(auto_discover=True)
+    client.get("/api/schema")
+    assert client.get("/api/status").json() == {"discovered": False, "problem": "site_unreachable"}
+
+    shared._client = FakeSite(NEWS_NODES, labels=NEWS_LABELS).client(auto_discover=True)
+    client.get("/api/schema")
+    assert client.get("/api/status").json() == {"discovered": True, "problem": None}

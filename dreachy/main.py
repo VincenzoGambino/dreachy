@@ -28,7 +28,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
 
-from dreachy.config import AUTH_MODES, Config, parse_types
+from dreachy.config import Config, parse_types
 from dreachy.tools._shared import get_client, reset_client
 
 logger = logging.getLogger(__name__)
@@ -160,24 +160,34 @@ class _AuthPayload(BaseModel):
     clear_client_secret: bool = False
 
 
+def _set_env(key: str, value: str) -> None:
+    """Save one setting to the instance .env and the running environment.
+
+    python-dotenv collapses two backslashes in a row when it reloads the file,
+    so backslashes are escaped on the way in: every value, a secret included,
+    reads back exactly as saved after a restart.
+    """
+    dotenv.set_key(str(_instance_path() / ".env"), key, value.replace("\\", "\\\\"))
+    os.environ[key] = value
+
+
 def _auth_status() -> dict:
-    auth = os.environ.get("DREACHY_AUTH", "none") or "none"
-    client_id = os.environ.get("DREACHY_OAUTH_CLIENT_ID", "")
-    scope = os.environ.get("DREACHY_OAUTH_SCOPE", "")
-    secret_set = bool(os.environ.get("DREACHY_OAUTH_CLIENT_SECRET"))
+    # From Config, so the page reports exactly what Dreachy does (Config
+    # lowercases the mode and strips the values).
+    config = Config.from_env()
     return {
-        "auth": auth if auth in AUTH_MODES else "none",
-        "client_id": client_id,
-        "scope": scope,
-        "client_secret_set": secret_set,
-        "active": auth == "oauth" and bool(client_id) and secret_set,
+        "auth": config.auth,
+        "client_id": config.oauth_client_id,
+        "scope": config.oauth_scope,
+        "client_secret_set": bool(config.oauth_client_secret),
+        "active": config.uses_oauth,
     }
 
 
 def _register_settings_routes(settings_app: FastAPI) -> None:
     """Wire the settings page's routes onto the app's own FastAPI instance.
 
-    GET/POST /api/config, GET /api/schema and GET/POST /api/auth.
+    GET/POST /api/config, GET /api/schema, GET /api/status and GET/POST /api/auth.
     """
 
     @settings_app.get("/api/config")
@@ -207,6 +217,12 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             ],
         }
 
+    @settings_app.get("/api/status")
+    def get_status() -> dict:
+        # No discovery here: the page asks after /api/schema has tried one.
+        client = get_client()
+        return {"discovered": client.schema_discovered, "problem": client.last_discovery_problem}
+
     @settings_app.get("/api/auth")
     def get_auth() -> dict:
         return _auth_status()
@@ -220,12 +236,14 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             "DREACHY_OAUTH_SCOPE": payload.scope,
         }
         updates = {key: value.strip() for key, value in fields.items() if value is not None}
-        if payload.client_secret and not payload.clear_client_secret:
-            updates["DREACHY_OAUTH_CLIENT_SECRET"] = payload.client_secret.strip()
+        # Blank, or only spaces, means "keep the saved secret". A newly typed
+        # secret wins over "Remove the saved secret".
+        new_secret = (payload.client_secret or "").strip()
+        if new_secret:
+            updates["DREACHY_OAUTH_CLIENT_SECRET"] = new_secret
         for key, value in updates.items():
-            dotenv.set_key(str(env_path), key, value)
-            os.environ[key] = value
-        if payload.clear_client_secret:
+            _set_env(key, value)
+        if payload.clear_client_secret and not new_secret:
             env_path.touch()
             dotenv.unset_key(str(env_path), "DREACHY_OAUTH_CLIENT_SECRET")
             os.environ.pop("DREACHY_OAUTH_CLIENT_SECRET", None)
@@ -243,16 +261,14 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
         previous_base_url = os.environ.get("DREACHY_BASE_URL")
         base_url_changed = False
         if base_url and base_url != previous_base_url:
-            dotenv.set_key(str(env_path), "DREACHY_BASE_URL", base_url)
-            os.environ["DREACHY_BASE_URL"] = base_url
+            _set_env("DREACHY_BASE_URL", base_url)
             base_url_changed = True
 
         locale_changed = False
         if payload.locale is not None:
             locale = payload.locale.strip()
             if locale != os.environ.get("DREACHY_LOCALE"):
-                dotenv.set_key(str(env_path), "DREACHY_LOCALE", locale)
-                os.environ["DREACHY_LOCALE"] = locale
+                _set_env("DREACHY_LOCALE", locale)
                 locale_changed = True
 
         types = None
@@ -267,16 +283,14 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             # Credentials belong to the site that issued them. Kept, the next
             # token request would POST the secret to whatever the new URL
             # points at — so moving site means entering the new site's login.
-            dotenv.set_key(str(env_path), "DREACHY_AUTH", "none")
-            os.environ["DREACHY_AUTH"] = "none"
+            _set_env("DREACHY_AUTH", "none")
             dotenv.unset_key(str(env_path), "DREACHY_OAUTH_CLIENT_SECRET")
             os.environ.pop("DREACHY_OAUTH_CLIENT_SECRET", None)
             login_cleared = True
 
         types_changed = False
         if types is not None and types != os.environ.get("DREACHY_TYPES", ""):
-            dotenv.set_key(str(env_path), "DREACHY_TYPES", types)
-            os.environ["DREACHY_TYPES"] = types
+            _set_env("DREACHY_TYPES", types)
             types_changed = True
 
         # Always, even when nothing above changed: the next tool call picks up

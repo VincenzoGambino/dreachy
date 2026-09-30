@@ -60,6 +60,9 @@ class Backend(ABC):
         self._next_discovery_at = 0.0
         self._discovery_lock = threading.Lock()
         self._warned_stale_selection = False
+        # Why the last discovery failed, for the settings page:
+        # "login_refused", "site_unreachable", "no_readable_types", or None.
+        self.last_discovery_problem: str | None = None
 
     def __enter__(self) -> Backend:
         return self
@@ -113,11 +116,14 @@ class Backend(ABC):
         try:
             schema = self.get_schema()
         except DreachySiteError as exc:
+            self.last_discovery_problem = "login_refused" if isinstance(exc, DreachyAuthError) else "site_unreachable"
             return self._discovery_failed(str(exc))
         if not schema:
+            self.last_discovery_problem = "no_readable_types"
             return self._discovery_failed("no readable content type has text fields")
         self._full_schema = schema
         self.schema_discovered = True
+        self.last_discovery_problem = None
         return True
 
     def _discovery_failed(self, reason: str) -> bool:
