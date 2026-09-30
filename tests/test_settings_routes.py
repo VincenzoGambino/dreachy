@@ -493,3 +493,26 @@ def test_a_save_without_login_fields_leaves_the_login_alone() -> None:
         "auth": "oauth", "client_id": "dreachy", "scope": "dreachy", "client_secret_set": True, "active": True,
     }
     assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == _SECRET
+
+
+def test_concurrent_callers_after_a_reset_share_one_client(monkeypatch) -> None:
+    built = []
+    gate = threading.Event()
+
+    class _SlowBackend:
+        def __init__(self, *args, **kwargs) -> None:
+            gate.wait(2)  # both callers are inside get_client() before either finishes building
+            built.append(self)
+
+    monkeypatch.setattr(shared, "JsonApiBackend", _SlowBackend)
+    shared.reset_client()
+    results = []
+    threads = [threading.Thread(target=lambda: results.append(shared.get_client())) for _ in range(2)]
+    for thread in threads:
+        thread.start()
+    gate.set()
+    for thread in threads:
+        thread.join(5)
+
+    assert len(built) == 1
+    assert results[0] is results[1]

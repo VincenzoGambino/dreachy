@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Callable
 from typing import Any
 from urllib.parse import urljoin
 
@@ -203,13 +204,13 @@ class JsonApiBackend(Backend):
 
     def get_recent_nodes(self, limit: int | None = None, *, include_unpublished: bool = False) -> list[dict[str, Any]]:
         limit = limit or self.config.whats_new_limit
-        nodes: list[dict[str, Any]] = []
-        for bundle, type_schema in self._types().items():
-            params = _published(
+
+        def params(type_schema: TypeSchema) -> DrupalJsonApiParams:
+            return _published(
                 DrupalJsonApiParams().add_sort("created", "DESC").add_page_limit(limit), include_unpublished
             )
-            for resource in self._get_collection(f"node--{bundle}", params):
-                nodes.append(_node_to_dict(bundle, type_schema, resource))
+
+        nodes = self._read_each_type(self._types(), params)
         nodes.sort(key=lambda n: n["created"], reverse=True)
         return nodes[:limit]
 
@@ -223,19 +224,47 @@ class JsonApiBackend(Backend):
         # nothing.
         if content_type in types:
             types = {content_type: types[content_type]}
-        matches: list[dict[str, Any]] = []
-        for bundle, type_schema in types.items():
-            params = _published(
+
+        def params(type_schema: TypeSchema) -> DrupalJsonApiParams:
+            return _published(
                 DrupalJsonApiParams()
                 .add_filter(type_schema.label_field, keyword, operator=FilterOperator.CONTAINS)
                 .add_sort("created", "DESC")
                 .add_page_limit(limit),
                 include_unpublished,
             )
-            for resource in self._get_collection(f"node--{bundle}", params):
-                matches.append(_node_to_dict(bundle, type_schema, resource))
+
+        matches = self._read_each_type(types, params)
         matches.sort(key=lambda n: n["created"], reverse=True)
         return matches[:limit]
+
+    def _read_each_type(
+        self, types: Schema, params_for: Callable[[TypeSchema], DrupalJsonApiParams]
+    ) -> list[dict[str, Any]]:
+        """Node dicts from one collection read per type.
+
+        A type that fails on its own (deleted or locked mid-session: a 403,
+        404, or an anonymous 401) is skipped with a warning, so it can't sink
+        every query until a restart. A bad login, a site-wide failure, or
+        every type failing at once (a wrong language prefix 404s them all)
+        still raises: that's the site, not one type.
+        """
+        nodes: list[dict[str, Any]] = []
+        skipped: list[tuple[str, DreachySiteError]] = []
+        for bundle, type_schema in types.items():
+            try:
+                resources = self._get_collection(f"node--{bundle}", params_for(type_schema))
+            except DreachySiteError as exc:
+                if isinstance(exc, DreachyAuthError) or exc.status not in _UNREADABLE_STATUSES:
+                    raise
+                skipped.append((bundle, exc))
+                continue
+            nodes.extend(_node_to_dict(bundle, type_schema, resource) for resource in resources)
+        if skipped and len(skipped) == len(types):
+            raise skipped[0][1]
+        for bundle, exc in skipped:
+            logger.warning("Skipping node--%s this time: %s", bundle, exc)
+        return nodes
 
     def get_article(self, title_or_path: str, *, include_unpublished: bool = False) -> dict[str, Any] | None:
         types = self._types()

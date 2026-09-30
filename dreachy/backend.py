@@ -59,6 +59,7 @@ class Backend(ABC):
         self.schema_discovered = False
         self._next_discovery_at = 0.0
         self._discovery_lock = threading.Lock()
+        self._warned_stale_selection = False
 
     def __enter__(self) -> Backend:
         return self
@@ -85,6 +86,11 @@ class Backend(ABC):
     @property
     def schema(self) -> Schema:
         """The types Dreachy talks about. Never touches the network."""
+        wanted = set(self.config.enabled_types)
+        if wanted and not wanted & self._full_schema.keys() and not self._warned_stale_selection:
+            # Once per backend: this runs on every tool call and watcher poll.
+            self._warned_stale_selection = True
+            logger.warning("None of the enabled content types %s exist on the site; using all of them", sorted(wanted))
         return select_types(self._full_schema, self.config.enabled_types)
 
     @abstractmethod

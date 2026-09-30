@@ -135,13 +135,8 @@ def select_types(schema: Schema, enabled: Iterable[str]) -> Schema:
 
     Empty *enabled* means every type. So does a selection naming only types
     the site no longer has: a stale setting mustn't leave Dreachy knowing
-    nothing.
+    nothing. (Backend.schema warns about that, once.)
     """
     wanted = set(enabled)
-    if not wanted:
-        return dict(schema)
     selected = {t: s for t, s in schema.items() if t in wanted}
-    if not selected:
-        logger.warning("None of the enabled content types %s exist on the site; using all of them", sorted(wanted))
-        return dict(schema)
-    return selected
+    return selected or dict(schema)

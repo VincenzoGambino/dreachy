@@ -3,6 +3,7 @@ queries built on it. No live site: see _fake_site.FakeSite."""
 
 from __future__ import annotations
 
+import logging
 import threading
 import time
 from types import SimpleNamespace
@@ -272,3 +273,38 @@ def test_include_unpublished_is_an_explicit_opt_in() -> None:
 
     assert "Draft: council scandal" in titles
     assert by_path["title"] == "Draft: council scandal"
+
+
+# ---------------------------------------------------------------------------
+# R3 Task 1 cleanup: one broken type mustn't sink every query; a stale type
+# selection warns once, not on every read.
+# ---------------------------------------------------------------------------
+
+
+def test_a_type_deleted_mid_session_is_skipped_by_multi_type_queries() -> None:
+    site = FakeSite(UMAMI_NODES, labels=UMAMI_LABELS)
+    with site.client() as client:
+        site.errors = {"page": 404}  # the page type was deleted after start
+        nodes = client.get_recent_nodes(limit=10)
+        matches = client.find_content("borscht")
+
+    assert sorted({n["type"] for n in nodes}) == ["article", "recipe"]
+    assert [m["id"] for m in matches] == ["r1"]
+
+
+def test_when_every_type_fails_it_is_still_a_site_error() -> None:
+    # A wrong language prefix 404s every type: that's the site, not one type.
+    site = FakeSite(UMAMI_NODES, labels=UMAMI_LABELS, errors={"article": 404, "page": 404, "recipe": 404})
+
+    with site.client() as client:
+        with pytest.raises(DreachySiteError):
+            client.get_recent_nodes()
+
+
+def test_a_stale_type_selection_warns_once(caplog) -> None:
+    with FakeSite(UMAMI_NODES, labels=UMAMI_LABELS).client(Config(enabled_types=("news_item",))) as client:
+        with caplog.at_level(logging.WARNING):
+            for _ in range(3):
+                assert list(client.schema) == ["article", "page", "recipe"]
+
+    assert caplog.text.count("None of the enabled content types") == 1

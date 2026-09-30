@@ -7,21 +7,30 @@ scans *.py files that don't start with "_").
 from __future__ import annotations
 
 import os
+import threading
 
 from dreachy.backend import Backend
 from dreachy.client import JsonApiBackend
 from dreachy.config import Config
 
 _client: Backend | None = None
+# The settings threadpool and the watcher can both ask right after a reset;
+# without the lock each builds a client, and a discovery can land on the one
+# that's thrown away.
+_client_lock = threading.Lock()
 
 
 def get_client() -> Backend:
     global _client
-    if _client is None:
-        # Discovery only once a real site is configured: the placeholder
-        # base_url would send it to example.com.
-        _client = JsonApiBackend(Config.from_env(), auto_discover=bool(os.environ.get("DREACHY_BASE_URL")))
-    return _client
+    client = _client
+    if client is not None:
+        return client
+    with _client_lock:
+        if _client is None:
+            # Discovery only once a real site is configured: the placeholder
+            # base_url would send it to example.com.
+            _client = JsonApiBackend(Config.from_env(), auto_discover=bool(os.environ.get("DREACHY_BASE_URL")))
+        return _client
 
 
 def reset_client() -> None:
