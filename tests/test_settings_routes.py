@@ -43,6 +43,7 @@ def _isolated_paths(tmp_path, monkeypatch):
         "DREACHY_OAUTH_CLIENT_ID",
         "DREACHY_OAUTH_CLIENT_SECRET",
         "DREACHY_OAUTH_SCOPE",
+        "DREACHY_NOTE_TYPE",
     ):
         monkeypatch.setenv(key, "")
         monkeypatch.delenv(key)
@@ -669,3 +670,30 @@ def test_a_settings_save_keeps_the_editorial_tools_decided_at_start(monkeypatch)
     _make_client().post("/api/config", json={"base_url": "https://example.com", "extra_instructions": "Be brief."})
 
     assert "drupal_create_note" in _rendered_tools()
+
+
+def test_editorial_status_reports_whether_editing_is_on(monkeypatch) -> None:
+    assert _make_client().get("/api/editorial").json() == {"available": False, "note_type": ""}
+
+    monkeypatch.setattr(dreachy_main, "_editorial_enabled", True)
+
+    assert _make_client().get("/api/editorial").json()["available"] is True
+
+
+def test_saving_the_note_type() -> None:
+    client = _make_client()
+
+    resp = client.post("/api/editorial", json={"note_type": "event"})
+
+    assert resp.json()["note_type"] == "event"
+    assert os.environ["DREACHY_NOTE_TYPE"] == "event"
+    assert shared._client is None  # the next note uses it at once
+
+
+def test_an_editorial_save_without_a_note_type_leaves_it_alone(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_NOTE_TYPE", "event")
+
+    resp = _make_client().post("/api/editorial", json={})
+
+    assert resp.json()["note_type"] == "event"  # the save happened, and kept it
+    assert os.environ["DREACHY_NOTE_TYPE"] == "event"

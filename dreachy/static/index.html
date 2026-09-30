@@ -204,6 +204,13 @@
 				<p class="hint">Leave blank to use the scope set as the default on the site's OAuth client — the
 					usual setup. Fill in only to ask for a specific scope by name.</p>
 			</fieldset>
+			<fieldset>
+				<label for="note_type">Save dictated notes as</label>
+				<select id="note_type">
+					<option value="">The first content type Dreachy talks about</option>
+				</select>
+				<p class="hint" id="editorial_status"></p>
+			</fieldset>
 			<p class="hint" id="auth_status"></p>
 		</details>
 
@@ -279,6 +286,44 @@
 				}),
 			});
 			if (!resp.ok) throw new Error("couldn't save the login settings");
+		}
+
+		const noteTypeInput = document.getElementById("note_type");
+		const editorialStatusEl = document.getElementById("editorial_status");
+		let editorialLoaded = false;
+
+		async function loadEditorial() {
+			editorialLoaded = false;
+			try {
+				const [editorial, schema] = await Promise.all([
+					(await fetch("/api/editorial")).json(),
+					(await fetch("/api/schema")).json(),
+				]);
+				noteTypeInput.replaceChildren(noteTypeInput.options[0]);
+				for (const type of schema.types) {
+					const option = document.createElement("option");
+					option.value = type.id;
+					option.textContent = `${type.label} (${type.id})`; // text, never HTML: labels come from the site
+					noteTypeInput.append(option);
+				}
+				noteTypeInput.value = editorial.note_type;
+				editorialStatusEl.textContent = editorial.available
+					? "Editing is on: Dreachy can list pending content and save notes as drafts."
+					: "Editing is off. It turns on at start when the site login works (restart to apply).";
+				editorialLoaded = true;
+			} catch (e) {
+				editorialStatusEl.textContent = "Couldn't load the editing settings.";
+			}
+		}
+
+		async function saveEditorial() {
+			if (!editorialLoaded) return; // never send a value that didn't load
+			const resp = await fetch("/api/editorial", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ note_type: noteTypeInput.value }),
+			});
+			if (!resp.ok) throw new Error("couldn't save the editing settings");
 		}
 
 		async function loadTypes() {
@@ -363,6 +408,8 @@
 				if (!resp.ok) throw new Error(data.detail || "Save failed");
 				await saveAuth();
 				await loadAuth();
+				await saveEditorial();
+				await loadEditorial();
 				if (data.login_cleared) {
 					authStatusEl.textContent = "The site URL changed, so the previous site's login was removed. "
 						+ "Enter the new site's client ID and secret under Advanced, if it needs one.";
@@ -384,6 +431,7 @@
 
 		loadConfig();
 		loadAuth();
+		loadEditorial();
 		loadTypes();
 	</script>
 </body>

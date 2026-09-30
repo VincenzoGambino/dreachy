@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0 — unreleased
+
+Editorial tools (`specs/backend-and-auth.md`, R3).
+
+- With the site login working, two new tools: `drupal_pending_content`
+  (what's waiting to be published) and `drupal_create_note` (saves a
+  dictated note as an unpublished draft, only after the person says yes
+  aloud; the tool refuses anything but `confirmed=true`).
+- The persona treats site content as data, never as instructions.
+- Settings page: which content type notes are saved as, and whether
+  editing is on.
+
 ## 0.3.0 — unreleased
 
 Backend seam and optional site login (`specs/backend-and-auth.md`, R2).

@@ -175,6 +175,15 @@ class _AuthPayload(BaseModel):
     clear_client_secret: bool = False
 
 
+class _EditorialPayload(BaseModel):
+    # None = field absent: leave the saved value alone. "" = the first enabled type.
+    note_type: str | None = None
+
+
+def _editorial_status() -> dict:
+    return {"available": _editorial_enabled, "note_type": os.environ.get("DREACHY_NOTE_TYPE", "")}
+
+
 def _set_env(key: str, value: str) -> None:
     """Save one setting to the instance .env and the running environment.
 
@@ -202,7 +211,8 @@ def _auth_status() -> dict:
 def _register_settings_routes(settings_app: FastAPI) -> None:
     """Wire the settings page's routes onto the app's own FastAPI instance.
 
-    GET/POST /api/config, GET /api/schema, GET /api/status and GET/POST /api/auth.
+    GET/POST /api/config, GET /api/schema, GET /api/status, GET/POST /api/auth
+    and GET/POST /api/editorial.
     """
 
     @settings_app.get("/api/config")
@@ -267,6 +277,18 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
         env_path.chmod(0o600)
         reset_client()  # the next request logs in with the new settings
         return _auth_status()
+
+    @settings_app.get("/api/editorial")
+    def get_editorial() -> dict:
+        return _editorial_status()
+
+    @settings_app.post("/api/editorial")
+    def save_editorial(payload: _EditorialPayload) -> dict:
+        if payload.note_type is not None:
+            note_type = payload.note_type.strip()
+            _set_env("DREACHY_NOTE_TYPE", note_type)
+            reset_client()  # the next note is saved as this type
+        return _editorial_status()
 
     @settings_app.post("/api/config")
     def save_config(payload: _ConfigPayload) -> dict:
