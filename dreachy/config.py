@@ -62,6 +62,12 @@ class Config:
     # ---------------------------------------------------------------------------
     whats_new_limit: int = 5
     find_content_limit: int = 5
+    # drupal_pending_content (R3): unpublished items sampled per type; the
+    # count is capped here, like the pulse.
+    pending_sample_limit: int = 50
+    # drupal_create_note (R3): the content type notes are saved as. Empty =
+    # the first enabled type. An installer setting — the model never picks.
+    note_type: str = ""
     # No true collection count in core JSON:API; get_site_pulse() approximates
     # counts by capping a fetch at this many items per type and taking len().
     pulse_sample_limit: int = 50
@@ -90,6 +96,7 @@ class Config:
         if locale is not None:
             config.default_locale = locale or None
         config.enabled_types = parse_types(os.environ.get("DREACHY_TYPES", ""))
+        config.note_type = os.environ.get("DREACHY_NOTE_TYPE", "").strip()
         auth = os.environ.get("DREACHY_AUTH", "none").strip().lower() or "none"
         if auth not in AUTH_MODES:
             logger.warning("Unknown DREACHY_AUTH %r; using anonymous access", auth)

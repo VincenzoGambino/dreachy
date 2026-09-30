@@ -268,3 +268,29 @@ def test_a_logged_in_path_read_treats_a_missing_status_as_unpublished() -> None:
 
     with PrivateSite(nodes=nodes).backend() as backend:
         assert backend.get_article("/news_item/d9") is None
+
+
+def test_editing_needs_a_login() -> None:
+    private = PrivateSite()
+
+    with private.backend(Config()) as backend:
+        assert backend.can_edit() is False
+
+    assert private.grants == 0
+
+
+def test_editing_is_available_when_the_site_grants_a_token() -> None:
+    private = PrivateSite()
+
+    with private.backend() as backend:
+        assert backend.can_edit() is True
+
+    assert private.grants == 1
+
+
+def test_editing_is_unavailable_when_the_login_is_refused(caplog) -> None:
+    with caplog.at_level(logging.DEBUG):
+        with PrivateSite(accept=False).backend() as backend:
+            assert backend.can_edit() is False
+
+    assert _SECRET not in caplog.text

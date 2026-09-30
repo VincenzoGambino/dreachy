@@ -174,6 +174,28 @@ class Backend(ABC):
         Published content only unless include_unpublished.
         """
 
+    # -- editorial (R3): only when logged in -------------------------------
+
+    def can_edit(self) -> bool:
+        """Whether this backend is logged in and the site accepts its login."""
+        return False
+
+    @abstractmethod
+    def get_pending_nodes(self, limit: int | None = None) -> list[dict[str, Any]]:
+        """Unpublished content awaiting publication, most recently changed first.
+
+        Across the enabled types; archived content (Content Moderation's
+        "archived" state) isn't pending and is left out.
+        """
+
+    @abstractmethod
+    def create_draft(self, content_type: str, title: str, body: str) -> dict[str, Any]:
+        """Save one unpublished node and return its node dict.
+
+        Never publishes. Raises DreachySiteError when the site refuses, and
+        when the result came back published — that's an error, not a success.
+        """
+
     def get_site_pulse(self) -> dict[str, Any]:
         """Node counts and latest activity timestamp.
 

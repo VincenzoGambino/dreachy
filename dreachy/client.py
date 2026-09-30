@@ -46,6 +46,11 @@ _CREDENTIALS_REFUSED = (
     " — if this keeps happening, check the site login on Dreachy's settings page"
 )
 
+# Core's fallback format: usable by every role, so notes need no format permission.
+_NOTE_TEXT_FORMAT = "plain_text"
+_DRAFT_STATE = "draft"
+_ARCHIVED_STATE = "archived"
+
 
 def _strip_html(text: str) -> str:
     """Collapse Drupal's rendered HTML into plain, speakable text."""
@@ -201,6 +206,74 @@ class JsonApiBackend(Backend):
             logger.info("Can't sample node--%s, skipping it: %s", bundle, exc)
             return None
         return [resource.get("attributes") or {} for resource in resources]
+
+    # -- editorial (R3) ---------------------------------------------------
+
+    def can_edit(self) -> bool:
+        """Logged in, and the site grants a token (checked now: one request)."""
+        if not self.config.uses_oauth:
+            return False
+        try:
+            self._client.add_authorization_header()
+        except (AuthenticationError, httpx.HTTPError) as exc:
+            # The type only: an exception's text is no place to risk credentials.
+            logger.warning("Editing is unavailable: the site login failed (%s)", type(exc).__name__)
+            return False
+        return True
+
+    def get_pending_nodes(self, limit: int | None = None) -> list[dict[str, Any]]:
+        limit = limit or self.config.pending_sample_limit
+
+        def params(type_schema: TypeSchema) -> DrupalJsonApiParams:
+            return DrupalJsonApiParams().add_filter("status", 0).add_sort("changed", "DESC").add_page_limit(limit)
+
+        # Same per-type rule as the other reads: one failing type is skipped.
+        nodes = [n for n in self._read_each_type(self._types(), params) if n["moderation_state"] != _ARCHIVED_STATE]
+        nodes.sort(key=lambda n: n["changed"], reverse=True)
+        return nodes[:limit]
+
+    def create_draft(self, content_type: str, title: str, body: str) -> dict[str, Any]:
+        # Never write from the fallback table or a guess: only a discovered
+        # schema says which field holds the text and whether the type is moderated.
+        type_schema = self.schema.get(content_type) if self.schema_discovered else None
+        if type_schema is None:
+            raise DreachySiteError(f"notes can't be saved as {content_type!r} on this site right now")
+        attributes: dict[str, Any] = {
+            type_schema.label_field: title,
+            type_schema.text_fields[0]: {"value": body, "format": _NOTE_TEXT_FORMAT},
+        }
+        if type_schema.moderated:
+            # Content Moderation forbids setting status on moderated content;
+            # the state decides it. Explicit, in case the workflow's default isn't a draft.
+            attributes["moderation_state"] = _DRAFT_STATE
+        else:
+            attributes["status"] = False
+        document = {"data": {"type": f"node--{content_type}", "attributes": attributes}}
+        try:
+            response = self._client.create_resource(f"node--{content_type}", document)
+            node = _node_to_dict(content_type, type_schema, response["data"])
+        except (AuthenticationError, httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
+            raise self._write_error(exc, content_type) from exc
+        if node["status"]:
+            logger.error("drupal_create_note: the site published %s despite a draft request", node["id"])
+            raise DreachySiteError(
+                "the site published the note instead of keeping it as a draft — tell whoever looks after the site"
+            )
+        return node
+
+    def _write_error(self, exc: Exception, content_type: str) -> DreachySiteError:
+        """Why a write failed, in words the model can pass on."""
+        if isinstance(exc, httpx.HTTPStatusError):
+            status = exc.response.status_code
+            if status == 405:
+                return DreachySiteError(
+                    "the site doesn't accept changes over JSON:API (it's in read-only mode)", status=status
+                )
+            if status == 403:
+                return DreachySiteError(f"the site doesn't let Dreachy create {content_type} drafts", status=status)
+            if status == 422:
+                return DreachySiteError("the site rejected the note as it was sent", status=status)
+        return self._site_error(exc, f"node--{content_type}")
 
     # -- queries --------------------------------------------------------
 
