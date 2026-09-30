@@ -19,7 +19,7 @@ class DrupalFindContent(Tool):
     # Properties, not class attributes: the conversation app builds tool
     # specs once at start, after main.py has discovered the site's types, so
     # these name the site's own. A type enabled later reaches the spec on the
-    # next start; one disabled later makes DrupalClient.find_content widen
+    # next start; one disabled later makes Backend.find_content widen
     # the search instead of failing.
     @property
     def description(self) -> str:

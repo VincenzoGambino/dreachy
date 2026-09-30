@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0 — unreleased
+
+Backend seam and optional site login (`specs/backend-and-auth.md`, R2).
+
+- Tools, the watcher and the settings page query a `Backend` interface;
+  the JSON:API client is its first implementation (R4 adds MCP).
+- Optional OAuth2 client-credentials login for private sites, from the
+  settings page's Advanced section, with an optional scope. The secret is
+  write-only and stored only in the owner-only instance `.env`. Needs
+  drupal-api-client 0.3.1.
+- Dreachy reads published content only, logged in or not.
+- A refused login is reported as such, not as a crash; the watcher keeps
+  running.
+
 ## 0.2.0 — unreleased
 
 Schema-driven content model (`specs/backend-and-auth.md`, R1).

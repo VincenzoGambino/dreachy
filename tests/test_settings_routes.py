@@ -33,7 +33,15 @@ def _isolated_paths(tmp_path, monkeypatch):
     (bundled_dir / "greeting.txt").write_text("Hello!\n")
     monkeypatch.setattr(dreachy_main, "_BUNDLED_PROFILE_DIR", bundled_dir)
 
-    for key in ("DREACHY_BASE_URL", "DREACHY_LOCALE", "DREACHY_TYPES"):
+    for key in (
+        "DREACHY_BASE_URL",
+        "DREACHY_LOCALE",
+        "DREACHY_TYPES",
+        "DREACHY_AUTH",
+        "DREACHY_OAUTH_CLIENT_ID",
+        "DREACHY_OAUTH_CLIENT_SECRET",
+        "DREACHY_OAUTH_SCOPE",
+    ):
         monkeypatch.setenv(key, "")
         monkeypatch.delenv(key)
     shared._client = None
@@ -361,3 +369,127 @@ def test_the_settings_page_serves_while_start_up_discovery_hangs(monkeypatch) ->
     finally:
         release.set()
         start_up.join(5)
+
+
+# ---------------------------------------------------------------------------
+# Advanced: site login. The secret is write-only: saved to the owner-only
+# .env, never sent back to the page.
+# ---------------------------------------------------------------------------
+
+_SECRET = "s3cret-value-never-shown"
+
+
+def _save_login(client, **fields):
+    body = {"auth": "oauth", "client_id": "dreachy", "client_secret": None, "clear_client_secret": False, **fields}
+    return client.post("/api/auth", json=body)
+
+
+def test_get_auth_defaults_to_anonymous() -> None:
+    assert _make_client().get("/api/auth").json() == {
+        "auth": "none", "client_id": "", "scope": "", "client_secret_set": False, "active": False,
+    }
+
+
+def test_get_auth_never_returns_the_secret(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_AUTH", "oauth")
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_ID", "dreachy")
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_SECRET", _SECRET)
+
+    resp = _make_client().get("/api/auth")
+
+    assert _SECRET not in resp.text
+    assert resp.json() == {
+        "auth": "oauth", "client_id": "dreachy", "scope": "", "client_secret_set": True, "active": True,
+    }
+
+
+def test_saving_a_login_stores_it_and_drops_the_cached_client() -> None:
+    shared._client = "sentinel-old-client"
+
+    resp = _save_login(_make_client(), client_secret=_SECRET)
+
+    assert _SECRET not in resp.text
+    assert resp.json()["active"] is True
+    assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == _SECRET
+    assert _SECRET in (dreachy_main._instance_path() / ".env").read_text()
+    assert shared._client is None
+
+
+def test_saving_a_secret_makes_the_env_owner_only() -> None:
+    _save_login(_make_client(), client_secret=_SECRET)
+
+    assert (dreachy_main._instance_path() / ".env").stat().st_mode & 0o777 == 0o600
+
+
+def test_saving_with_a_blank_secret_keeps_the_saved_one(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_SECRET", _SECRET)
+
+    resp = _save_login(_make_client(), client_secret="")
+
+    assert resp.json()["client_secret_set"] is True  # the save happened, and kept it
+    assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == _SECRET
+
+
+def test_clearing_the_secret_removes_it(monkeypatch) -> None:
+    client = _make_client()
+    _save_login(client, client_secret=_SECRET)
+
+    resp = _save_login(client, clear_client_secret=True)
+
+    assert resp.json()["client_secret_set"] is False
+    assert "DREACHY_OAUTH_CLIENT_SECRET" not in os.environ
+    assert _SECRET not in (dreachy_main._instance_path() / ".env").read_text()
+
+
+def test_get_auth_reports_an_incomplete_login(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_AUTH", "oauth")
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_ID", "dreachy")
+
+    assert _make_client().get("/api/auth").json()["active"] is False
+
+
+def test_saving_a_login_can_name_a_scope() -> None:
+    resp = _save_login(_make_client(), client_secret=_SECRET, scope="dreachy")
+
+    assert resp.json()["scope"] == "dreachy"
+    assert os.environ["DREACHY_OAUTH_SCOPE"] == "dreachy"
+
+
+def test_moving_to_another_site_clears_the_previous_sites_login(monkeypatch) -> None:
+    # Credentials belong to the site that issued them. Left in place, the next
+    # token request would POST the secret to whatever the new URL points at.
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://old.example")
+    client = _make_client()
+    _save_login(client, client_secret=_SECRET)
+
+    resp = client.post("/api/config", json={"base_url": "https://new.example", "extra_instructions": ""})
+
+    assert resp.json()["login_cleared"] is True
+    assert os.environ["DREACHY_AUTH"] == "none"
+    assert "DREACHY_OAUTH_CLIENT_SECRET" not in os.environ
+    assert _SECRET not in (dreachy_main._instance_path() / ".env").read_text()
+
+
+def test_setting_the_first_site_url_keeps_a_hand_configured_login(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_AUTH", "oauth")
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_ID", "dreachy")
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_SECRET", _SECRET)
+
+    resp = _make_client().post("/api/config", json={"base_url": "https://site.example", "extra_instructions": ""})
+
+    assert resp.json()["login_cleared"] is False
+    assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == _SECRET
+
+
+def test_a_save_without_login_fields_leaves_the_login_alone() -> None:
+    # The page's main Save also posts the login section. If that section never
+    # loaded, it must not send blank defaults that wipe a working login.
+    client = _make_client()
+    _save_login(client, client_secret=_SECRET, scope="dreachy")
+
+    resp = client.post("/api/auth", json={})
+
+    assert resp.json() == {
+        "auth": "oauth", "client_id": "dreachy", "scope": "dreachy", "client_secret_set": True, "active": True,
+    }
+    assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == _SECRET

@@ -17,7 +17,7 @@ import asyncio
 import logging
 from typing import Any, Dict
 
-from dreachy.client import DreachySiteError, DrupalClient
+from dreachy.backend import Backend, DreachySiteError
 from dreachy.common_reactions import REACTIONS
 from dreachy.reaction_player import play_reaction
 from dreachy.tools._shared import get_client
@@ -32,12 +32,12 @@ _watch_task: asyncio.Task[None] | None = None
 _CLIENT_CHECK_SECONDS = 1.0
 
 
-async def _latest_created(client: DrupalClient) -> str | None:
+async def _latest_created(client: Backend) -> str | None:
     nodes = await asyncio.to_thread(client.get_recent_nodes, limit=1)
     return nodes[0]["created"] if nodes else None
 
 
-async def _sleep_unless_client_changes(seconds: float, client: DrupalClient) -> None:
+async def _sleep_unless_client_changes(seconds: float, client: Backend) -> None:
     loop = asyncio.get_running_loop()
     deadline = loop.time() + seconds
     while (remaining := deadline - loop.time()) > 0:

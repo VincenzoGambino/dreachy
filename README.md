@@ -36,8 +36,9 @@ Drupal site over JSON:API.
   - **JSON:API** enabled (core module, no extra configuration needed for read access).
   - The **language prefix** set correctly for the site (see Configuration): `en` for a
     multilingual site served at `/en`, blank for a single-language site.
-  - **Anonymous read access** to whichever content types you expose (Dreachy doesn't
-    authenticate — this is a read-only, publicly-reachable demo companion, not an admin tool).
+  - **Anonymous read access** to the content Dreachy should talk about — or, for a private
+    site, an OAuth client (see [`docs/drupal-setup.md`](docs/drupal-setup.md)). Dreachy only
+    ever reads published content.
   - At least one content type with a formatted text field (core's `body`, for example). Dreachy
     reads the site's content types and their text fields itself — see **Content types** under
     Configuration — so any content model works without code changes. The **Umami demo
@@ -70,6 +71,10 @@ the Reachy Mini dashboard (the gear/settings icon next to the app) and set:
   immediately, except the search tool's type filter: restart Dreachy to apply that, as the page
   notes beside the checkboxes. Saving also re-reads the site's types, so a type created on the
   site since start shows up after a save.
+- **Advanced: site login** (optional) — OAuth client credentials for a site whose content
+  isn't public; see [`docs/drupal-setup.md`](docs/drupal-setup.md). The secret is write-only:
+  once saved it's never shown again, and a blank field keeps it. Takes effect immediately.
+  Changing the site URL removes the saved login, so it's never sent to a different site.
 - **Extra instructions** (optional) — free text appended to Dreachy's built-in persona (tone,
   language, anything else). Built-in guardrails (e.g. "only answer from site content") stay in
   force either way, since this is appended, not a replacement. Takes effect the next time the
@@ -125,6 +130,9 @@ Everything else lives under `dreachy/`:
 
 - `client.py` / `config.py` — a small sync wrapper over Drupal's JSON:API, which discovers the
   site's content model at start.
+- `backend.py` — the `Backend` interface the tools, watcher and settings page query through;
+  `client.py`'s `JsonApiBackend` implements it.
+- `auth.py` — chooses the site login; drupal-api-client (≥0.3.1) handles the tokens.
 - `schema.py` — the content-model heuristics (which types, which fields hold text). `client.py`
   fetches; `schema.py` decides.
 - `tool_queries.py` — the plain-function query logic behind each tool.

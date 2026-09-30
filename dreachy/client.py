@@ -1,4 +1,4 @@
-"""DrupalClient — thin sync wrapper over drupal-api-client's JsonApiClient.
+"""JsonApiBackend — the Backend (backend.py) over Drupal's JSON:API, via drupal-api-client's JsonApiClient.
 
 Returns plain dicts only; no drupal_api_client types leak past this module.
 Sync-only (per drupal-api-client) — tools call this via asyncio.to_thread().
@@ -15,36 +15,35 @@ from __future__ import annotations
 
 import logging
 import re
-import threading
-import time
-from types import TracebackType
 from typing import Any
 from urllib.parse import urljoin
 
 import httpx
-from drupal_api_client import JsonApiClient, ResourceNotFoundError
+from drupal_api_client import AuthenticationError, JsonApiClient, ResourceNotFoundError
 from drupal_jsonapi_params import DrupalJsonApiParams
 from drupal_jsonapi_params.operators import FilterOperator
 
+from .auth import library_authentication
+from .backend import Backend, DreachyAuthError, DreachySiteError
 from .config import Config
-from .schema import Schema, TypeSchema, build_schema, fallback_schema, select_types
+from .schema import Schema, TypeSchema, build_schema
 
 logger = logging.getLogger(__name__)
+
+__all__ = ["DreachySiteError", "DrupalClient", "JsonApiBackend"]
 
 _TAG_RE = re.compile(r"<[^>]+>")
 _SUMMARY_FALLBACK_CHARS = 200
 # Statuses that mean "anonymous may not read this type", as opposed to a
 # temporary failure: only these let discovery skip a type and carry on.
 _UNREADABLE_STATUSES = (401, 403, 404)
-
-
-class DreachySiteError(Exception):
-    """The Drupal site is unreachable or returned an error response."""
-
-    def __init__(self, message: str, *, status: int | None = None) -> None:
-        super().__init__(message)
-        # The HTTP status, when the site answered with an error one.
-        self.status = status
+# Never includes credentials; the tools prefix it with "I can't reach the site right now: ".
+# Hedged on purpose: drupal-api-client raises AuthenticationError for any
+# failed grant, a 503 from a site in maintenance mode included.
+_CREDENTIALS_REFUSED = (
+    "couldn't log in to the site: it refused Dreachy's credentials or is unavailable"
+    " — if this keeps happening, check the site login on Dreachy's settings page"
+)
 
 
 def _strip_html(text: str) -> str:
@@ -78,13 +77,23 @@ def _node_to_dict(bundle: str, type_schema: TypeSchema, resource: dict[str, Any]
     }
 
 
-class DrupalClient:
-    """Sync wrapper over JsonApiClient exposing Dreachy's query behaviours."""
+def _published(params: DrupalJsonApiParams, include_unpublished: bool = False) -> DrupalJsonApiParams:
+    """Published content only, unless a caller explicitly opts in.
+
+    Anonymous access sees only published nodes anyway; a logged-in Dreachy
+    (R2) may be able to view drafts, and no tool may read them aloud, search
+    them or react to them. R3's editorial tools opt in deliberately.
+    """
+    return params if include_unpublished else params.add_filter("status", 1)
+
+
+class JsonApiBackend(Backend):
+    """The Backend over JSON:API: anonymous by default."""
 
     def __init__(
         self, config: Config, *, http_client: httpx.Client | None = None, auto_discover: bool = False
     ) -> None:
-        self.config = config
+        super().__init__(config, auto_discover=auto_discover)
         # No cache: InMemoryCache has no TTL, and every read below passes
         # disable_cache=True — a long-lived client (e.g. the tools' shared
         # singleton) would otherwise never see content published after its
@@ -94,29 +103,26 @@ class DrupalClient:
             timeout=config.request_timeout,
             default_locale=config.default_locale,
             http_client=http_client,
+            # None = anonymous; the refresh margin and scope ride on OAuthAuth.
+            authentication=library_authentication(config),
         )
-        # auto_discover: queries retry a failed discovery (see _types). Off
-        # by default, so a client built for a test, or before a site URL is
-        # configured, never sends discovery requests of its own accord.
-        self._auto_discover = auto_discover
-        self._full_schema: Schema = fallback_schema(config.content_types)
-        self.schema_discovered = False
-        self._next_discovery_at = 0.0
-        self._discovery_lock = threading.Lock()
-
-    def __enter__(self) -> DrupalClient:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        self.close()
 
     def close(self) -> None:
         self._client.close()
+
+    def _site_error(self, exc: Exception, context: str) -> DreachySiteError:
+        """The DreachySiteError for *exc*; a refused login becomes DreachyAuthError."""
+        if isinstance(exc, AuthenticationError):
+            return DreachyAuthError(_CREDENTIALS_REFUSED)
+        if isinstance(exc, httpx.HTTPStatusError):
+            status = exc.response.status_code
+            # Logged in and still 401 after the library's one retry: the login is bad.
+            if status == 401 and self.config.uses_oauth:
+                return DreachyAuthError(_CREDENTIALS_REFUSED, status=status)
+            return DreachySiteError(str(exc), status=status)
+        if isinstance(exc, httpx.HTTPError):
+            return DreachySiteError(str(exc))
+        return DreachySiteError(f"Unexpected response for {context}: {exc!r}")
 
     def _get_collection(self, resource_type: str, params: DrupalJsonApiParams) -> list[dict[str, Any]]:
         try:
@@ -124,27 +130,13 @@ class DrupalClient:
                 resource_type, query_string=params, raise_for_status=True, disable_cache=True
             )
             return response["data"]
-        except httpx.HTTPStatusError as exc:
-            raise DreachySiteError(str(exc), status=exc.response.status_code) from exc
-        except httpx.HTTPError as exc:
-            raise DreachySiteError(str(exc)) from exc
-        except (ValueError, KeyError, TypeError) as exc:
-            # A 200 that isn't JSON:API (a captive portal, a maintenance page).
-            # Left raw, it would end the watcher's task and bypass discovery's
-            # retry throttle.
-            raise DreachySiteError(f"Unexpected response for {resource_type}: {exc!r}") from exc
+        # ValueError and friends: a 200 that isn't JSON:API (a captive
+        # portal, a maintenance page). Left raw, it would end the watcher's
+        # task and bypass discovery's retry throttle.
+        except (AuthenticationError, httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
+            raise self._site_error(exc, resource_type) from exc
 
     # -- content model --------------------------------------------------
-
-    @property
-    def full_schema(self) -> Schema:
-        """Every type Dreachy knows of, before the installer's selection."""
-        return dict(self._full_schema)
-
-    @property
-    def schema(self) -> Schema:
-        """The types Dreachy talks about. Never touches the network."""
-        return select_types(self._full_schema, self.config.enabled_types)
 
     def get_schema(self) -> Schema:
         """Discover the site's node types and their text fields.
@@ -156,47 +148,6 @@ class DrupalClient:
         samples = {bundle: self._sample_attributes(bundle) for bundle in bundles}
         return build_schema(bundles, labels, samples)
 
-    def refresh_schema(self) -> bool:
-        """Replace the cached schema with a fresh discovery.
-
-        On failure keeps the current schema (the fallback, or the last one
-        discovered) and returns False; never raises DreachySiteError.
-        """
-        with self._discovery_lock:
-            return self._refresh_locked()
-
-    def _refresh_locked(self) -> bool:
-        try:
-            schema = self.get_schema()
-        except DreachySiteError as exc:
-            return self._discovery_failed(str(exc))
-        if not schema:
-            return self._discovery_failed("no readable content type has text fields")
-        self._full_schema = schema
-        self.schema_discovered = True
-        return True
-
-    def _discovery_failed(self, reason: str) -> bool:
-        logger.warning(
-            "Couldn't discover the site's content types (%s); using %s", reason, ", ".join(self._full_schema)
-        )
-        self._next_discovery_at = time.monotonic() + self.config.schema_retry_seconds
-        return False
-
-    def _discovery_due(self) -> bool:
-        return not self.schema_discovered and time.monotonic() >= self._next_discovery_at
-
-    def _types(self) -> Schema:
-        """The enabled schema, first retrying a failed discovery if one is due."""
-        if self._auto_discover and self._discovery_due():
-            with self._discovery_lock:
-                # Checked again under the lock: callers that queued behind
-                # another thread's discovery use its result, rather than
-                # each running their own back to back.
-                if self._discovery_due():
-                    self._refresh_locked()
-        return self.schema
-
     def _index_url(self) -> str:
         locale = self.config.default_locale
         return urljoin(self._client.base_url, f"{locale}/jsonapi" if locale else "jsonapi")
@@ -205,8 +156,11 @@ class DrupalClient:
         try:
             response = self._client.fetch(self._index_url(), raise_for_status=True)
             links = response.json().get("links", {})
-        except (httpx.HTTPError, ValueError, AttributeError) as exc:
-            raise DreachySiteError(f"JSON:API index unavailable: {exc}") from exc
+        except (AuthenticationError, httpx.HTTPError, ValueError, AttributeError) as exc:
+            error = self._site_error(exc, "the JSON:API index")
+            if type(error) is DreachySiteError:  # keep R1's wording for plain site failures
+                error = DreachySiteError(f"JSON:API index unavailable: {exc}", status=error.status)
+            raise error from exc
         return [key.split("--", 1)[1] for key in links if key.startswith("node--")]
 
     def _node_type_labels(self) -> dict[str, str]:
@@ -225,10 +179,14 @@ class DrupalClient:
 
     def _sample_attributes(self, bundle: str) -> list[dict[str, Any]] | None:
         """Recent nodes' attributes, or None if this type can't be read at all."""
-        params = DrupalJsonApiParams().add_sort("created", "DESC").add_page_limit(self.config.schema_sample_size)
+        params = _published(
+            DrupalJsonApiParams().add_sort("created", "DESC").add_page_limit(self.config.schema_sample_size)
+        )
         try:
             resources = self._get_collection(f"node--{bundle}", params)
         except DreachySiteError as exc:
+            if isinstance(exc, DreachyAuthError):
+                raise  # a bad login fails discovery; it doesn't make a type "unreadable"
             # One unreadable type (e.g. no anonymous view access) mustn't sink
             # the rest. Anything else — a 5xx, a timeout — fails the whole
             # discovery, so the retry picks the type up rather than losing it
@@ -241,18 +199,20 @@ class DrupalClient:
 
     # -- queries --------------------------------------------------------
 
-    def get_recent_nodes(self, limit: int | None = None) -> list[dict[str, Any]]:
+    def get_recent_nodes(self, limit: int | None = None, *, include_unpublished: bool = False) -> list[dict[str, Any]]:
         limit = limit or self.config.whats_new_limit
         nodes: list[dict[str, Any]] = []
         for bundle, type_schema in self._types().items():
-            params = DrupalJsonApiParams().add_sort("created", "DESC").add_page_limit(limit)
+            params = _published(
+                DrupalJsonApiParams().add_sort("created", "DESC").add_page_limit(limit), include_unpublished
+            )
             for resource in self._get_collection(f"node--{bundle}", params):
                 nodes.append(_node_to_dict(bundle, type_schema, resource))
         nodes.sort(key=lambda n: n["created"], reverse=True)
         return nodes[:limit]
 
     def find_content(
-        self, keyword: str, content_type: str | None = None
+        self, keyword: str, content_type: str | None = None, *, include_unpublished: bool = False
     ) -> list[dict[str, Any]]:
         limit = self.config.find_content_limit
         types = self._types()
@@ -263,18 +223,19 @@ class DrupalClient:
             types = {content_type: types[content_type]}
         matches: list[dict[str, Any]] = []
         for bundle, type_schema in types.items():
-            params = (
+            params = _published(
                 DrupalJsonApiParams()
                 .add_filter(type_schema.label_field, keyword, operator=FilterOperator.CONTAINS)
                 .add_sort("created", "DESC")
-                .add_page_limit(limit)
+                .add_page_limit(limit),
+                include_unpublished,
             )
             for resource in self._get_collection(f"node--{bundle}", params):
                 matches.append(_node_to_dict(bundle, type_schema, resource))
         matches.sort(key=lambda n: n["created"], reverse=True)
         return matches[:limit]
 
-    def get_article(self, title_or_path: str) -> dict[str, Any] | None:
+    def get_article(self, title_or_path: str, *, include_unpublished: bool = False) -> dict[str, Any] | None:
         types = self._types()
         path = title_or_path if title_or_path.startswith("/") else f"/{title_or_path}"
         resource = None
@@ -282,36 +243,30 @@ class DrupalClient:
             resource = self._client.get_resource_by_path(path, raise_for_status=True, disable_cache=True)
         except ResourceNotFoundError:
             pass
-        except httpx.HTTPError as exc:
-            raise DreachySiteError(str(exc)) from exc
+        except (AuthenticationError, httpx.HTTPError) as exc:
+            raise self._site_error(exc, title_or_path) from exc
 
         if resource is not None:
             bundle = resource["data"]["type"].split("--")[1]
-            if bundle in types:
+            published = resource["data"]["attributes"].get("status", True)
+            if bundle in types and (published or include_unpublished):
                 return _node_to_dict(bundle, types[bundle], resource["data"])
             # A path to something Dreachy doesn't talk about (a disabled
-            # type, a taxonomy term): fall through to the title search.
+            # type, a taxonomy term, an unpublished node): fall through to
+            # the title search.
 
         for bundle, type_schema in types.items():
-            params = (
+            params = _published(
                 DrupalJsonApiParams()
                 .add_filter(type_schema.label_field, title_or_path, operator=FilterOperator.EQUAL)
-                .add_page_limit(1)
+                .add_page_limit(1),
+                include_unpublished,
             )
             found = self._get_collection(f"node--{bundle}", params)
             if found:
                 return _node_to_dict(bundle, type_schema, found[0])
         return None
 
-    def get_site_pulse(self) -> dict[str, Any]:
-        """Node counts and latest activity timestamp.
 
-        The count is capped at ``config.pulse_sample_limit`` — core JSON:API
-        doesn't expose a cheap collection total, so this is an explicit
-        approximation suited to a small demo site, not a true count.
-        """
-        nodes = self.get_recent_nodes(limit=self.config.pulse_sample_limit)
-        return {
-            "node_count": len(nodes),
-            "latest_node_created": nodes[0]["created"] if nodes else None,
-        }
+# The pre-R2 name: existing callers and tests keep working.
+DrupalClient = JsonApiBackend

@@ -9,9 +9,9 @@ from types import SimpleNamespace
 
 import httpx
 import pytest
-from _fake_site import NEWS_LABELS, NEWS_NODES, UMAMI_LABELS, UMAMI_NODES, FakeSite
+from _fake_site import NEWS_LABELS, NEWS_NODES, UMAMI_LABELS, UMAMI_NODES, FakeSite, formatted, node
 
-import dreachy.client as client_module
+import dreachy.backend as backend_module
 from dreachy.client import DreachySiteError, DrupalClient
 from dreachy.config import Config
 from dreachy.schema import FALLBACK_TYPES
@@ -106,7 +106,7 @@ def test_a_client_without_auto_discover_never_asks_for_the_schema() -> None:
 
 def test_a_failed_discovery_is_retried_once_the_retry_interval_has_passed(monkeypatch) -> None:
     clock = [1000.0]
-    monkeypatch.setattr(client_module, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    monkeypatch.setattr(backend_module, "time", SimpleNamespace(monotonic=lambda: clock[0]))
     # Index down, content up: the fallback Umami types still answer meanwhile.
     site = FakeSite(UMAMI_NODES, labels=UMAMI_LABELS, index_status=503)
 
@@ -185,7 +185,7 @@ def test_a_timeout_on_one_type_fails_discovery_instead_of_dropping_the_type() ->
 
 def test_a_non_json_answer_fails_discovery_and_is_throttled_like_any_failure(monkeypatch) -> None:
     clock = [1000.0]
-    monkeypatch.setattr(client_module, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    monkeypatch.setattr(backend_module, "time", SimpleNamespace(monotonic=lambda: clock[0]))
     site = FakeSite(UMAMI_NODES, labels=UMAMI_LABELS)
     captive_portal = [True]
 
@@ -228,3 +228,47 @@ def test_concurrent_queries_share_one_discovery() -> None:
     second.join(5)
 
     assert site.requests.count("/en/jsonapi") == 1
+
+
+# ---------------------------------------------------------------------------
+# Published content only, unless a caller explicitly asks otherwise. A
+# logged-in Dreachy (R2) may be able to view drafts, and no tool may read
+# them aloud or react to them; R3's editorial tools opt in deliberately.
+# ---------------------------------------------------------------------------
+
+_DRAFT = node(
+    "news_item", "d1", "Draft: council scandal", "2026-09-29T09:00:00+00:00",
+    status=False, body=formatted("<p>Not for publication.</p>"),
+)
+_WITH_DRAFT = {**NEWS_NODES, "news_item": [*NEWS_NODES["news_item"], _DRAFT]}
+
+
+def test_logged_in_reads_skip_unpublished_content() -> None:
+    with FakeSite(_WITH_DRAFT, labels=NEWS_LABELS).client(auto_discover=True) as client:
+        titles = [n["title"] for n in client.get_recent_nodes(limit=10)]
+
+    assert "Draft: council scandal" not in titles
+
+
+def test_search_skips_unpublished_content() -> None:
+    with FakeSite(_WITH_DRAFT, labels=NEWS_LABELS).client(auto_discover=True) as client:
+        assert client.find_content("scandal") == []
+
+
+def test_reading_an_unpublished_node_by_title_finds_nothing() -> None:
+    with FakeSite(_WITH_DRAFT, labels=NEWS_LABELS).client(auto_discover=True) as client:
+        assert client.get_article("Draft: council scandal") is None
+
+
+def test_reading_an_unpublished_node_by_path_finds_nothing() -> None:
+    with FakeSite(_WITH_DRAFT, labels=NEWS_LABELS).client(auto_discover=True) as client:
+        assert client.get_article("/news_item/d1") is None
+
+
+def test_include_unpublished_is_an_explicit_opt_in() -> None:
+    with FakeSite(_WITH_DRAFT, labels=NEWS_LABELS).client(auto_discover=True) as client:
+        titles = [n["title"] for n in client.get_recent_nodes(limit=10, include_unpublished=True)]
+        by_path = client.get_article("/news_item/d1", include_unpublished=True)
+
+    assert "Draft: council scandal" in titles
+    assert by_path["title"] == "Draft: council scandal"

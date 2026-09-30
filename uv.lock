@@ -493,7 +493,7 @@ wheels = [
 
 [[package]]
 name = "dreachy"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "drupal-api-client" },
@@ -511,7 +511,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "drupal-api-client", specifier = ">=0.3.0" },
+    { name = "drupal-api-client", specifier = ">=0.3.1" },
     { name = "drupal-jsonapi-params", specifier = ">=0.1.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "python-dotenv" },
@@ -524,14 +524,14 @@ dev = [{ name = "pytest", specifier = ">=9.1.1" }]
 
 [[package]]
 name = "drupal-api-client"
-version = "0.3.0"
+version = "0.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/94/d7/418c60be9340a3f7fbfff70559794f361e1fe98ba427f408b93e1d12f8be/drupal_api_client-0.3.0.tar.gz", hash = "sha256:071a578842ca22a8e2c6b3ca3ec730abe0094eb1782f1a4a7a9dfb2c50695bf7", size = 59893, upload-time = "2026-08-04T17:38:58.801Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/34/37/6c42a1ea9f285176551130a694d420c46c52e8111e5ce52d3e29a6622626/drupal_api_client-0.3.1.tar.gz", hash = "sha256:7e0300ba9a1ae61a3eaa0591adf1dd68ef64f15e3de3caca1b19449448c555e2", size = 62539, upload-time = "2026-09-30T13:07:06.529Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f8/3c/019662745c367bd9d093fa194d245d86e80432b150b0c794d02156b8d866/drupal_api_client-0.3.0-py3-none-any.whl", hash = "sha256:0cf60cb4a13280377e1763d69914d539a0b126d4b0bdb606712f5137da1e469a", size = 29853, upload-time = "2026-08-04T17:38:57.469Z" },
+    { url = "https://files.pythonhosted.org/packages/18/4b/6b604f5f3d3c6bf46f887af825c7b965b0ac2e5d5bf76fd414dfbf48de01/drupal_api_client-0.3.1-py3-none-any.whl", hash = "sha256:46fce7c6f73a19e1ac46203a3a447a25b6ca58f703ae415f235eb7907862d557", size = 30705, upload-time = "2026-09-30T13:07:05.261Z" },
 ]
 
 [[package]]

@@ -189,6 +189,8 @@ class FakeSite:
         if bundle not in self.nodes:
             return _error(404)
         data = sorted(self.nodes[bundle], key=lambda r: r["attributes"]["created"], reverse=True)
+        if params.get("filter[status]") == "1":
+            data = [r for r in data if r["attributes"].get("status", True)]
         if contains := params.get("filter[title][value]"):
             data = [r for r in data if contains.lower() in r["attributes"]["title"].lower()]
         elif equal := params.get("filter[title]"):
