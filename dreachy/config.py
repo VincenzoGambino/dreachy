@@ -4,8 +4,14 @@ All call sites import from here; nothing is hard-coded in client.py or the
 tools built on top of it.
 """
 
+import logging
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+
+logger = logging.getLogger(__name__)
+
+AUTH_MODES = ("none", "oauth")
 
 
 @dataclass
@@ -21,6 +27,17 @@ class Config:
     # prefix. Set per install via DREACHY_LOCALE / the settings page.
     default_locale: str | None = "en"
     request_timeout: float = 10.0
+
+    # ---------------------------------------------------------------------------
+    # Site login (R2) — optional; anonymous is the default
+    # ---------------------------------------------------------------------------
+    # "none": anonymous. "oauth": OAuth2 client credentials, handled by
+    # drupal-api-client — used only when both the id and the secret are set.
+    auth: str = "none"
+    oauth_client_id: str = ""
+    # repr=False: Configs get logged and passed around; the secret mustn't
+    # ride along (spec Invariants: secrets confined to the client/auth layer).
+    oauth_client_secret: str = field(default="", repr=False)
 
     # ---------------------------------------------------------------------------
     # Content model — discovered from the site (see schema.py)
@@ -54,6 +71,10 @@ class Config:
     # off a down site rather than hammering it), capped at this many seconds.
     watch_max_backoff_seconds: float = 300.0
 
+    @property
+    def uses_oauth(self) -> bool:
+        return self.auth == "oauth" and bool(self.oauth_client_id and self.oauth_client_secret)
+
     @classmethod
     def from_env(cls) -> "Config":
         """A Config with the installer's settings applied (instance .env / settings page)."""
@@ -66,6 +87,15 @@ class Config:
         if locale is not None:
             config.default_locale = locale or None
         config.enabled_types = parse_types(os.environ.get("DREACHY_TYPES", ""))
+        auth = os.environ.get("DREACHY_AUTH", "none").strip().lower() or "none"
+        if auth not in AUTH_MODES:
+            logger.warning("Unknown DREACHY_AUTH %r; using anonymous access", auth)
+            auth = "none"
+        config.auth = auth
+        config.oauth_client_id = os.environ.get("DREACHY_OAUTH_CLIENT_ID", "").strip()
+        config.oauth_client_secret = os.environ.get("DREACHY_OAUTH_CLIENT_SECRET", "").strip()
+        if auth == "oauth" and not config.uses_oauth:
+            logger.warning("OAuth is selected but the client ID or secret is missing; using anonymous access")
         return config
 
 
