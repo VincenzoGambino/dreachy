@@ -27,7 +27,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
 
-from dreachy.config import Config
+from dreachy.config import Config, parse_types
 from dreachy.tools._shared import get_client, reset_client
 
 logger = logging.getLogger(__name__)
@@ -141,10 +141,13 @@ class _ConfigPayload(BaseModel):
     # None = field absent from the request (leave the saved value alone);
     # "" = explicitly no language prefix, for a single-language site.
     locale: str | None = None
+    # None = field absent (leave the saved selection alone); [] = every type
+    # the site has, including ones added later.
+    types: list[str] | None = None
 
 
 def _register_settings_routes(settings_app: FastAPI) -> None:
-    """Wire the settings page's GET/POST /api/config onto the app's own FastAPI instance."""
+    """Wire the settings page's GET/POST /api/config and GET /api/schema onto the app's own FastAPI instance."""
 
     @settings_app.get("/api/config")
     def get_config() -> dict:
@@ -157,26 +160,53 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             "locale": saved_locale if saved_locale is not None else (Config.default_locale or ""),
         }
 
+    @settings_app.get("/api/schema")
+    def get_content_types() -> dict:
+        client = get_client()
+        # Retry a failed discovery whenever the page asks, but never before a
+        # site is configured: that would go to the placeholder URL.
+        if not client.schema_discovered and os.environ.get("DREACHY_BASE_URL"):
+            client.refresh_schema()
+        enabled = client.schema
+        return {
+            "discovered": client.schema_discovered,
+            "types": [
+                {"id": type_id, "label": type_schema.label, "enabled": type_id in enabled}
+                for type_id, type_schema in client.full_schema.items()
+            ],
+        }
+
     @settings_app.post("/api/config")
     def save_config(payload: _ConfigPayload) -> dict:
+        env_path = _instance_path() / ".env"
+
         base_url = payload.base_url.strip()
         base_url_changed = False
         if base_url and base_url != os.environ.get("DREACHY_BASE_URL"):
-            env_path = _instance_path() / ".env"
             dotenv.set_key(str(env_path), "DREACHY_BASE_URL", base_url)
             os.environ["DREACHY_BASE_URL"] = base_url
-            reset_client()  # next tool call picks up the new site immediately, no restart
             base_url_changed = True
 
         locale_changed = False
         if payload.locale is not None:
             locale = payload.locale.strip()
             if locale != os.environ.get("DREACHY_LOCALE"):
-                env_path = _instance_path() / ".env"
                 dotenv.set_key(str(env_path), "DREACHY_LOCALE", locale)
                 os.environ["DREACHY_LOCALE"] = locale
-                reset_client()
                 locale_changed = True
+
+        types_changed = False
+        if payload.types is not None:
+            types = ",".join(parse_types(",".join(payload.types)))
+            if types != os.environ.get("DREACHY_TYPES", ""):
+                dotenv.set_key(str(env_path), "DREACHY_TYPES", types)
+                os.environ["DREACHY_TYPES"] = types
+                types_changed = True
+
+        # Always, even when nothing above changed: the next tool call picks up
+        # the new settings with no restart, and rediscovers the site's content
+        # types — saving is how a type created on the site since start shows up.
+        reset_client()
 
         _write_extra_instructions(payload.extra_instructions)
         _render_profile()  # only takes effect on the next app start
@@ -185,6 +215,7 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             "status": "saved",
             "base_url_applied_immediately": base_url_changed,
             "locale_applied_immediately": locale_changed,
+            "types_applied_immediately": types_changed,
             "instructions_require_restart": True,
         }
 

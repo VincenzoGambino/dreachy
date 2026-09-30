@@ -9,11 +9,13 @@ from __future__ import annotations
 import os
 
 import pytest
+from _fake_site import NEWS_LABELS, NEWS_NODES, FakeSite
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 import dreachy.main as dreachy_main
 import dreachy.tools._shared as shared
+from dreachy.config import Config
 
 
 @pytest.fixture(autouse=True)
@@ -233,3 +235,86 @@ def test_get_client_reads_the_type_selection(monkeypatch) -> None:
     monkeypatch.setenv("DREACHY_TYPES", "recipe, article,")
 
     assert shared.get_client().config.enabled_types == ("recipe", "article")
+
+
+# ---------------------------------------------------------------------------
+# Content types: discovered list with include/exclude, persisted as
+# DREACHY_TYPES; saving rediscovers.
+# ---------------------------------------------------------------------------
+
+
+def test_get_schema_lists_discovered_types_and_which_are_enabled(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://example.com")
+    site = FakeSite(NEWS_NODES, labels=NEWS_LABELS)
+    shared._client = site.client(Config(enabled_types=("news_item",)), auto_discover=True)
+
+    resp = _make_client().get("/api/schema")
+
+    assert resp.json() == {
+        "discovered": True,
+        "types": [
+            {"id": "event", "label": "Event", "enabled": False},
+            {"id": "news_item", "label": "News item", "enabled": True},
+        ],
+    }
+
+
+def test_get_schema_reports_the_fallback_when_the_site_cannot_be_read(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://example.com")
+    shared._client = FakeSite(NEWS_NODES, index_status=503).client(auto_discover=True)
+
+    body = _make_client().get("/api/schema").json()
+
+    assert body["discovered"] is False
+    assert [t["id"] for t in body["types"]] == ["article", "page", "recipe"]
+
+
+def test_get_schema_contacts_no_site_before_one_is_configured() -> None:
+    site = FakeSite(NEWS_NODES)
+    shared._client = site.client()
+
+    _make_client().get("/api/schema")
+
+    assert site.requests == []
+
+
+def test_post_config_saves_the_type_selection() -> None:
+    client = _make_client()
+
+    resp = client.post(
+        "/api/config",
+        json={"base_url": "https://example.com", "extra_instructions": "", "types": ["recipe", "article"]},
+    )
+
+    assert resp.json()["types_applied_immediately"] is True
+    assert os.environ["DREACHY_TYPES"] == "recipe,article"
+    env_text = (dreachy_main._instance_path() / ".env").read_text()
+    assert "DREACHY_TYPES='recipe,article'" in env_text or "DREACHY_TYPES=recipe,article" in env_text
+    assert shared.get_client().config.enabled_types == ("recipe", "article")
+
+
+def test_post_config_saves_an_empty_selection_as_every_type(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_TYPES", "recipe")
+
+    _make_client().post("/api/config", json={"base_url": "https://example.com", "extra_instructions": "", "types": []})
+
+    assert os.environ["DREACHY_TYPES"] == ""
+    assert shared.get_client().config.enabled_types == ()
+
+
+def test_post_config_without_types_leaves_the_saved_selection_alone(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_TYPES", "recipe")
+
+    resp = _make_client().post("/api/config", json={"base_url": "https://example.com", "extra_instructions": ""})
+
+    assert resp.json()["types_applied_immediately"] is False
+    assert os.environ["DREACHY_TYPES"] == "recipe"
+
+
+def test_post_config_always_drops_the_cached_schema() -> None:
+    shared._client = "sentinel-old-client"
+
+    _make_client().post("/api/config", json={"base_url": "", "extra_instructions": ""})
+
+    # Nothing changed, but saving is also how a newly created site type gets picked up.
+    assert shared._client is None

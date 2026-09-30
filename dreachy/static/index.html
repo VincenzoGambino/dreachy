@@ -70,6 +70,20 @@
 			margin: 0 0 1.5rem 0;
 		}
 
+		legend {
+			font-weight: 600;
+			margin-bottom: 0.4rem;
+			padding: 0;
+		}
+
+		.type-option {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			font-weight: 400;
+			margin-bottom: 0.3rem;
+		}
+
 		button {
 			background: linear-gradient(135deg, #667eea, #764ba2);
 			color: white;
@@ -118,8 +132,8 @@
 		<fieldset>
 			<label for="base_url">Drupal site URL</label>
 			<input type="url" id="base_url" placeholder="https://your-drupal-site.example" required />
-			<p class="hint">Must expose JSON:API with anonymous read access. Takes effect immediately — no restart
-				needed.</p>
+			<p class="hint">Must expose JSON:API with anonymous read access; Dreachy reads its content types
+				from it. Takes effect immediately — no restart needed.</p>
 		</fieldset>
 
 		<fieldset>
@@ -128,6 +142,17 @@
 			<p class="hint">Multilingual sites serve JSON:API under a language code, e.g.
 				<code>/en/jsonapi/…</code> — enter that code. Leave blank for a single-language site, which
 				has no prefix. Takes effect immediately — no restart needed.</p>
+		</fieldset>
+
+		<fieldset>
+			<legend>Content types</legend>
+			<div id="types">
+				<p class="hint">Loading…</p>
+			</div>
+			<p class="hint"><strong>Restart to apply</strong> to the search tool's type filter — it's built when
+				Dreachy starts. Everything else applies immediately.</p>
+			<p class="hint">What Dreachy talks about. Leave them all ticked to include every type, including ones
+				the site adds later. Saving also re-reads the site's types.</p>
 		</fieldset>
 
 		<fieldset>
@@ -150,6 +175,53 @@
 		const languagePrefixInput = document.getElementById("language_prefix");
 		const statusEl = document.getElementById("status");
 		const saveBtn = document.getElementById("save-btn");
+		const typesEl = document.getElementById("types");
+		// True only while the boxes show the site's own types. On the built-in
+		// fallback, or when the URL/prefix is changed in this same save, the boxes
+		// don't describe the site being saved, so the saved selection is left alone.
+		let typesFromSite = false;
+		let loadedBaseUrl = "";
+		let loadedLocale = "";
+
+		async function loadTypes() {
+			typesFromSite = false;
+			try {
+				const resp = await fetch("/api/schema");
+				const data = await resp.json();
+				const rows = data.types.map((type) => {
+					const row = document.createElement("label");
+					row.className = "type-option";
+					const box = document.createElement("input");
+					box.type = "checkbox";
+					box.value = type.id;
+					box.checked = type.enabled;
+					box.disabled = !data.discovered;
+					// A text node, never innerHTML: labels come from the site.
+					row.append(box, document.createTextNode(`${type.label} (${type.id})`));
+					return row;
+				});
+				if (!data.discovered) {
+					const note = document.createElement("p");
+					note.className = "hint";
+					note.textContent = "Couldn't read content types from the site, so Dreachy is using its "
+						+ "built-in defaults. Check the site URL, then save to try again.";
+					rows.unshift(note);
+				}
+				typesEl.replaceChildren(...rows);
+				typesFromSite = data.discovered;
+			} catch (e) {
+				typesEl.textContent = "Couldn't load content types.";
+			}
+		}
+
+		function selectedTypes() {
+			if (!typesFromSite) return null;
+			if (baseUrlInput.value !== loadedBaseUrl || languagePrefixInput.value !== loadedLocale) return null;
+			const boxes = [...typesEl.querySelectorAll("input[type=checkbox]")];
+			const ticked = boxes.filter((box) => box.checked).map((box) => box.value);
+			// All ticked (or none) means every type, including ones the site adds later.
+			return ticked.length === boxes.length ? [] : ticked;
+		}
 
 		function showStatus(message, isError) {
 			statusEl.textContent = message;
@@ -164,6 +236,8 @@
 				extraInstructionsInput.value = data.extra_instructions || "";
 				// Empty is a real setting (no prefix), so don't fall back to a default here.
 				languagePrefixInput.value = data.locale ?? "";
+				loadedBaseUrl = baseUrlInput.value;
+				loadedLocale = languagePrefixInput.value;
 			} catch (e) {
 				showStatus("Couldn't load current settings.", true);
 			}
@@ -180,14 +254,18 @@
 						base_url: baseUrlInput.value,
 						extra_instructions: extraInstructionsInput.value,
 						locale: languagePrefixInput.value,
+						types: selectedTypes(),
 					}),
 				});
 				const data = await resp.json();
 				if (!resp.ok) throw new Error(data.detail || "Save failed");
+				loadedBaseUrl = baseUrlInput.value;
+				loadedLocale = languagePrefixInput.value;
 				showStatus(
-					"Saved. Site URL is active immediately; instruction changes apply next time Dreachy starts.",
+					"Saved. Site settings are active immediately; instruction changes apply next time Dreachy starts.",
 					false
 				);
+				await loadTypes();
 			} catch (e) {
 				showStatus("Couldn't save settings: " + e.message, true);
 			} finally {
@@ -196,6 +274,7 @@
 		});
 
 		loadConfig();
+		loadTypes();
 	</script>
 </body>
 
