@@ -146,10 +146,11 @@ the login works; restart Dreachy after setting it up.
 2. **Grant the `dreachy` role, and add to the `dreachy` scope, the
    permissions below.** For client credentials, the scope is what counts
    (§4).
-   - **View any unpublished content** (`view any unpublished content`).
-     This comes with the Content Moderation module. Without it, core only
-     offers "view own unpublished content", and Dreachy can list only the
-     drafts it saved itself.
+   - **View any unpublished content** (`view any unpublished content`), so
+     "what's pending?" can see everyone's drafts. This comes with the Content
+     Moderation module. Without Content Moderation, grant **View own
+     unpublished content** (`view own unpublished content`) instead: Dreachy
+     then sees only the drafts it saved itself.
 
      > **Never grant `bypass node access` to make up for it.** That
      > permission lets its holder view, edit and delete *every* node,
@@ -162,11 +163,25 @@ the login works; restart Dreachy after setting it up.
    - On a moderated type: the transition that creates a draft, for example
      **Editorial workflow: Use Create New Draft transition**
      (`use editorial transition create_new_draft`).
+   - Only if the note type is **not** moderated: **Administer node published
+     status** (`administer node published status`). Drupal lets only this
+     permission set whether a new node is published, and Dreachy must set it
+     to unpublished. It's marked as a restricted permission: with it, Dreachy
+     could in principle publish what it creates, though the code never does,
+     and it grants no access to anyone else's content. A moderated note type
+     avoids it altogether, so prefer one.
 3. **Choose the note type** in Dreachy's settings page (Advanced: **Save
    dictated notes as**). The default is the first content type Dreachy talks
    about. Notes are saved as plain text (core's `plain_text` format), which
    every role may use.
 4. Notes are authored by the `dreachy` user.
+
+**How "pending" is counted:** Dreachy reads each content type's 50 most
+recently changed items and counts the unpublished ones that aren't archived.
+It can't simply ask the site for "all drafts": Drupal's JSON:API narrows any
+filtered listing to published content (plus the account's own) unless the
+account may bypass node access, which Dreachy must never have. Drafts older
+than a type's last 50 changes aren't counted.
 
 **Not covered:** a new draft of content that's already published (Content
 Moderation's "Create New Draft" from Published) isn't counted as pending.

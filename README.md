@@ -105,9 +105,10 @@ by a `.env` file at `~/.local/share/dreachy/.env` on the robot — see
   formatted text falls back to the Umami `article`/`page`/`recipe` mapping. Paragraphs support
   is planned as its own future release (R5 in
   [`specs/backend-and-auth.md`](specs/backend-and-auth.md)).
-- **"Pending" undercounts on sites using Content Moderation.** A new draft of content that's
-  already published is a separate revision that JSON:API lists don't return, so
-  `drupal_pending_content` doesn't count it. Tracked in
+- **"Pending" undercounts.** `drupal_pending_content` looks at each content type's 50 most
+  recently changed items, so older drafts aren't counted (see `docs/drupal-setup.md` §8 for
+  why). On sites using Content Moderation, a new draft of content that's already published is
+  a separate revision that JSON:API lists don't return, so it isn't counted either. Tracked in
   [`specs/backend-and-auth.md`](specs/backend-and-auth.md) ("Tracked separately").
 - **If the site can't be read at start**, Dreachy falls back to the Umami
   `article`/`page`/`recipe` mapping and retries discovery, at most once a minute, as it's used.

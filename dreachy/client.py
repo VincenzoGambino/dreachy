@@ -52,6 +52,16 @@ _DRAFT_STATE = "draft"
 _ARCHIVED_STATE = "archived"
 
 
+def _error_detail(response: httpx.Response) -> str:
+    """The first JSON:API error's detail, shortened; "" if there isn't one."""
+    try:
+        errors = response.json().get("errors") or []
+        detail = str(errors[0].get("detail") or "") if errors else ""
+    except (ValueError, AttributeError, TypeError):
+        return ""
+    return detail[:200]
+
+
 def _strip_html(text: str) -> str:
     """Collapse Drupal's rendered HTML into plain, speakable text."""
     return re.sub(r"\s+", " ", _TAG_RE.sub(" ", text)).strip()
@@ -224,18 +234,32 @@ class JsonApiBackend(Backend):
     def get_pending_nodes(self, limit: int | None = None) -> list[dict[str, Any]]:
         limit = limit or self.config.pending_sample_limit
 
+        # No filter, on purpose: core JSON:API narrows any *filtered* node
+        # collection to published (and the account's own) content unless it
+        # has `bypass node access` (JsonapiHooks::jsonapiNodeFilterAccess), so
+        # filter[status]=0 would hide everyone else's drafts. Unfiltered, each
+        # item is checked on its own, where `view any unpublished content`
+        # counts. So: each type's most recently changed items, unpublished
+        # kept — pending *among the latest `limit` changes per type*.
         def params(type_schema: TypeSchema) -> DrupalJsonApiParams:
-            return DrupalJsonApiParams().add_filter("status", 0).add_sort("changed", "DESC").add_page_limit(limit)
+            return DrupalJsonApiParams().add_sort("changed", "DESC").add_page_limit(limit)
 
         # Same per-type rule as the other reads: one failing type is skipped.
-        nodes = [n for n in self._read_each_type(self._types(), params) if n["moderation_state"] != _ARCHIVED_STATE]
+        nodes = [
+            n
+            for n in self._read_each_type(self._types(), params)
+            if not n["status"] and n["moderation_state"] != _ARCHIVED_STATE
+        ]
         nodes.sort(key=lambda n: n["changed"], reverse=True)
         return nodes[:limit]
 
     def create_draft(self, content_type: str, title: str, body: str) -> dict[str, Any]:
         # Never write from the fallback table or a guess: only a discovered
         # schema says which field holds the text and whether the type is moderated.
-        type_schema = self.schema.get(content_type) if self.schema_discovered else None
+        # _types() first: it retries a failed discovery when one is due (a site
+        # that was down at start), rather than refusing notes until a read does.
+        types = self._types()
+        type_schema = types.get(content_type) if self.schema_discovered else None
         if type_schema is None:
             raise DreachySiteError(f"notes can't be saved as {content_type!r} on this site right now")
         attributes: dict[str, Any] = {
@@ -262,17 +286,25 @@ class JsonApiBackend(Backend):
         return node
 
     def _write_error(self, exc: Exception, content_type: str) -> DreachySiteError:
-        """Why a write failed, in words the model can pass on."""
+        """Why a write failed, in words the model can pass on — with the site's
+        own reason when it gave one (JSON:API errors[].detail: a missing
+        permission, an unknown moderation state, a required field)."""
         if isinstance(exc, httpx.HTTPStatusError):
             status = exc.response.status_code
+            reason = _error_detail(exc.response)
+            if reason:
+                logger.warning("drupal_create_note: the site refused the note (%s): %s", status, reason)
+            suffix = f" ({reason})" if reason else ""
             if status == 405:
                 return DreachySiteError(
                     "the site doesn't accept changes over JSON:API (it's in read-only mode)", status=status
                 )
             if status == 403:
-                return DreachySiteError(f"the site doesn't let Dreachy create {content_type} drafts", status=status)
+                return DreachySiteError(
+                    f"the site doesn't let Dreachy create {content_type} drafts{suffix}", status=status
+                )
             if status == 422:
-                return DreachySiteError("the site rejected the note as it was sent", status=status)
+                return DreachySiteError(f"the site rejected the note{suffix}", status=status)
         return self._site_error(exc, f"node--{content_type}")
 
     # -- queries --------------------------------------------------------

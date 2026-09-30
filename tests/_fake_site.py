@@ -148,6 +148,8 @@ class FakeSite:
         errors: dict[str, int] | None = None,
         write_status: int | None = None,
         publish_on_create: bool = False,
+        write_detail: str | None = None,
+        filter_hides_drafts: bool = False,
     ) -> None:
         self.nodes = nodes
         self.labels = labels or {}
@@ -161,6 +163,12 @@ class FakeSite:
         self.write_status = write_status
         self.publish_on_create = publish_on_create
         self.created: list[dict[str, Any]] = []
+        # The JSON:API errors[].detail sent with write_status.
+        self.write_detail = write_detail
+        # Core JSON:API filter access: without `bypass node access`, a *filtered*
+        # node collection admits only published content (JsonapiHooks::
+        # jsonapiNodeFilterAccess), whatever else the account may view per item.
+        self.filter_hides_drafts = filter_hides_drafts
         self.requests: list[str] = []
         prefix = f"/{locale}" if locale else ""
         self._api = f"{prefix}/jsonapi"
@@ -222,6 +230,8 @@ class FakeSite:
         if bundle not in self.nodes:
             return _error(404)
         data = sorted(self.nodes[bundle], key=lambda r: r["attributes"]["created"], reverse=True)
+        if self.filter_hides_drafts and any(key.startswith("filter[") for key in params.keys()):
+            data = [r for r in data if r["attributes"].get("status", True)]
         if params.get("filter[status]") == "1":
             data = [r for r in data if r["attributes"].get("status", True)]
         elif params.get("filter[status]") == "0":
@@ -238,6 +248,9 @@ class FakeSite:
         body = json.loads(request.content)
         self.created.append(body)
         if self.write_status is not None:
+            if self.write_detail is not None:
+                error = {"status": str(self.write_status), "detail": self.write_detail}
+                return httpx.Response(self.write_status, json={"errors": [error]})
             return _error(self.write_status)
         attributes = dict(body["data"]["attributes"])
         title = attributes.pop("title")
