@@ -22,9 +22,19 @@ class Config:
     request_timeout: float = 10.0
 
     # ---------------------------------------------------------------------------
-    # Content model (Umami demo profile — confirmed 2026-07-27)
+    # Content model — discovered from the site (see schema.py)
     # ---------------------------------------------------------------------------
+    # Fallback only: the types queried until a discovery succeeds (Umami demo
+    # profile — confirmed 2026-07-27).
     content_types: tuple[str, ...] = ("article", "page", "recipe")
+    # The installer's selection from the settings page (DREACHY_TYPES).
+    # Empty means every type the site has, including ones added later.
+    enabled_types: tuple[str, ...] = ()
+    # Discovery reads this many recent nodes per type to find its text
+    # fields, so a field left empty on one node doesn't hide it.
+    schema_sample_size: int = 5
+    # After a failed discovery, queries retry it at most this often.
+    schema_retry_seconds: float = 60.0
 
     # ---------------------------------------------------------------------------
     # Per-tool result limits

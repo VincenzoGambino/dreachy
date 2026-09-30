@@ -8,7 +8,13 @@ objects sit alongside them and must not be mistaken for text.
 
 from __future__ import annotations
 
+import re
 from typing import Any
+
+import httpx
+
+from dreachy.client import DrupalClient
+from dreachy.config import Config
 
 
 def formatted(html: str) -> dict[str, str]:
@@ -91,3 +97,111 @@ NEWS_NODES = {
         node("gallery", "g1", "Summer photos", "2026-08-01T09:00:00+00:00", field_photo_count=12),
     ],
 }
+
+
+def _error(status: int) -> httpx.Response:
+    return httpx.Response(status, json={"errors": [{"status": str(status)}]})
+
+
+class FakeSite:
+    """A mocked Drupal JSON:API site for discovery tests.
+
+    Serves the JSON:API index, node types, node collections (sorted, limited
+    and title-filtered like the real thing), single nodes and Decoupled
+    Router path lookups. Every request path is recorded in ``requests``.
+    """
+
+    def __init__(
+        self,
+        nodes: dict[str, list[dict[str, Any]]],
+        *,
+        labels: dict[str, str] | None = None,
+        locale: str | None = "en",
+        index_status: int = 200,
+        node_types_status: int = 200,
+        unreadable: tuple[str, ...] = (),
+    ) -> None:
+        self.nodes = nodes
+        self.labels = labels or {}
+        self.locale = locale
+        self.index_status = index_status
+        self.node_types_status = node_types_status
+        self.unreadable = unreadable
+        self.requests: list[str] = []
+        prefix = f"/{locale}" if locale else ""
+        self._api = f"{prefix}/jsonapi"
+        self._router = f"{prefix}/router/translate-path"
+
+    def client(self, config: Config | None = None, **kwargs: Any) -> DrupalClient:
+        config = config or Config()
+        config.default_locale = self.locale
+        transport = httpx.MockTransport(self.handle)
+        return DrupalClient(config, http_client=httpx.Client(transport=transport), **kwargs)
+
+    def handle(self, request: httpx.Request) -> httpx.Response:
+        path = request.url.path
+        self.requests.append(path)
+        if path == self._api:
+            return self._index()
+        if path == f"{self._api}/node_type/node_type":
+            return self._node_types()
+        if match := re.fullmatch(rf"{re.escape(self._api)}/node/(\w+)/([\w-]+)", path):
+            return self._resource(*match.groups())
+        if match := re.fullmatch(rf"{re.escape(self._api)}/node/(\w+)", path):
+            return self._collection(match.group(1), request.url.params)
+        if path == self._router:
+            return self._resolve(request.url.params.get("path"))
+        return _error(404)
+
+    def _index(self) -> httpx.Response:
+        if self.index_status != 200:
+            return _error(self.index_status)
+        base = f"https://example.com{self._api}"
+        links: dict[str, Any] = {
+            "self": {"href": base},
+            "node_type--node_type": {"href": f"{base}/node_type/node_type"},
+        }
+        for bundle in self.nodes:
+            links[f"node--{bundle}"] = {"href": f"{base}/node/{bundle}"}
+        return httpx.Response(200, json={"jsonapi": {"version": "1.1"}, "data": [], "links": links})
+
+    def _node_types(self) -> httpx.Response:
+        if self.node_types_status != 200:
+            return _error(self.node_types_status)
+        data = [
+            {
+                "type": "node_type--node_type",
+                "id": f"{bundle}-type-uuid",
+                "attributes": {"drupal_internal__type": bundle, "name": self.labels.get(bundle, bundle)},
+            }
+            for bundle in self.nodes
+        ]
+        return httpx.Response(200, json={"data": data, "links": {}})
+
+    def _collection(self, bundle: str, params: httpx.QueryParams) -> httpx.Response:
+        if bundle in self.unreadable:
+            return _error(403)
+        if bundle not in self.nodes:
+            return _error(404)
+        data = sorted(self.nodes[bundle], key=lambda r: r["attributes"]["created"], reverse=True)
+        if contains := params.get("filter[title][value]"):
+            data = [r for r in data if contains.lower() in r["attributes"]["title"].lower()]
+        elif equal := params.get("filter[title]"):
+            data = [r for r in data if r["attributes"]["title"] == equal]
+        if limit := params.get("page[limit]"):
+            data = data[: int(limit)]
+        return httpx.Response(200, json={"data": data, "links": {}})
+
+    def _resource(self, bundle: str, uuid: str) -> httpx.Response:
+        for resource in self.nodes.get(bundle, []):
+            if resource["id"] == uuid:
+                return httpx.Response(200, json={"data": resource})
+        return _error(404)
+
+    def _resolve(self, alias: str | None) -> httpx.Response:
+        for bundle, resources in self.nodes.items():
+            for resource in resources:
+                if resource["attributes"]["path"]["alias"] == alias:
+                    entity = {"type": "node", "bundle": bundle, "uuid": resource["id"]}
+                    return httpx.Response(200, json={"resolved": True, "isHomePath": False, "entity": entity})
+        return httpx.Response(200, json={"resolved": False, "message": f"Unable to resolve {alias!r}."})
