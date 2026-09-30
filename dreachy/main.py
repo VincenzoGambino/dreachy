@@ -16,6 +16,7 @@ without needing SSH access to the robot.
 
 from __future__ import annotations
 
+import logging
 import os
 import threading
 from argparse import Namespace
@@ -26,8 +27,10 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
 
-from dreachy.config import Config
-from dreachy.tools._shared import reset_client
+from dreachy.config import Config, parse_types
+from dreachy.tools._shared import get_client, reset_client
+
+logger = logging.getLogger(__name__)
 
 _PACKAGE_DIR = Path(__file__).resolve().parent
 _BUNDLED_PROFILE_DIR = _PACKAGE_DIR / "profile" / "dreachy"
@@ -104,16 +107,47 @@ def _configure_environment() -> None:
     os.environ["REACHY_MINI_EXTERNAL_TOOLS_DIRECTORY"] = str(_PACKAGE_DIR / "tools")
 
 
+def _load_instance_env() -> None:
+    """Load the instance .env into os.environ before anything reads it.
+
+    The conversation app loads this same file too, but only once its audio
+    stream launches — after it has built its tool specs. Dreachy needs the
+    site settings earlier, to discover the site's content types before
+    those specs are built (so drupal_find_content lists the site's own).
+    """
+    env_path = _instance_path() / ".env"
+    if env_path.exists():
+        dotenv.load_dotenv(env_path, override=True)
+
+
+def _warm_schema() -> None:
+    """Discover the site's content model once at start.
+
+    Skipped until a site URL is configured: the placeholder would send
+    discovery requests to example.com. A failure leaves the Umami fallback
+    in place, and the client retries discovery as it's used.
+    """
+    if not os.environ.get("DREACHY_BASE_URL"):
+        return
+    try:
+        get_client().refresh_schema()
+    except Exception:
+        logger.exception("Content-type discovery failed at start; continuing with the fallback")
+
+
 class _ConfigPayload(BaseModel):
     base_url: str = ""
     extra_instructions: str = ""
     # None = field absent from the request (leave the saved value alone);
     # "" = explicitly no language prefix, for a single-language site.
     locale: str | None = None
+    # None = field absent (leave the saved selection alone); [] = every type
+    # the site has, including ones added later.
+    types: list[str] | None = None
 
 
 def _register_settings_routes(settings_app: FastAPI) -> None:
-    """Wire the settings page's GET/POST /api/config onto the app's own FastAPI instance."""
+    """Wire the settings page's GET/POST /api/config and GET /api/schema onto the app's own FastAPI instance."""
 
     @settings_app.get("/api/config")
     def get_config() -> dict:
@@ -126,26 +160,59 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             "locale": saved_locale if saved_locale is not None else (Config.default_locale or ""),
         }
 
+    @settings_app.get("/api/schema")
+    def get_content_types() -> dict:
+        client = get_client()
+        # Retry a failed discovery whenever the page asks, but never before a
+        # site is configured: that would go to the placeholder URL.
+        if not client.schema_discovered and os.environ.get("DREACHY_BASE_URL"):
+            client.refresh_schema()
+        enabled = client.schema
+        return {
+            "discovered": client.schema_discovered,
+            "types": [
+                {"id": type_id, "label": type_schema.label, "enabled": type_id in enabled}
+                for type_id, type_schema in client.full_schema.items()
+            ],
+        }
+
     @settings_app.post("/api/config")
     def save_config(payload: _ConfigPayload) -> dict:
+        env_path = _instance_path() / ".env"
+
         base_url = payload.base_url.strip()
+        previous_base_url = os.environ.get("DREACHY_BASE_URL")
         base_url_changed = False
-        if base_url and base_url != os.environ.get("DREACHY_BASE_URL"):
-            env_path = _instance_path() / ".env"
+        if base_url and base_url != previous_base_url:
             dotenv.set_key(str(env_path), "DREACHY_BASE_URL", base_url)
             os.environ["DREACHY_BASE_URL"] = base_url
-            reset_client()  # next tool call picks up the new site immediately, no restart
             base_url_changed = True
 
         locale_changed = False
         if payload.locale is not None:
             locale = payload.locale.strip()
             if locale != os.environ.get("DREACHY_LOCALE"):
-                env_path = _instance_path() / ".env"
                 dotenv.set_key(str(env_path), "DREACHY_LOCALE", locale)
                 os.environ["DREACHY_LOCALE"] = locale
-                reset_client()
                 locale_changed = True
+
+        types = None
+        if payload.types is not None:
+            types = ",".join(parse_types(",".join(payload.types)))
+        elif base_url_changed and previous_base_url:
+            # Moving to another site: the page sends no selection then, and one
+            # made for the previous site would silently filter this one.
+            types = ""
+        types_changed = False
+        if types is not None and types != os.environ.get("DREACHY_TYPES", ""):
+            dotenv.set_key(str(env_path), "DREACHY_TYPES", types)
+            os.environ["DREACHY_TYPES"] = types
+            types_changed = True
+
+        # Always, even when nothing above changed: the next tool call picks up
+        # the new settings with no restart, and rediscovers the site's content
+        # types — saving is how a type created on the site since start shows up.
+        reset_client()
 
         _write_extra_instructions(payload.extra_instructions)
         _render_profile()  # only takes effect on the next app start
@@ -154,9 +221,21 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             "status": "saved",
             "base_url_applied_immediately": base_url_changed,
             "locale_applied_immediately": locale_changed,
+            "types_applied_immediately": types_changed,
             "instructions_require_restart": True,
         }
 
+
+def _start_up(settings_app: FastAPI | None) -> None:
+    """Everything Dreachy does before handing over to the conversation app."""
+    _load_instance_env()
+    _render_profile()
+    _configure_environment()
+    # Routes before discovery: a saved URL that hangs keeps discovery waiting
+    # on its timeout, and the settings page is how an installer fixes it.
+    if settings_app is not None:
+        _register_settings_routes(settings_app)
+    _warm_schema()
 
 class Dreachy(ReachyMiniApp):
     """Reachy Mini becomes the embodiment of a Drupal site."""
@@ -168,11 +247,7 @@ class Dreachy(ReachyMiniApp):
     request_media_backend: str | None = "gstreamer_no_video"
 
     def run(self, reachy_mini: ReachyMini, stop_event: threading.Event) -> None:
-        _render_profile()
-        _configure_environment()
-
-        if self.settings_app is not None:
-            _register_settings_routes(self.settings_app)
+        _start_up(self.settings_app)
 
         # Imported here, not at module level: must happen after
         # _configure_environment() has set the env vars its Config reads.

@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 from dreachy.client import DreachySiteError
 from dreachy.tool_queries import drupal_read_article
-from dreachy.tools._shared import get_client
+from dreachy.tools._shared import get_client, or_list, type_choices
 from reachy_mini_conversation_app.tools.core_tools import Tool, ToolDependencies
 
 logger = logging.getLogger(__name__)
@@ -16,10 +16,15 @@ class DrupalReadArticle(Tool):
     """Fetch the full text of one piece of content, for reading aloud."""
 
     name = "drupal_read_article"
-    description = (
-        "Fetch the full text of one article, page, or recipe by title or URL path, for "
-        "reading aloud. Use when asked to read something, or to read an article/recipe out loud."
-    )
+    # A property for the same reason as DrupalFindContent's: it names the
+    # site's own types, discovered before the specs are built.
+    @property
+    def description(self) -> str:
+        return (
+            f"Fetch the full text of one {or_list(type_choices())} by title or URL path, for "
+            "reading aloud. Use when asked to read something, or to read a piece of content out loud."
+        )
+
     parameters_schema = {
         "type": "object",
         "properties": {
