@@ -30,8 +30,9 @@ def _isolated_paths(tmp_path, monkeypatch):
     (bundled_dir / "greeting.txt").write_text("Hello!\n")
     monkeypatch.setattr(dreachy_main, "_BUNDLED_PROFILE_DIR", bundled_dir)
 
-    monkeypatch.delenv("DREACHY_BASE_URL", raising=False)
-    monkeypatch.delenv("DREACHY_LOCALE", raising=False)
+    for key in ("DREACHY_BASE_URL", "DREACHY_LOCALE", "DREACHY_TYPES"):
+        monkeypatch.setenv(key, "")
+        monkeypatch.delenv(key)
     shared._client = None
     yield
     shared._client = None
@@ -164,3 +165,71 @@ def test_get_client_builds_a_prefix_free_client_when_locale_is_blank() -> None:
     client.post("/api/config", json={"base_url": "https://example.com", "extra_instructions": "", "locale": ""})
 
     assert shared.get_client().config.default_locale is None
+
+
+# ---------------------------------------------------------------------------
+# Start-up: the instance .env is loaded and the schema warmed before the
+# conversation app builds its tool specs.
+# ---------------------------------------------------------------------------
+
+
+class _RecordingClient:
+    def __init__(self) -> None:
+        self.refreshes = 0
+
+    def refresh_schema(self) -> bool:
+        self.refreshes += 1
+        return True
+
+
+def test_load_instance_env_puts_saved_settings_into_the_environment() -> None:
+    (dreachy_main._instance_path() / ".env").write_text(
+        "DREACHY_BASE_URL=https://saved.example\nDREACHY_TYPES=recipe\n"
+    )
+
+    dreachy_main._load_instance_env()
+
+    assert os.environ["DREACHY_BASE_URL"] == "https://saved.example"
+    assert os.environ["DREACHY_TYPES"] == "recipe"
+
+
+def test_load_instance_env_is_a_no_op_on_a_fresh_install() -> None:
+    dreachy_main._load_instance_env()
+
+    assert "DREACHY_BASE_URL" not in os.environ
+
+
+def test_warm_schema_discovers_once_a_site_url_is_set(monkeypatch) -> None:
+    recorder = _RecordingClient()
+    monkeypatch.setattr(dreachy_main, "get_client", lambda: recorder)
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://site.example")
+
+    dreachy_main._warm_schema()
+
+    assert recorder.refreshes == 1
+
+
+def test_warm_schema_sends_nothing_before_a_site_url_is_set(monkeypatch) -> None:
+    recorder = _RecordingClient()
+    monkeypatch.setattr(dreachy_main, "get_client", lambda: recorder)
+
+    dreachy_main._warm_schema()
+
+    assert recorder.refreshes == 0
+
+
+def test_warm_schema_survives_an_unexpected_discovery_error(monkeypatch) -> None:
+    class _Exploding:
+        def refresh_schema(self) -> bool:
+            raise KeyError("attributes")
+
+    monkeypatch.setattr(dreachy_main, "get_client", lambda: _Exploding())
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://site.example")
+
+    dreachy_main._warm_schema()  # must not raise: start-up survives a misbehaving site
+
+
+def test_get_client_reads_the_type_selection(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_TYPES", "recipe, article,")
+
+    assert shared.get_client().config.enabled_types == ("recipe", "article")

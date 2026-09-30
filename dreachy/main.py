@@ -16,6 +16,7 @@ without needing SSH access to the robot.
 
 from __future__ import annotations
 
+import logging
 import os
 import threading
 from argparse import Namespace
@@ -27,7 +28,9 @@ from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
 
 from dreachy.config import Config
-from dreachy.tools._shared import reset_client
+from dreachy.tools._shared import get_client, reset_client
+
+logger = logging.getLogger(__name__)
 
 _PACKAGE_DIR = Path(__file__).resolve().parent
 _BUNDLED_PROFILE_DIR = _PACKAGE_DIR / "profile" / "dreachy"
@@ -104,6 +107,34 @@ def _configure_environment() -> None:
     os.environ["REACHY_MINI_EXTERNAL_TOOLS_DIRECTORY"] = str(_PACKAGE_DIR / "tools")
 
 
+def _load_instance_env() -> None:
+    """Load the instance .env into os.environ before anything reads it.
+
+    The conversation app loads this same file too, but only once its audio
+    stream launches — after it has built its tool specs. Dreachy needs the
+    site settings earlier, to discover the site's content types before
+    those specs are built (so drupal_find_content lists the site's own).
+    """
+    env_path = _instance_path() / ".env"
+    if env_path.exists():
+        dotenv.load_dotenv(env_path, override=True)
+
+
+def _warm_schema() -> None:
+    """Discover the site's content model once at start.
+
+    Skipped until a site URL is configured: the placeholder would send
+    discovery requests to example.com. A failure leaves the Umami fallback
+    in place, and the client retries discovery as it's used.
+    """
+    if not os.environ.get("DREACHY_BASE_URL"):
+        return
+    try:
+        get_client().refresh_schema()
+    except Exception:
+        logger.exception("Content-type discovery failed at start; continuing with the fallback")
+
+
 class _ConfigPayload(BaseModel):
     base_url: str = ""
     extra_instructions: str = ""
@@ -168,8 +199,10 @@ class Dreachy(ReachyMiniApp):
     request_media_backend: str | None = "gstreamer_no_video"
 
     def run(self, reachy_mini: ReachyMini, stop_event: threading.Event) -> None:
+        _load_instance_env()
         _render_profile()
         _configure_environment()
+        _warm_schema()
 
         if self.settings_app is not None:
             _register_settings_routes(self.settings_app)

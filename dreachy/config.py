@@ -4,6 +4,7 @@ All call sites import from here; nothing is hard-coded in client.py or the
 tools built on top of it.
 """
 
+import os
 from dataclasses import dataclass
 
 
@@ -52,3 +53,22 @@ class Config:
     # On a failed poll, the interval doubles each consecutive failure (backing
     # off a down site rather than hammering it), capped at this many seconds.
     watch_max_backoff_seconds: float = 300.0
+
+    @classmethod
+    def from_env(cls) -> "Config":
+        """A Config with the installer's settings applied (instance .env / settings page)."""
+        config = cls()
+        if base_url := os.environ.get("DREACHY_BASE_URL"):
+            config.base_url = base_url
+        # Deliberately not `if locale :=` — an empty DREACHY_LOCALE is a real
+        # setting ("this site has no language prefix"), not an absent one.
+        locale = os.environ.get("DREACHY_LOCALE")
+        if locale is not None:
+            config.default_locale = locale or None
+        config.enabled_types = parse_types(os.environ.get("DREACHY_TYPES", ""))
+        return config
+
+
+def parse_types(value: str) -> tuple[str, ...]:
+    """``"recipe, article,"`` -> ``("recipe", "article")``."""
+    return tuple(part.strip() for part in value.split(",") if part.strip())
