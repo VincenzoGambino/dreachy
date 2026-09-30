@@ -232,3 +232,16 @@ def test_editorial_tools_refuse_without_a_login() -> None:
         "error": "Editing isn't available on this site."
     }
     assert backend.created == []
+
+
+def test_injected_article_text_reaches_the_model_as_plain_data() -> None:
+    from _fake_backend import INJECTION_NODE
+
+    backend = _editor()
+    backend.nodes.append(INJECTION_NODE)
+
+    result = _call(DrupalReadArticle(), title_or_path="A note to the robot")
+
+    # Read back verbatim as the article's text — no tool call, no write.
+    assert result == {"title": "A note to the robot", "text": INJECTION_NODE["body"]}
+    assert backend.created == []
