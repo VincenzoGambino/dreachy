@@ -106,9 +106,10 @@ GET https://your-site.example/en/jsonapi/node/article?sort=-created&page[limit]=
 ```
 
 Anonymous, read-only, no authentication. The language prefix comes from the
-settings page. The client strips HTML, maps each content type's text fields, and
+settings page. The client strips HTML, reads each content type's text fields, and
 returns plain data — titles, types and human-readable ages, not raw JSON:API
-documents. Keeping that shaping here rather than leaving it to the model is
+documents. Which types exist and which of their fields hold the text is discovered
+from the site at start (see `dreachy/schema.py`), not written into the code. Keeping that shaping here rather than leaving it to the model is
 deliberate: less to send, less to hallucinate around.
 
 ### 6. The result goes back to the model
@@ -202,23 +203,29 @@ behind a five-minute wait.
 | Audio capture and playback | | loops | ✅ pipeline | |
 | Head motion while speaking | | | ✅ wobbler | |
 | Physical reactions | ✅ `perk_up` | movement manager | ✅ motor control | |
-| Settings page | ✅ site URL, language, extra instructions | mounts the app | serves `custom_app_url` | |
+| Settings page | ✅ site URL, language, content types, extra instructions | mounts the app | serves `custom_app_url` | |
 | Session allocation, auth | | ✅ | | ✅ |
 
 ## How Dreachy plugs in
 
-`dreachy/main.py` is a `ReachyMiniApp` subclass that does three things before
+`dreachy/main.py` is a `ReachyMiniApp` subclass that does five things before
 handing over:
 
-1. **Renders the profile** into the writable instance path, appending any extra
+1. **Loads the instance `.env`** itself. The conversation app loads the same file,
+   but only once its audio stream launches, which is after it has built the tool
+   specs, and Dreachy needs the site URL before then.
+2. **Renders the profile** into the writable instance path, appending any extra
    instructions from the settings page to the built-in persona rather than
    replacing it, so the guardrails survive whatever an installer types.
-2. **Sets three environment variables** the conversation app's `Config` reads at
+3. **Sets three environment variables** the conversation app's `Config` reads at
    import time — the custom profile name, the profiles directory and the external
    tools directory. This is why the import of `run()` happens *inside* the method
    and not at module level.
-3. **Registers `GET`/`POST /api/config`** on the settings app that the dashboard
-   serves, then calls `reachy_mini_conversation_app.main.run()` and does not
+4. **Discovers the site's content types**, so the search tool's type filter lists
+   the site's own types when its spec is built. If the site can't be reached, the
+   Umami mapping stands in and discovery is retried as the tools are used.
+5. **Registers `GET`/`POST /api/config` and `GET /api/schema`** on the settings app
+   that the dashboard serves, then calls `reachy_mini_conversation_app.main.run()` and does not
    return until the app stops.
 
 Tools are discovered by filename from the external tools directory, which is why
@@ -237,6 +244,7 @@ delegates to it.
 | Every request 404s | Language prefix set when the site is single-language, or missing when it's multilingual | Settings page |
 | Says it will read an article, then stops | The model acknowledged without emitting the tool call. Known, intermittent | Ask again |
 | Reaction never fires | Watcher polling the wrong site, or nothing published since the baseline | Logs: `drupal_watch_site: new content detected` |
+| Ignores a content type | The type has no formatted text field, is unticked on the settings page, or was created since start | Settings page (saving re-reads the site's types); logs: `Couldn't discover the site's content types` |
 | Site pulse counts look wrong | Counts are capped at `pulse_sample_limit` (50) per type — core JSON:API has no collection count | `config.py` |
 
 The daemon streams its journal over a WebSocket at `/logs/ws/daemon`, which
@@ -250,7 +258,8 @@ moves.** A new tool is a file in `dreachy/tools/` that returns plain data, plus 
 line in `tools.txt`, plus a sentence of description good enough for the model to
 choose it. You don't touch audio, speech or movement.
 
-The things Dreachy currently hardcodes — which content types exist, which fields
-hold readable text, which language prefix — are the obvious next thing to move
-into the Drupal site itself, so a site builder configures the robot from Drupal's
-admin UI instead of editing Python.
+Dreachy no longer hardcodes the content model: it discovers which content types
+exist and which fields hold readable text from the site. What's left in its own
+settings — which language prefix, which types to talk about — is the obvious next
+thing to move into the Drupal site itself, so a site builder configures the robot
+from Drupal's admin UI.
