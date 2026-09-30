@@ -3,6 +3,8 @@ queries built on it. No live site: see _fake_site.FakeSite."""
 
 from __future__ import annotations
 
+import threading
+import time
 from types import SimpleNamespace
 
 import httpx
@@ -151,3 +153,78 @@ def test_search_with_a_disabled_type_widens_to_every_enabled_type() -> None:
 def test_reading_by_path_a_type_that_is_disabled_finds_nothing() -> None:
     with FakeSite(UMAMI_NODES, labels=UMAMI_LABELS).client(Config(enabled_types=("recipe",))) as client:
         assert client.get_article("/article/a1") is None
+
+
+# ---------------------------------------------------------------------------
+# Final-review fixes
+# ---------------------------------------------------------------------------
+
+
+def test_a_temporary_error_on_one_type_fails_discovery_instead_of_dropping_the_type() -> None:
+    # A 502 isn't "anonymous can't read this type": dropping recipe here would
+    # hide it for the whole session, since a successful discovery never retries.
+    site = FakeSite(UMAMI_NODES, labels=UMAMI_LABELS, errors={"recipe": 502})
+
+    with site.client() as client:
+        assert client.refresh_schema() is False
+        assert "recipe" in client.full_schema
+
+
+def test_a_timeout_on_one_type_fails_discovery_instead_of_dropping_the_type() -> None:
+    site = FakeSite(UMAMI_NODES, labels=UMAMI_LABELS)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/en/jsonapi/node/recipe":
+            raise httpx.ReadTimeout("slow", request=request)
+        return site.handle(request)
+
+    client = DrupalClient(Config(), http_client=httpx.Client(transport=httpx.MockTransport(handler)))
+    assert client.refresh_schema() is False
+    assert "recipe" in client.full_schema
+
+
+def test_a_non_json_answer_fails_discovery_and_is_throttled_like_any_failure(monkeypatch) -> None:
+    clock = [1000.0]
+    monkeypatch.setattr(client_module, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    site = FakeSite(UMAMI_NODES, labels=UMAMI_LABELS)
+    captive_portal = [True]
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if captive_portal[0] and request.url.path == "/en/jsonapi/node/recipe":
+            return httpx.Response(200, text="<html>Sign in to the Wi-Fi</html>")
+        return site.handle(request)
+
+    client = DrupalClient(
+        Config(schema_retry_seconds=60),
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        auto_discover=True,
+    )
+    assert client.refresh_schema() is False  # must not raise: it would kill the watcher
+    captive_portal[0] = False
+    client.get_recent_nodes()
+    assert site.requests.count("/en/jsonapi") == 1  # throttled, not retried on every call
+
+
+def test_concurrent_queries_share_one_discovery() -> None:
+    site = FakeSite(NEWS_NODES, labels=NEWS_LABELS)
+    index_entered = threading.Event()
+    release = threading.Event()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/en/jsonapi" and not index_entered.is_set():
+            index_entered.set()
+            release.wait(5)
+        return site.handle(request)
+
+    client = DrupalClient(Config(), http_client=httpx.Client(transport=httpx.MockTransport(handler)), auto_discover=True)
+    first = threading.Thread(target=client.get_recent_nodes)
+    first.start()
+    assert index_entered.wait(5)
+    second = threading.Thread(target=client.get_recent_nodes)
+    second.start()
+    time.sleep(0.1)  # let the second caller reach the discovery lock while the first is mid-discovery
+    release.set()
+    first.join(5)
+    second.join(5)
+
+    assert site.requests.count("/en/jsonapi") == 1

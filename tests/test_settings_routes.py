@@ -318,3 +318,17 @@ def test_post_config_always_drops_the_cached_schema() -> None:
 
     # Nothing changed, but saving is also how a newly created site type gets picked up.
     assert shared._client is None
+
+
+def test_post_config_moving_to_another_site_clears_the_previous_sites_selection(monkeypatch) -> None:
+    # The page sends no selection when the URL changes; a selection made for
+    # the old site (article,recipe) would silently filter the new one.
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://old.example")
+    monkeypatch.setenv("DREACHY_TYPES", "article,recipe")
+
+    resp = _make_client().post(
+        "/api/config", json={"base_url": "https://new.example", "extra_instructions": "", "types": None}
+    )
+
+    assert resp.json()["types_applied_immediately"] is True
+    assert os.environ["DREACHY_TYPES"] == ""

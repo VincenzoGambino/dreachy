@@ -120,6 +120,7 @@ class FakeSite:
         index_status: int = 200,
         node_types_status: int = 200,
         unreadable: tuple[str, ...] = (),
+        errors: dict[str, int] | None = None,
     ) -> None:
         self.nodes = nodes
         self.labels = labels or {}
@@ -127,6 +128,8 @@ class FakeSite:
         self.index_status = index_status
         self.node_types_status = node_types_status
         self.unreadable = unreadable
+        # Per-type status for collection requests, e.g. {"recipe": 502}.
+        self.errors = errors or {}
         self.requests: list[str] = []
         prefix = f"/{locale}" if locale else ""
         self._api = f"{prefix}/jsonapi"
@@ -181,6 +184,8 @@ class FakeSite:
     def _collection(self, bundle: str, params: httpx.QueryParams) -> httpx.Response:
         if bundle in self.unreadable:
             return _error(403)
+        if bundle in self.errors:
+            return _error(self.errors[bundle])
         if bundle not in self.nodes:
             return _error(404)
         data = sorted(self.nodes[bundle], key=lambda r: r["attributes"]["created"], reverse=True)

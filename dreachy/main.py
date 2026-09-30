@@ -181,8 +181,9 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
         env_path = _instance_path() / ".env"
 
         base_url = payload.base_url.strip()
+        previous_base_url = os.environ.get("DREACHY_BASE_URL")
         base_url_changed = False
-        if base_url and base_url != os.environ.get("DREACHY_BASE_URL"):
+        if base_url and base_url != previous_base_url:
             dotenv.set_key(str(env_path), "DREACHY_BASE_URL", base_url)
             os.environ["DREACHY_BASE_URL"] = base_url
             base_url_changed = True
@@ -195,13 +196,18 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
                 os.environ["DREACHY_LOCALE"] = locale
                 locale_changed = True
 
-        types_changed = False
+        types = None
         if payload.types is not None:
             types = ",".join(parse_types(",".join(payload.types)))
-            if types != os.environ.get("DREACHY_TYPES", ""):
-                dotenv.set_key(str(env_path), "DREACHY_TYPES", types)
-                os.environ["DREACHY_TYPES"] = types
-                types_changed = True
+        elif base_url_changed and previous_base_url:
+            # Moving to another site: the page sends no selection then, and one
+            # made for the previous site would silently filter this one.
+            types = ""
+        types_changed = False
+        if types is not None and types != os.environ.get("DREACHY_TYPES", ""):
+            dotenv.set_key(str(env_path), "DREACHY_TYPES", types)
+            os.environ["DREACHY_TYPES"] = types
+            types_changed = True
 
         # Always, even when nothing above changed: the next tool call picks up
         # the new settings with no restart, and rediscovers the site's content

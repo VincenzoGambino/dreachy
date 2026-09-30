@@ -33,10 +33,18 @@ logger = logging.getLogger(__name__)
 
 _TAG_RE = re.compile(r"<[^>]+>")
 _SUMMARY_FALLBACK_CHARS = 200
+# Statuses that mean "anonymous may not read this type", as opposed to a
+# temporary failure: only these let discovery skip a type and carry on.
+_UNREADABLE_STATUSES = (401, 403, 404)
 
 
 class DreachySiteError(Exception):
     """The Drupal site is unreachable or returned an error response."""
+
+    def __init__(self, message: str, *, status: int | None = None) -> None:
+        super().__init__(message)
+        # The HTTP status, when the site answered with an error one.
+        self.status = status
 
 
 def _strip_html(text: str) -> str:
@@ -115,9 +123,16 @@ class DrupalClient:
             response = self._client.get_collection(
                 resource_type, query_string=params, raise_for_status=True, disable_cache=True
             )
+            return response["data"]
+        except httpx.HTTPStatusError as exc:
+            raise DreachySiteError(str(exc), status=exc.response.status_code) from exc
         except httpx.HTTPError as exc:
             raise DreachySiteError(str(exc)) from exc
-        return response["data"]
+        except (ValueError, KeyError, TypeError) as exc:
+            # A 200 that isn't JSON:API (a captive portal, a maintenance page).
+            # Left raw, it would end the watcher's task and bypass discovery's
+            # retry throttle.
+            raise DreachySiteError(f"Unexpected response for {resource_type}: {exc!r}") from exc
 
     # -- content model --------------------------------------------------
 
@@ -148,15 +163,18 @@ class DrupalClient:
         discovered) and returns False; never raises DreachySiteError.
         """
         with self._discovery_lock:
-            try:
-                schema = self.get_schema()
-            except DreachySiteError as exc:
-                return self._discovery_failed(str(exc))
-            if not schema:
-                return self._discovery_failed("no readable content type has text fields")
-            self._full_schema = schema
-            self.schema_discovered = True
-            return True
+            return self._refresh_locked()
+
+    def _refresh_locked(self) -> bool:
+        try:
+            schema = self.get_schema()
+        except DreachySiteError as exc:
+            return self._discovery_failed(str(exc))
+        if not schema:
+            return self._discovery_failed("no readable content type has text fields")
+        self._full_schema = schema
+        self.schema_discovered = True
+        return True
 
     def _discovery_failed(self, reason: str) -> bool:
         logger.warning(
@@ -165,10 +183,18 @@ class DrupalClient:
         self._next_discovery_at = time.monotonic() + self.config.schema_retry_seconds
         return False
 
+    def _discovery_due(self) -> bool:
+        return not self.schema_discovered and time.monotonic() >= self._next_discovery_at
+
     def _types(self) -> Schema:
         """The enabled schema, first retrying a failed discovery if one is due."""
-        if self._auto_discover and not self.schema_discovered and time.monotonic() >= self._next_discovery_at:
-            self.refresh_schema()
+        if self._auto_discover and self._discovery_due():
+            with self._discovery_lock:
+                # Checked again under the lock: callers that queued behind
+                # another thread's discovery use its result, rather than
+                # each running their own back to back.
+                if self._discovery_due():
+                    self._refresh_locked()
         return self.schema
 
     def _index_url(self) -> str:
@@ -203,7 +229,12 @@ class DrupalClient:
         try:
             resources = self._get_collection(f"node--{bundle}", params)
         except DreachySiteError as exc:
-            # One unreadable type (e.g. no anonymous view access) mustn't sink the rest.
+            # One unreadable type (e.g. no anonymous view access) mustn't sink
+            # the rest. Anything else — a 5xx, a timeout — fails the whole
+            # discovery, so the retry picks the type up rather than losing it
+            # for the session.
+            if exc.status not in _UNREADABLE_STATUSES:
+                raise
             logger.info("Can't sample node--%s, skipping it: %s", bundle, exc)
             return None
         return [resource.get("attributes") or {} for resource in resources]
