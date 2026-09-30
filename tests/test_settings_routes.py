@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import threading
+import time
 
 import dotenv
 import pytest
@@ -581,3 +582,22 @@ def test_status_tells_a_refused_login_from_an_unreachable_site(monkeypatch) -> N
     shared._client = FakeSite(NEWS_NODES, labels=NEWS_LABELS).client(auto_discover=True)
     client.get("/api/schema")
     assert client.get("/api/status").json() == {"discovered": True, "problem": None}
+
+
+def test_a_dropped_client_is_closed_once_nothing_should_still_be_using_it(monkeypatch) -> None:
+    # Not at once: an in-flight tool call or the watcher may still hold it.
+    monkeypatch.setattr(shared, "_RETIRE_AFTER_SECONDS", 0.2)
+
+    class _Old:
+        closed = False
+
+        def close(self) -> None:
+            self.closed = True
+
+    old = _Old()
+    shared._client = old
+    shared.reset_client()
+
+    assert old.closed is False
+    time.sleep(0.5)
+    assert old.closed is True

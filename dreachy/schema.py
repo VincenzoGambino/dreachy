@@ -120,7 +120,9 @@ def build_schema(
             type_schema = infer_type_schema(label, bundle_samples)
         else:
             type_schema = guess_type_schema(bundle, label)
-        if type_schema is not None:
+        if type_schema is None:
+            logger.info("Skipping node--%s: none of its content has a formatted text field", bundle)
+        else:
             schema[bundle] = type_schema
     return schema
 

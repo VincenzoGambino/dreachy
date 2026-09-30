@@ -227,10 +227,43 @@ def test_switching_between_working_sites_does_not_react_to_existing_content(monk
     async def run_test():
         await tool(deps, action="start")
         await asyncio.sleep(0.1)
-        holder["client"] = _make_client(new_site, poll_interval=0.01)
+        new_client = _make_client(new_site, poll_interval=0.01)
+        new_client.config.base_url = "https://other-site.example"  # a different site, as the test means
+        holder["client"] = new_client
         await asyncio.sleep(0.2)
         await tool(deps, action="stop")
 
     asyncio.run(run_test())
 
     assert played == []
+
+
+def test_a_settings_save_on_the_same_site_keeps_the_watchers_baseline(monkeypatch) -> None:
+    # Every settings save swaps the client (R1: saving re-reads the site's
+    # types). On the same site that isn't a new baseline: content published
+    # since the last poll must still be noticed.
+    def before(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/en/jsonapi/node/article":
+            return httpx.Response(200, json={"data": [_node("a1", "Seen", "2026-07-20T00:00:00+00:00")]})
+        return httpx.Response(200, json={"data": []})
+
+    def after(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/en/jsonapi/node/article":
+            return httpx.Response(200, json={"data": [_node("a2", "Published meanwhile", "2026-07-27T00:00:00+00:00")]})
+        return httpx.Response(200, json={"data": []})
+
+    holder = _make_switchable_client(monkeypatch, _make_client(before, poll_interval=0.01))
+    played = _record_reactions(monkeypatch)
+    deps = ToolDependencies(reachy_mini=_FakeReachyMini(), movement_manager=None)
+    tool = watch_module.DrupalWatchSite()
+
+    async def run_test():
+        await tool(deps, action="start")
+        await asyncio.sleep(0.1)
+        holder["client"] = _make_client(after, poll_interval=0.01)  # same URL, locale and types
+        await asyncio.sleep(0.2)
+        await tool(deps, action="stop")
+
+    asyncio.run(run_test())
+
+    assert played == ["perk_up"]

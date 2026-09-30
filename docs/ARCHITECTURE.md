@@ -211,9 +211,9 @@ behind a five-minute wait.
 `dreachy/main.py` is a `ReachyMiniApp` subclass that does five things before
 handing over:
 
-1. **Loads the instance `.env`** itself. The conversation app loads the same file,
-   but only once its audio stream launches, which is after it has built the tool
-   specs, and Dreachy needs the site URL before then.
+1. **Loads the instance `.env`** itself. The conversation app loads the same file
+   at the start of its own `run()`, but Dreachy discovers the site's content types
+   before handing over to it, so it needs the site URL first.
 2. **Renders the profile** into the writable instance path, appending any extra
    instructions from the settings page to the built-in persona rather than
    replacing it, so the guardrails survive whatever an installer types.
@@ -246,7 +246,7 @@ delegates to it.
 | Every request 404s | Language prefix set when the site is single-language, or missing when it's multilingual | Settings page |
 | Says it will read an article, then stops | The model acknowledged without emitting the tool call. Known, intermittent | Ask again |
 | Reaction never fires | Watcher polling the wrong site, or nothing published since the baseline | Logs: `drupal_watch_site: new content detected` |
-| Ignores a content type | The type has no formatted text field, is unticked on the settings page, or was created since start | Settings page (saving re-reads the site's types); logs: `Couldn't discover the site's content types` |
+| Ignores a content type | The type has no formatted text field, is unticked on the settings page, or was created since start | Settings page (saving re-reads the site's types); logs: `Can't sample node--X, skipping it` (the site refused that type) or `Skipping node--X: none of its content has a formatted text field` |
 | Site pulse counts look wrong | Counts are capped at `pulse_sample_limit` (50) per type — core JSON:API has no collection count | `config.py` |
 
 The daemon streams its journal over a WebSocket at `/logs/ws/daemon`, which

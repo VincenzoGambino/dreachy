@@ -197,10 +197,38 @@ def test_a_configured_scope_is_sent_with_the_token_request() -> None:
     assert all("scope=dreachy" in body for body in private.token_bodies)
 
 
-def test_the_watcher_survives_a_refused_login() -> None:
-    # DreachyAuthError is a DreachySiteError, which the watcher's loop
-    # already catches and backs off on.
-    assert issubclass(DreachyAuthError, DreachySiteError)
+def test_the_watcher_keeps_polling_through_a_refused_login(monkeypatch) -> None:
+    from dreachy.tools import drupal_watch_site as watch_module
+
+    backend = PrivateSite(accept=False).backend(_oauth_config(poll_interval_seconds=0.01))
+    polls: list[int] = []
+    real_read = backend.get_recent_nodes
+
+    def counting_read(*args, **kwargs):
+        polls.append(1)
+        return real_read(*args, **kwargs)
+
+    monkeypatch.setattr(backend, "get_recent_nodes", counting_read)
+    monkeypatch.setattr(watch_module, "get_client", lambda: backend)
+    monkeypatch.setattr(watch_module, "_watch_task", None)
+    tool = watch_module.DrupalWatchSite()
+    deps = ToolDependencies(reachy_mini=None, movement_manager=None)
+
+    async def run() -> bool:
+        await tool(deps, action="start")
+        await asyncio.sleep(0.3)
+        alive = not watch_module._watch_task.done()
+        await tool(deps, action="stop")
+        return alive
+
+    assert asyncio.run(run()) is True  # the refused login didn't end the watcher's task
+    assert len(polls) >= 2  # and it kept trying, backing off
+
+
+def test_a_path_lookup_through_the_router_maps_a_refused_login() -> None:
+    with PrivateSite(accept=False).backend() as backend:
+        with pytest.raises(DreachyAuthError):
+            backend.get_article("/news_item/n2")
 
 
 def test_an_unavailable_token_endpoint_is_not_blamed_on_the_credentials() -> None:

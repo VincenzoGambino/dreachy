@@ -18,6 +18,10 @@ _client: Backend | None = None
 # without the lock each builds a client, and a discovery can land on the one
 # that's thrown away.
 _client_lock = threading.Lock()
+# A dropped client is closed this long after a reset — not at once, since an
+# in-flight tool call or the watcher (which switches within seconds) may
+# still hold it. Closing releases its connections, token and credentials.
+_RETIRE_AFTER_SECONDS = 60.0
 
 
 def get_client() -> Backend:
@@ -41,7 +45,13 @@ def reset_client() -> None:
     needed — and the next use rediscovers the site's content types.
     """
     global _client
-    _client = None
+    with _client_lock:
+        old, _client = _client, None
+    close = getattr(old, "close", None)
+    if close is not None:
+        timer = threading.Timer(_RETIRE_AFTER_SECONDS, close)
+        timer.daemon = True
+        timer.start()
 
 
 def type_choices() -> list[str]:

@@ -111,10 +111,10 @@ def _configure_environment() -> None:
 def _load_instance_env() -> None:
     """Load the instance .env into os.environ before anything reads it.
 
-    The conversation app loads this same file too, but only once its audio
-    stream launches — after it has built its tool specs. Dreachy needs the
-    site settings earlier, to discover the site's content types before
-    those specs are built (so drupal_find_content lists the site's own).
+    The conversation app loads this same file too, at the start of its own
+    run(). But Dreachy discovers the site's content types (so
+    drupal_find_content lists the site's own) before it hands over to that
+    run(), so it needs the site settings first and loads the file itself.
     """
     env_path = _instance_path() / ".env"
     if env_path.exists():
