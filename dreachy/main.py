@@ -226,6 +226,17 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
         }
 
 
+def _start_up(settings_app: FastAPI | None) -> None:
+    """Everything Dreachy does before handing over to the conversation app."""
+    _load_instance_env()
+    _render_profile()
+    _configure_environment()
+    # Routes before discovery: a saved URL that hangs keeps discovery waiting
+    # on its timeout, and the settings page is how an installer fixes it.
+    if settings_app is not None:
+        _register_settings_routes(settings_app)
+    _warm_schema()
+
 class Dreachy(ReachyMiniApp):
     """Reachy Mini becomes the embodiment of a Drupal site."""
 
@@ -236,13 +247,7 @@ class Dreachy(ReachyMiniApp):
     request_media_backend: str | None = "gstreamer_no_video"
 
     def run(self, reachy_mini: ReachyMini, stop_event: threading.Event) -> None:
-        _load_instance_env()
-        _render_profile()
-        _configure_environment()
-        _warm_schema()
-
-        if self.settings_app is not None:
-            _register_settings_routes(self.settings_app)
+        _start_up(self.settings_app)
 
         # Imported here, not at module level: must happen after
         # _configure_environment() has set the env vars its Config reads.

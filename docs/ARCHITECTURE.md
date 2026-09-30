@@ -221,11 +221,13 @@ handing over:
    import time — the custom profile name, the profiles directory and the external
    tools directory. This is why the import of `run()` happens *inside* the method
    and not at module level.
-4. **Discovers the site's content types**, so the search tool's type filter lists
+4. **Registers `GET`/`POST /api/config` and `GET /api/schema`** on the settings app
+   that the dashboard serves. This comes before discovery, so the settings page
+   answers even while a bad saved URL is timing out — it's how you fix the URL.
+5. **Discovers the site's content types**, so the search tool's type filter lists
    the site's own types when its spec is built. If the site can't be reached, the
-   Umami mapping stands in and discovery is retried as the tools are used.
-5. **Registers `GET`/`POST /api/config` and `GET /api/schema`** on the settings app
-   that the dashboard serves, then calls `reachy_mini_conversation_app.main.run()` and does not
+   Umami mapping stands in and discovery is retried as the tools are used. Then it
+   calls `reachy_mini_conversation_app.main.run()` and does not
    return until the app stops.
 
 Tools are discovered by filename from the external tools directory, which is why

@@ -7,6 +7,7 @@ TestClient, against a scratch instance path and bundled profile dir.
 from __future__ import annotations
 
 import os
+import threading
 
 import pytest
 from _fake_site import NEWS_LABELS, NEWS_NODES, FakeSite
@@ -332,3 +333,31 @@ def test_post_config_moving_to_another_site_clears_the_previous_sites_selection(
 
     assert resp.json()["types_applied_immediately"] is True
     assert os.environ["DREACHY_TYPES"] == ""
+
+
+def test_the_settings_page_serves_while_start_up_discovery_hangs(monkeypatch) -> None:
+    # A saved URL that blackholes keeps discovery waiting on its timeout. The
+    # settings page is how an installer fixes that URL, so it must answer now.
+    for key in (
+        "REACHY_MINI_CUSTOM_PROFILE",
+        "REACHY_MINI_EXTERNAL_PROFILES_DIRECTORY",
+        "REACHY_MINI_EXTERNAL_TOOLS_DIRECTORY",
+    ):
+        monkeypatch.setenv(key, "")  # so _start_up's writes are undone after the test
+    discovering = threading.Event()
+    release = threading.Event()
+
+    def hung_discovery() -> None:
+        discovering.set()
+        release.wait(5)
+
+    monkeypatch.setattr(dreachy_main, "_warm_schema", hung_discovery)
+    app = FastAPI()
+    start_up = threading.Thread(target=dreachy_main._start_up, args=(app,))
+    start_up.start()
+    try:
+        assert discovering.wait(5)
+        assert TestClient(app).get("/api/config").status_code == 200
+    finally:
+        release.set()
+        start_up.join(5)
