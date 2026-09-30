@@ -36,6 +36,12 @@ logger = logging.getLogger(__name__)
 _PACKAGE_DIR = Path(__file__).resolve().parent
 _BUNDLED_PROFILE_DIR = _PACKAGE_DIR / "profile" / "dreachy"
 
+_EDITORIAL_TOOLS = ("drupal_pending_content", "drupal_create_note")
+# Decided once at start, after discovery (_start_up): the editorial tools
+# are registered only when the site login works (spec R3.1). Settings saves
+# re-render the profile with the same decision.
+_editorial_enabled = False
+
 
 def _instance_path() -> Path:
     """Writable per-install directory.
@@ -73,7 +79,8 @@ def _write_extra_instructions(text: str) -> None:
 def _render_profile() -> None:
     """Sync the bundled profile into the writable instance path.
 
-    tools.txt/greeting.txt copy verbatim; instructions.txt gets any
+    greeting.txt copies verbatim; tools.txt too, plus the editorial tools
+    when _editorial_enabled (decided at start: the site login works); instructions.txt gets any
     installer-supplied extra instructions appended after the built-in
     persona — appending, not replacing, keeps the built-in guardrails (e.g.
     "only answer from site content") intact regardless of what gets typed
@@ -84,8 +91,16 @@ def _render_profile() -> None:
     hot-reloaded.
     """
     dest = _instance_profile_dir()
-    for name in ("tools.txt", "greeting.txt"):
-        (dest / name).write_text((_BUNDLED_PROFILE_DIR / name).read_text())
+    (dest / "greeting.txt").write_text((_BUNDLED_PROFILE_DIR / "greeting.txt").read_text())
+    tools = (_BUNDLED_PROFILE_DIR / "tools.txt").read_text()
+    if _editorial_enabled:
+        tools = (
+            tools.rstrip("\n")
+            + "\n\n# Editorial tools: registered because the site login works (spec R3).\n"
+            + "\n".join(_EDITORIAL_TOOLS)
+            + "\n"
+        )
+    (dest / "tools.txt").write_text(tools)
 
     base_instructions = (_BUNDLED_PROFILE_DIR / "instructions.txt").read_text()
     extra = _read_extra_instructions()
@@ -311,16 +326,31 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
         }
 
 
+def _editorial_available() -> bool:
+    """Whether to register the editorial tools: the site login works right now."""
+    try:
+        return get_client().can_edit()
+    except Exception:
+        # Start-up must survive a misbehaving site; editing simply stays off.
+        logger.exception("Couldn't check the site login at start; editing stays off")
+        return False
+
+
 def _start_up(settings_app: FastAPI | None) -> None:
     """Everything Dreachy does before handing over to the conversation app."""
+    global _editorial_enabled
     _load_instance_env()
-    _render_profile()
     _configure_environment()
     # Routes before discovery: a saved URL that hangs keeps discovery waiting
     # on its timeout, and the settings page is how an installer fixes it.
     if settings_app is not None:
         _register_settings_routes(settings_app)
     _warm_schema()
+    _editorial_enabled = _editorial_available()
+    # Last: tools.txt depends on the login check. The conversation app reads
+    # the profile only after _start_up returns.
+    _render_profile()
+
 
 class Dreachy(ReachyMiniApp):
     """Reachy Mini becomes the embodiment of a Drupal site."""

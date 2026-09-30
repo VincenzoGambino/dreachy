@@ -208,27 +208,31 @@ behind a five-minute wait.
 
 ## How Dreachy plugs in
 
-`dreachy/main.py` is a `ReachyMiniApp` subclass that does five things before
+`dreachy/main.py` is a `ReachyMiniApp` subclass that does six things before
 handing over:
 
 1. **Loads the instance `.env`** itself. The conversation app loads the same file
    at the start of its own `run()`, but Dreachy discovers the site's content types
    before handing over to it, so it needs the site URL first.
-2. **Renders the profile** into the writable instance path, appending any extra
-   instructions from the settings page to the built-in persona rather than
-   replacing it, so the guardrails survive whatever an installer types.
-3. **Sets three environment variables** the conversation app's `Config` reads at
+2. **Sets three environment variables** the conversation app's `Config` reads at
    import time — the custom profile name, the profiles directory and the external
    tools directory. This is why the import of `run()` happens *inside* the method
    and not at module level.
-4. **Registers `GET`/`POST /api/config` and `GET /api/schema`** on the settings app
-   that the dashboard serves. This comes before discovery, so the settings page
-   answers even while a bad saved URL is timing out — it's how you fix the URL.
-5. **Discovers the site's content types**, so the search tool's type filter lists
+3. **Registers the settings routes** (`/api/config`, `/api/schema`, `/api/status`,
+   `/api/auth`, `/api/editorial`) on the settings app that the dashboard serves.
+   This comes before discovery, so the settings page answers even while a bad
+   saved URL is timing out — it's how you fix the URL.
+4. **Discovers the site's content types**, so the search tool's type filter lists
    the site's own types when its spec is built. If the site can't be reached, the
-   Umami mapping stands in and discovery is retried as the tools are used. Then it
-   calls `reachy_mini_conversation_app.main.run()` and does not
-   return until the app stops.
+   Umami mapping stands in and discovery is retried as the tools are used.
+5. **Checks the site login** (R3). Only if it works does Dreachy get its two
+   editorial tools, `drupal_pending_content` and `drupal_create_note`.
+6. **Renders the profile** into the writable instance path, last because
+   `tools.txt` depends on the login check: the editorial tools are listed only
+   when it passed. Extra instructions from the settings page are appended to the
+   built-in persona rather than replacing it, so the guardrails survive whatever
+   an installer types. Then it calls `reachy_mini_conversation_app.main.run()` and
+   does not return until the app stops.
 
 Tools are discovered by filename from the external tools directory, which is why
 shared helpers live in `tools/_shared.py`: the loader skips files starting with an

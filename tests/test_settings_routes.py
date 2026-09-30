@@ -46,6 +46,7 @@ def _isolated_paths(tmp_path, monkeypatch):
     ):
         monkeypatch.setenv(key, "")
         monkeypatch.delenv(key)
+    monkeypatch.setattr(dreachy_main, "_editorial_enabled", False, raising=False)
     shared._client = None
     yield
     shared._client = None
@@ -601,3 +602,70 @@ def test_a_dropped_client_is_closed_once_nothing_should_still_be_using_it(monkey
     assert old.closed is False
     time.sleep(0.5)
     assert old.closed is True
+
+
+# ---------------------------------------------------------------------------
+# Editorial tools (R3): in tools.txt only when the site login works.
+# ---------------------------------------------------------------------------
+
+
+class _Editor:
+    def __init__(self, can: bool) -> None:
+        self.can = can
+
+    def refresh_schema(self) -> bool:
+        return True
+
+    def can_edit(self) -> bool:
+        return self.can
+
+
+def _rendered_tools() -> list[str]:
+    text = (dreachy_main._instance_profile_dir() / "tools.txt").read_text()
+    return [line.strip() for line in text.splitlines() if line.strip() and not line.startswith("#")]
+
+
+def test_render_profile_adds_the_editorial_tools_only_when_enabled(monkeypatch) -> None:
+    dreachy_main._render_profile()
+    assert _rendered_tools() == ["drupal_whats_new"]
+
+    monkeypatch.setattr(dreachy_main, "_editorial_enabled", True)
+    dreachy_main._render_profile()
+    assert _rendered_tools() == ["drupal_whats_new", "drupal_pending_content", "drupal_create_note"]
+
+
+@pytest.mark.parametrize(("can_edit", "expected"), [
+    (True, ["drupal_whats_new", "drupal_pending_content", "drupal_create_note"]),
+    (False, ["drupal_whats_new"]),
+])
+def test_start_up_registers_editorial_tools_only_when_the_login_works(monkeypatch, can_edit, expected) -> None:
+    for key in ("REACHY_MINI_CUSTOM_PROFILE", "REACHY_MINI_EXTERNAL_PROFILES_DIRECTORY", "REACHY_MINI_EXTERNAL_TOOLS_DIRECTORY"):
+        monkeypatch.setenv(key, "")
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://site.example")
+    monkeypatch.setattr(dreachy_main, "get_client", lambda: _Editor(can_edit))
+
+    dreachy_main._start_up(None)
+
+    assert _rendered_tools() == expected
+
+
+def test_start_up_leaves_editing_off_when_the_login_check_errors(monkeypatch) -> None:
+    class _Broken(_Editor):
+        def can_edit(self) -> bool:
+            raise KeyError("expires_in")
+
+    for key in ("REACHY_MINI_CUSTOM_PROFILE", "REACHY_MINI_EXTERNAL_PROFILES_DIRECTORY", "REACHY_MINI_EXTERNAL_TOOLS_DIRECTORY"):
+        monkeypatch.setenv(key, "")
+    monkeypatch.setattr(dreachy_main, "get_client", lambda: _Broken(True))
+
+    dreachy_main._start_up(None)  # must not raise
+
+    assert _rendered_tools() == ["drupal_whats_new"]
+
+
+def test_a_settings_save_keeps_the_editorial_tools_decided_at_start(monkeypatch) -> None:
+    monkeypatch.setattr(dreachy_main, "_editorial_enabled", True)
+
+    _make_client().post("/api/config", json={"base_url": "https://example.com", "extra_instructions": "Be brief."})
+
+    assert "drupal_create_note" in _rendered_tools()
