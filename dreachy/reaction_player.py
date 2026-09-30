@@ -27,7 +27,7 @@ async def play_reaction(
 ) -> None:
     """Play a Reaction's steps in sequence on the real robot.
 
-    ``sleep`` is a test seam (same DI pattern as DrupalClient's http_client) —
+    ``sleep`` is a test seam (same DI pattern as JsonApiBackend's http_client) —
     tests inject a no-op so the sequencing logic runs instantly instead of
     waiting out each step's real duration.
     """

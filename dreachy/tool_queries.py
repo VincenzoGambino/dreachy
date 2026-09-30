@@ -2,7 +2,7 @@
 drupal_find_content, drupal_site_pulse, drupal_read_article).
 
 Plain functions, not Tool subclasses. Each function takes an already-
-configured DrupalClient and raises DreachySiteError on real site failures
+configured Backend and raises DreachySiteError on real site failures
 rather than catching it; only the Tool.__call__ boundary must never raise,
 so the catching happens there, not here.
 """
@@ -12,7 +12,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from .client import DrupalClient
+from .backend import Backend
 
 
 def _humanize_age(timestamp: str) -> str:
@@ -35,7 +35,7 @@ def _humanize_age(timestamp: str) -> str:
     return f"{months} month{'s' if months != 1 else ''} ago"
 
 
-def drupal_whats_new(client: DrupalClient, *, limit: int | None = None) -> dict[str, Any]:
+def drupal_whats_new(client: Backend, *, limit: int | None = None) -> dict[str, Any]:
     nodes = client.get_recent_nodes(limit=limit)
     return {
         "items": [
@@ -46,7 +46,7 @@ def drupal_whats_new(client: DrupalClient, *, limit: int | None = None) -> dict[
 
 
 def drupal_find_content(
-    client: DrupalClient, *, keyword: str, content_type: str | None = None
+    client: Backend, *, keyword: str, content_type: str | None = None
 ) -> dict[str, Any]:
     matches = client.find_content(keyword, content_type=content_type)
     return {
@@ -57,7 +57,7 @@ def drupal_find_content(
     }
 
 
-def drupal_site_pulse(client: DrupalClient) -> dict[str, Any]:
+def drupal_site_pulse(client: Backend) -> dict[str, Any]:
     pulse = client.get_site_pulse()
     latest = pulse["latest_node_created"]
     return {
@@ -66,7 +66,7 @@ def drupal_site_pulse(client: DrupalClient) -> dict[str, Any]:
     }
 
 
-def drupal_read_article(client: DrupalClient, *, title_or_path: str) -> dict[str, Any] | None:
+def drupal_read_article(client: Backend, *, title_or_path: str) -> dict[str, Any] | None:
     article = client.get_article(title_or_path)
     if article is None:
         return None

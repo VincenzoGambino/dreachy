@@ -1,4 +1,4 @@
-"""DrupalClient — thin sync wrapper over drupal-api-client's JsonApiClient.
+"""JsonApiBackend — the Backend (backend.py) over Drupal's JSON:API, via drupal-api-client's JsonApiClient.
 
 Returns plain dicts only; no drupal_api_client types leak past this module.
 Sync-only (per drupal-api-client) — tools call this via asyncio.to_thread().
@@ -15,9 +15,6 @@ from __future__ import annotations
 
 import logging
 import re
-import threading
-import time
-from types import TracebackType
 from typing import Any
 from urllib.parse import urljoin
 
@@ -26,25 +23,19 @@ from drupal_api_client import JsonApiClient, ResourceNotFoundError
 from drupal_jsonapi_params import DrupalJsonApiParams
 from drupal_jsonapi_params.operators import FilterOperator
 
+from .backend import Backend, DreachySiteError
 from .config import Config
-from .schema import Schema, TypeSchema, build_schema, fallback_schema, select_types
+from .schema import Schema, TypeSchema, build_schema
 
 logger = logging.getLogger(__name__)
+
+__all__ = ["DreachySiteError", "DrupalClient", "JsonApiBackend"]
 
 _TAG_RE = re.compile(r"<[^>]+>")
 _SUMMARY_FALLBACK_CHARS = 200
 # Statuses that mean "anonymous may not read this type", as opposed to a
 # temporary failure: only these let discovery skip a type and carry on.
 _UNREADABLE_STATUSES = (401, 403, 404)
-
-
-class DreachySiteError(Exception):
-    """The Drupal site is unreachable or returned an error response."""
-
-    def __init__(self, message: str, *, status: int | None = None) -> None:
-        super().__init__(message)
-        # The HTTP status, when the site answered with an error one.
-        self.status = status
 
 
 def _strip_html(text: str) -> str:
@@ -78,13 +69,13 @@ def _node_to_dict(bundle: str, type_schema: TypeSchema, resource: dict[str, Any]
     }
 
 
-class DrupalClient:
-    """Sync wrapper over JsonApiClient exposing Dreachy's query behaviours."""
+class JsonApiBackend(Backend):
+    """The Backend over JSON:API: anonymous by default."""
 
     def __init__(
         self, config: Config, *, http_client: httpx.Client | None = None, auto_discover: bool = False
     ) -> None:
-        self.config = config
+        super().__init__(config, auto_discover=auto_discover)
         # No cache: InMemoryCache has no TTL, and every read below passes
         # disable_cache=True — a long-lived client (e.g. the tools' shared
         # singleton) would otherwise never see content published after its
@@ -95,25 +86,6 @@ class DrupalClient:
             default_locale=config.default_locale,
             http_client=http_client,
         )
-        # auto_discover: queries retry a failed discovery (see _types). Off
-        # by default, so a client built for a test, or before a site URL is
-        # configured, never sends discovery requests of its own accord.
-        self._auto_discover = auto_discover
-        self._full_schema: Schema = fallback_schema(config.content_types)
-        self.schema_discovered = False
-        self._next_discovery_at = 0.0
-        self._discovery_lock = threading.Lock()
-
-    def __enter__(self) -> DrupalClient:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        self.close()
 
     def close(self) -> None:
         self._client.close()
@@ -136,16 +108,6 @@ class DrupalClient:
 
     # -- content model --------------------------------------------------
 
-    @property
-    def full_schema(self) -> Schema:
-        """Every type Dreachy knows of, before the installer's selection."""
-        return dict(self._full_schema)
-
-    @property
-    def schema(self) -> Schema:
-        """The types Dreachy talks about. Never touches the network."""
-        return select_types(self._full_schema, self.config.enabled_types)
-
     def get_schema(self) -> Schema:
         """Discover the site's node types and their text fields.
 
@@ -155,47 +117,6 @@ class DrupalClient:
         labels = self._node_type_labels()
         samples = {bundle: self._sample_attributes(bundle) for bundle in bundles}
         return build_schema(bundles, labels, samples)
-
-    def refresh_schema(self) -> bool:
-        """Replace the cached schema with a fresh discovery.
-
-        On failure keeps the current schema (the fallback, or the last one
-        discovered) and returns False; never raises DreachySiteError.
-        """
-        with self._discovery_lock:
-            return self._refresh_locked()
-
-    def _refresh_locked(self) -> bool:
-        try:
-            schema = self.get_schema()
-        except DreachySiteError as exc:
-            return self._discovery_failed(str(exc))
-        if not schema:
-            return self._discovery_failed("no readable content type has text fields")
-        self._full_schema = schema
-        self.schema_discovered = True
-        return True
-
-    def _discovery_failed(self, reason: str) -> bool:
-        logger.warning(
-            "Couldn't discover the site's content types (%s); using %s", reason, ", ".join(self._full_schema)
-        )
-        self._next_discovery_at = time.monotonic() + self.config.schema_retry_seconds
-        return False
-
-    def _discovery_due(self) -> bool:
-        return not self.schema_discovered and time.monotonic() >= self._next_discovery_at
-
-    def _types(self) -> Schema:
-        """The enabled schema, first retrying a failed discovery if one is due."""
-        if self._auto_discover and self._discovery_due():
-            with self._discovery_lock:
-                # Checked again under the lock: callers that queued behind
-                # another thread's discovery use its result, rather than
-                # each running their own back to back.
-                if self._discovery_due():
-                    self._refresh_locked()
-        return self.schema
 
     def _index_url(self) -> str:
         locale = self.config.default_locale
@@ -303,15 +224,6 @@ class DrupalClient:
                 return _node_to_dict(bundle, type_schema, found[0])
         return None
 
-    def get_site_pulse(self) -> dict[str, Any]:
-        """Node counts and latest activity timestamp.
 
-        The count is capped at ``config.pulse_sample_limit`` — core JSON:API
-        doesn't expose a cheap collection total, so this is an explicit
-        approximation suited to a small demo site, not a true count.
-        """
-        nodes = self.get_recent_nodes(limit=self.config.pulse_sample_limit)
-        return {
-            "node_count": len(nodes),
-            "latest_node_created": nodes[0]["created"] if nodes else None,
-        }
+# The pre-R2 name: existing callers and tests keep working.
+DrupalClient = JsonApiBackend

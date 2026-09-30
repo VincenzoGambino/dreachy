@@ -1,4 +1,4 @@
-"""Shared DrupalClient singleton for the four Dreachy tool files.
+"""Shared Backend singleton for the Dreachy tool files.
 
 Leading underscore keeps this out of the external-tools auto-loader (it only
 scans *.py files that don't start with "_").
@@ -8,18 +8,19 @@ from __future__ import annotations
 
 import os
 
-from dreachy.client import DrupalClient
+from dreachy.backend import Backend
+from dreachy.client import JsonApiBackend
 from dreachy.config import Config
 
-_client: DrupalClient | None = None
+_client: Backend | None = None
 
 
-def get_client() -> DrupalClient:
+def get_client() -> Backend:
     global _client
     if _client is None:
         # Discovery only once a real site is configured: the placeholder
         # base_url would send it to example.com.
-        _client = DrupalClient(Config.from_env(), auto_discover=bool(os.environ.get("DREACHY_BASE_URL")))
+        _client = JsonApiBackend(Config.from_env(), auto_discover=bool(os.environ.get("DREACHY_BASE_URL")))
     return _client
 
 

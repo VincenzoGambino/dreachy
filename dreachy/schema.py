@@ -1,7 +1,7 @@
 """Content-model discovery: which node types a site has, and which of their
 fields hold speakable text.
 
-Pure functions over JSON:API data, no HTTP: DrupalClient.get_schema()
+Pure functions over JSON:API data, no HTTP: JsonApiBackend.get_schema()
 fetches the evidence, this module decides.
 
 Discovery route (chosen 2026-09-30 against Drupal core 11.4.4):

@@ -11,7 +11,7 @@ import httpx
 import pytest
 from _fake_site import NEWS_LABELS, NEWS_NODES, UMAMI_LABELS, UMAMI_NODES, FakeSite
 
-import dreachy.client as client_module
+import dreachy.backend as backend_module
 from dreachy.client import DreachySiteError, DrupalClient
 from dreachy.config import Config
 from dreachy.schema import FALLBACK_TYPES
@@ -106,7 +106,7 @@ def test_a_client_without_auto_discover_never_asks_for_the_schema() -> None:
 
 def test_a_failed_discovery_is_retried_once_the_retry_interval_has_passed(monkeypatch) -> None:
     clock = [1000.0]
-    monkeypatch.setattr(client_module, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    monkeypatch.setattr(backend_module, "time", SimpleNamespace(monotonic=lambda: clock[0]))
     # Index down, content up: the fallback Umami types still answer meanwhile.
     site = FakeSite(UMAMI_NODES, labels=UMAMI_LABELS, index_status=503)
 
@@ -185,7 +185,7 @@ def test_a_timeout_on_one_type_fails_discovery_instead_of_dropping_the_type() ->
 
 def test_a_non_json_answer_fails_discovery_and_is_throttled_like_any_failure(monkeypatch) -> None:
     clock = [1000.0]
-    monkeypatch.setattr(client_module, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    monkeypatch.setattr(backend_module, "time", SimpleNamespace(monotonic=lambda: clock[0]))
     site = FakeSite(UMAMI_NODES, labels=UMAMI_LABELS)
     captive_portal = [True]
 
