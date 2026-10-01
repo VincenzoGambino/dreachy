@@ -4,9 +4,15 @@ Backend methods are synchronous (tools call them via asyncio.to_thread) and
 the `mcp` SDK is async: run() opens a session in the calling worker thread
 with anyio.run, so nothing ever blocks the conversation app's event loop.
 
-One session per run(): the server's entity handle tokens belong to the
-session that issued them (docs/mcp-findings.md), so a whole call chain — load,
-then read fields; stub, set fields, save — runs inside one.
+One session per run() (R4 Ruling 2): a whole call chain — load, then read
+fields; stub, set fields, save — runs inside one. Handles do outlive their
+session on the recorded server, so pooling sessions is a later optimisation.
+
+Every tool answers an envelope, {"success", "message", "data"}, and never
+sets the MCP error flag: a failure is `success: false`. A token the site
+refuses gets 401 with an HTML body from Simple OAuth, which the SDK reports
+only as a generic -32603 — so a response hook watches the HTTP status.
+(docs/mcp-findings.md "Verified from Dreachy".)
 
 The `mcp` SDK (2.x) is built on httpx2, not httpx: its client, transport and
 errors come from there. The Bearer token comes from drupal-api-client's OAuth
@@ -16,7 +22,9 @@ client/auth layer and never reaches a message or the log.
 
 from __future__ import annotations
 
+import html
 import json
+import re
 from collections.abc import Awaitable, Callable
 from typing import Any, TypeVar
 
@@ -43,7 +51,7 @@ HttpClientFactory = Callable[[dict[str, str]], httpx2.AsyncClient]
 
 
 class McpToolError(DreachySiteError):
-    """A tool the server answered with isError: true."""
+    """A tool that answered `success: false` (or, by MCP's own flag, isError)."""
 
 
 class _Unauthorised(Exception):
@@ -57,23 +65,42 @@ class ToolCaller:
         self._session = session
 
     async def call(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        """The envelope's `data`; McpToolError when the tool failed."""
+        data, _ = await self.call_with_message(name, arguments)
+        return data
+
+    async def call_with_message(self, name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], str]:
+        """The envelope's `data` and `message` (list totals, saved ids)."""
         result = await self._session.call_tool(name, arguments)
         if result.is_error:
-            text = " ".join(getattr(item, "text", "") for item in result.content).strip()[:200]
-            raise McpToolError(f"{name}: {text or 'the tool reported an error'}")
-        if result.structured_content is not None:
-            return dict(result.structured_content)
-        for item in result.content:
-            if getattr(item, "type", "") == "text":
-                try:
-                    parsed = json.loads(item.text)
-                except ValueError:
-                    return {"text": item.text}
-                return parsed if isinstance(parsed, dict) else {"value": parsed}
-        return {}
+            text = " ".join(getattr(item, "text", "") for item in result.content)
+            raise McpToolError(f"{name}: {_clean(text) or 'the tool reported an error'}")
+        envelope = result.structured_content if result.structured_content is not None else _text_json(result)
+        if not isinstance(envelope, dict) or "success" not in envelope:
+            raise DreachySiteError(f"{name}: the MCP server answered in an unexpected shape")
+        message = _clean(str(envelope.get("message") or ""))
+        if not envelope["success"]:
+            raise McpToolError(f"{name}: {message or 'the tool reported an error'}")
+        data = envelope.get("data")
+        return (dict(data) if isinstance(data, dict) else {}), message
 
     async def list_tools(self) -> list[mcp_types.Tool]:
         return list((await self._session.list_tools()).tools)
+
+
+def _text_json(result: mcp_types.CallToolResult) -> Any:
+    for item in result.content:
+        if getattr(item, "type", "") == "text":
+            try:
+                return json.loads(item.text)
+            except ValueError:
+                return None
+    return None
+
+
+def _clean(text: str) -> str:
+    """A server message as plain text: Drupal escapes its placeholders' HTML."""
+    return re.sub(r"<[^>]+>", "", html.unescape(text)).strip()[:200]
 
 
 class McpSession:
@@ -131,13 +158,22 @@ class McpSession:
 
     async def _run(self, chain: Callable[[ToolCaller], Awaitable[T]]) -> T:
         headers = self._headers()
+        refused: list[int] = []
+
+        async def watch(response: httpx2.Response) -> None:
+            if response.status_code in (401, 403):
+                refused.append(response.status_code)
+
         try:
             async with self._factory(headers) as http:
+                http.event_hooks["response"].append(watch)
                 async with streamable_http_client(self.endpoint, http_client=http) as (read, write):
                     async with ClientSession(read, write) as session:
                         await session.initialize()
                         return await chain(ToolCaller(session))
         except Exception as exc:  # the SDK wraps failures in (nested) exception groups
+            if refused:
+                raise _Unauthorised() from exc
             raise _translate(exc) from exc
 
 

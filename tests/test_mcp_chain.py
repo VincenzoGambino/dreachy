@@ -1,54 +1,59 @@
-"""MCP call chains with handle-token passing (R4 Task 3).
+"""MCP call chains with handle-token passing (R4 Task 3, corrected by Task 1).
 
-Against FakeEntityStore: handles are session-scoped, and field_set_value
-retires the handle it was given — the newest token is the only valid one."""
+Against FakeEntityStore, which answers with the sandbox's recorded names and
+shapes: handles outlive their session and are immutable snapshots —
+field_set_value returns a NEW handle, and the old one silently shows the
+entity without the change. The newest token is the only correct one."""
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import pytest
-from _fake_mcp import FakeEntityStore, FakeMcpSite, FakeTokenEndpoint
+from _fake_mcp import FakeEntityStore, FakeMcpSite, FakeTokenEndpoint, Raw, handle_string
 
 from dreachy.backend import DreachySiteError
 from dreachy.config import Config
 from dreachy.mcp_chain import Handle, field_values, load, save, set_value, stub
 from dreachy.mcp_session import McpSession
 
+_RECORDED = Path(__file__).parent / "fixtures" / "mcp" / "responses"
+
 
 @dataclass(frozen=True)
 class _Tools:
-    """A hand-built mapping (Task 4 discovers the real one)."""
+    """A hand-built mapping with the recorded argument names (Task 4 discovers the real one)."""
 
-    load: str = "demo_entity_load_by_id"
-    field_values: str = "demo_entity_field_values"
-    stub: str = "demo_entity_stub"
-    set_value: str = "demo_field_set_value"
-    save: str = "demo_entity_save"
-    token_key: str = "token"
+    load: str = "tool_api__demo_entity_load_by_id"
+    field_values: str = "tool_api__demo_entity_field_values"
+    stub: str = "tool_api__demo_entity_stub"
+    set_value: str = "tool_api__demo_field_set_value"
+    save: str = "tool_api__demo_entity_save"
 
-    def load_args(self, entity_type: str, entity_id: Any) -> dict:
-        return {"entity_type": entity_type, "id": entity_id}
+    def load_args(self, entity_type: str, entity_id: int) -> dict:
+        return {"entity_type_id": entity_type, "entity_id": entity_id}
 
-    def values_args(self, token: str) -> dict:
-        return {"token": token}
+    def values_args(self, token: str, field: str | None = None) -> dict:
+        return {"entity": token, **({"fields": field} if field else {})}
 
-    def stub_args(self, entity_type: str, bundle: str) -> dict:
-        return {"entity_type": entity_type, "bundle": bundle}
+    def stub_args(self, entity_type: str, bundle: str, base_fields: dict[str, Any]) -> dict:
+        return {"entity_type_id": entity_type, "bundle": bundle, "base_fields": base_fields}
 
-    def set_args(self, token: str, field: str, value: Any) -> dict:
-        return {"token": token, "field": field, "value": value}
+    def set_args(self, token: str, field: str, value: dict[str, Any]) -> dict:
+        return {"entity": token, "field_name": field, "value": value}
 
     def save_args(self, token: str) -> dict:
-        return {"token": token}
+        return {"entity": token}
 
 
 _MAP = _Tools()
 
 
 def _store() -> FakeEntityStore:
-    return FakeEntityStore({7: {"bundle": "article", "fields": {"title": "Herbs", "body": {"value": "<p>Grow them.</p>"}}}})
+    return FakeEntityStore({7: {"bundle": "standard_page", "fields": {"title": "Herbs", "description": "Grow them."}}})
 
 
 def _run(site: FakeMcpSite, chain):
@@ -67,12 +72,23 @@ def test_load_then_field_values_in_one_session() -> None:
 
     async def chain(caller):
         handle = await load(caller, _MAP, "node", 7)
-        return await field_values(caller, _MAP, handle)
+        return handle, await field_values(caller, _MAP, handle)
 
-    fields = _run(site, chain)
+    handle, fields = _run(site, chain)
 
     assert fields["title"] == "Herbs"
+    assert handle.metadata["bundle"] == "standard_page"
     assert len(set(site.session_ids())) == 1
+
+
+def test_one_field_can_be_asked_for() -> None:
+    site = FakeMcpSite(_store().tools())
+
+    async def chain(caller):
+        handle = await load(caller, _MAP, "node", 7)
+        return await field_values(caller, _MAP, handle, "description")
+
+    assert _run(site, chain) == {"description": "Grow them."}
 
 
 def test_the_chain_always_uses_the_newest_token() -> None:
@@ -80,30 +96,38 @@ def test_the_chain_always_uses_the_newest_token() -> None:
     site = FakeMcpSite(store.tools())
 
     async def chain(caller):
-        first = await stub(caller, _MAP, "node", "article")
-        second = await set_value(caller, _MAP, first, "title", "Park bench")
-        third = await set_value(caller, _MAP, second, "status", False)
+        first = await stub(caller, _MAP, "node", "standard_page", {"title": "Park bench", "status": False})
+        second = await set_value(caller, _MAP, first, "description", {"value": "Seats four."})
+        third = await set_value(caller, _MAP, second, "preview_text", {"value": "A bench."})
         saved = await save(caller, _MAP, third)
         return first, second, third, saved
 
     first, second, third, saved = _run(site, chain)
 
     assert len({first.token, second.token, third.token}) == 3
-    assert store.nodes[saved["id"]]["fields"] == {"title": "Park bench", "status": False}
+    assert store.nodes[int(saved["id"])]["fields"] == {
+        "title": "Park bench",
+        "status": False,
+        "description": "Seats four.",
+        "preview_text": "A bench.",
+    }
 
 
-def test_a_stale_handle_is_refused() -> None:
-    site = FakeMcpSite(_store().tools())
+def test_a_stale_handle_silently_loses_changes() -> None:
+    # Why the rule matters: the server doesn't refuse an old handle, it
+    # answers with the entity as it was.
+    store = _store()
+    site = FakeMcpSite(store.tools())
 
     async def chain(caller):
-        first = await stub(caller, _MAP, "node", "article")
-        await set_value(caller, _MAP, first, "title", "x")
-        return await set_value(caller, _MAP, first, "title", "y")  # reuses the retired handle
+        first = await stub(caller, _MAP, "node", "standard_page", {"title": "x"})
+        await set_value(caller, _MAP, first, "description", {"value": "kept?"})
+        stale = await set_value(caller, _MAP, first, "preview_text", {"value": "y"})
+        return await save(caller, _MAP, stale)
 
-    with pytest.raises(DreachySiteError) as excinfo:
-        _run(site, chain)
+    saved = _run(site, chain)
 
-    assert "stale" in str(excinfo.value)
+    assert "description" not in store.nodes[int(saved["id"])]["fields"]
 
 
 def test_a_stub_is_never_saved_unless_save_is_called() -> None:
@@ -111,8 +135,8 @@ def test_a_stub_is_never_saved_unless_save_is_called() -> None:
     site = FakeMcpSite(store.tools())
 
     async def chain(caller):
-        handle = await stub(caller, _MAP, "node", "article")
-        return await set_value(caller, _MAP, handle, "title", "Never saved")
+        handle = await stub(caller, _MAP, "node", "standard_page", {"title": "Never saved"})
+        return await set_value(caller, _MAP, handle, "description", {"value": "x"})
 
     _run(site, chain)
 
@@ -120,7 +144,7 @@ def test_a_stub_is_never_saved_unless_save_is_called() -> None:
     assert list(store.nodes) == [7]
 
 
-def test_a_handle_does_not_outlive_its_session() -> None:
+def test_a_handle_still_works_in_a_later_session() -> None:
     site = FakeMcpSite(_store().tools())
 
     async def first_session(caller):
@@ -129,23 +153,52 @@ def test_a_handle_does_not_outlive_its_session() -> None:
     handle = _run(site, first_session)
 
     async def second_session(caller):
-        return await field_values(caller, _MAP, handle)
+        return await field_values(caller, _MAP, handle, "title")
 
-    with pytest.raises(DreachySiteError):
-        _run(site, second_session)
+    assert _run(site, second_session) == {"title": "Herbs"}
+    assert len(set(site.session_ids())) == 2
 
 
 def test_a_response_without_a_handle_is_a_site_error() -> None:
-    site = FakeMcpSite({"demo_entity_stub": lambda arguments, state: {"type": "node"}})
+    site = FakeMcpSite({_MAP.stub: lambda arguments, state: {"created_entity": "nothing to see"}})
 
     async def chain(caller):
-        return await stub(caller, _MAP, "node", "article")
+        return await stub(caller, _MAP, "node", "standard_page", {"title": "x"})
 
     with pytest.raises(DreachySiteError) as excinfo:
         _run(site, chain)
 
-    assert "demo_entity_stub" in str(excinfo.value)
+    assert _MAP.stub in str(excinfo.value)
+
+
+def test_a_save_that_reports_no_id_is_a_site_error() -> None:
+    unsaved = handle_string("{{entity:abc123}}", {"entity_type": "node", "bundle": "standard_page", "id": "new"})
+    site = FakeMcpSite({_MAP.save: lambda arguments, state: {"saved_entity": unsaved}})
+
+    async def chain(caller):
+        return await save(caller, _MAP, Handle("{{entity:abc123}}"))
+
+    with pytest.raises(DreachySiteError, match="saved id"):
+        _run(site, chain)
+
+
+def test_the_recorded_load_and_save_answers_parse() -> None:
+    def recorded(name):
+        return lambda arguments, state: Raw(json.loads((_RECORDED / name).read_text())["result"])
+
+    site = FakeMcpSite({_MAP.load: recorded("35-reload.json"), _MAP.save: recorded("34-save.json")})
+
+    async def chain(caller):
+        loaded = await load(caller, _MAP, "node", 142)
+        return loaded, await save(caller, _MAP, loaded)
+
+    loaded, saved = _run(site, chain)
+
+    assert loaded.token == "{{entity:7b6e39}}"
+    assert loaded.metadata == {"entity_type": "node", "bundle": "standard_page", "id": "142", "langcode": "en", "revision_id": "142"}
+    assert saved["id"] == "142"
 
 
 def test_handles_are_opaque_values() -> None:
-    assert Handle("{{entity:node:7:h1}}").token == "{{entity:node:7:h1}}"
+    assert Handle("{{entity:47c0cb}}").token == "{{entity:47c0cb}}"
+    assert Handle("{{entity:47c0cb}}") == Handle("{{entity:47c0cb}}", {"id": "5"})

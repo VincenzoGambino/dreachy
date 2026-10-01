@@ -4,11 +4,17 @@ Speaks JSON-RPC 2.0 over streamable HTTP, as the official `mcp` SDK client
 does it (spiked 2026-10-01): POST `initialize` (answered with an
 `mcp-session-id` header), the `initialized` notification (202), an optional
 GET for a server stream (declined, 405), `tools/call` and `tools/list` POSTs,
-and a DELETE on close. Bearer auth like the real `mcp_server` module: a
-missing or wrong token gets 401 with its realm header and JSON-RPC -32001.
+and a DELETE on close.
 
-State is per session, so handle tokens are session-scoped by construction —
-what docs/mcp-findings.md expects of the real server.
+Answers like the sandbox's `mcp_server` 1.0.0 as recorded in R4 Task 1
+(tests/fixtures/mcp/, docs/mcp-findings.md "Verified from Dreachy"):
+
+- every tool result is the envelope `{"success", "message", "data"}`, sent
+  as JSON text AND as structuredContent; a failed tool is `success: false`
+  with `isError: false`;
+- an unknown tool is a JSON-RPC error;
+- no token: 401, realm `mcp_server`, JSON-RPC -32001; a wrong token: 401
+  with an HTML body from Simple OAuth (realm `OAuth`).
 """
 
 from __future__ import annotations
@@ -16,6 +22,7 @@ from __future__ import annotations
 import itertools
 import json
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Any
 
 import httpx
@@ -23,10 +30,25 @@ import httpx2
 
 
 class FakeToolError(Exception):
-    """Raise from a fake tool to answer with isError: true and this message."""
+    """Raise from a fake tool to answer `success: false` with this message."""
 
 
-ToolFn = Callable[[dict[str, Any], dict[str, Any]], dict[str, Any]]
+@dataclass
+class Reply:
+    """A tool's answer when the message matters (list totals, save ids)."""
+
+    data: Any
+    message: str = ""
+
+
+@dataclass
+class Raw:
+    """A recorded tools/call result, answered verbatim."""
+
+    result: dict[str, Any]
+
+
+ToolFn = Callable[[dict[str, Any], dict[str, Any]], Any]
 
 
 class FakeMcpSite:
@@ -36,13 +58,11 @@ class FakeMcpSite:
         *,
         token: str | None = "good-token",
         annotations: dict[str, dict[str, Any]] | None = None,
-        structured: bool = False,
         down: bool = False,
     ) -> None:
         self.tools = tools
         self.token = token  # None: no auth required
         self.annotations = annotations or {}
-        self.structured = structured  # answer with structuredContent instead of JSON text
         self.down = down
         self.sessions: dict[str, dict[str, Any]] = {}
         self.calls: list[tuple[str, str, dict[str, Any]]] = []  # (session id, tool, arguments)
@@ -56,11 +76,20 @@ class FakeMcpSite:
             raise httpx2.ConnectError("connection refused", request=request)
         auth = request.headers.get("authorization")
         self.seen_auth.append(auth)
-        if self.token is not None and auth != f"Bearer {self.token}":
+        if self.token is not None and auth is None:
             return httpx2.Response(
                 401,
                 json={"jsonrpc": "2.0", "error": {"code": -32001, "message": "Authentication required"}, "id": None},
                 headers={"www-authenticate": 'Bearer realm="mcp_server"'},
+            )
+        if self.token is not None and auth != f"Bearer {self.token}":
+            return httpx2.Response(  # Simple OAuth refuses the token before mcp_server sees it
+                401,
+                text="<!DOCTYPE html><html><body>The resource owner or authorization server denied the request.</body></html>",
+                headers={
+                    "content-type": "text/html; charset=UTF-8",
+                    "www-authenticate": 'Bearer realm="OAuth", error="access_denied"',
+                },
             )
         if request.method == "GET":
             return httpx2.Response(405)
@@ -92,14 +121,15 @@ class FakeMcpSite:
             arguments = message["params"].get("arguments") or {}
             self.calls.append((session_id, name, arguments))
             if name not in self.tools:
-                return _error(request_id, -32602, f"Unknown tool: {name}")
+                return _error(request_id, -32602, f'Tool not found: "{name}".')
             try:
-                payload = self.tools[name](arguments, self.sessions[session_id])
+                answer = self.tools[name](arguments, self.sessions[session_id])
             except FakeToolError as exc:
-                return _result(request_id, {"content": [{"type": "text", "text": str(exc)}], "isError": True})
-            if self.structured:
-                return _result(request_id, {"content": [], "structuredContent": payload, "isError": False})
-            return _result(request_id, {"content": [{"type": "text", "text": json.dumps(payload)}], "isError": False})
+                return _result(request_id, _envelope(False, str(exc), []))
+            if isinstance(answer, Raw):
+                return _result(request_id, answer.result)
+            reply = answer if isinstance(answer, Reply) else Reply(answer)
+            return _result(request_id, _envelope(True, reply.message, reply.data))
         return _error(request_id, -32601, f"Method not found: {method}")
 
     def _describe(self, name: str) -> dict[str, Any]:
@@ -136,6 +166,11 @@ class FakeTokenEndpoint:
         return httpx.Client(transport=httpx.MockTransport(self.handle))
 
 
+def _envelope(success: bool, message: str, data: Any) -> dict[str, Any]:
+    body = {"success": success, "message": message, "data": data}
+    return {"content": [{"type": "text", "text": json.dumps(body, indent=4)}], "structuredContent": body, "isError": False}
+
+
 def _result(request_id: Any, result: dict[str, Any], headers: dict[str, str] | None = None) -> httpx2.Response:
     return httpx2.Response(200, json={"jsonrpc": "2.0", "id": request_id, "result": result}, headers=headers)
 
@@ -144,21 +179,24 @@ def _error(request_id: Any, code: int, message: str) -> httpx2.Response:
     return httpx2.Response(200, json={"jsonrpc": "2.0", "id": request_id, "error": {"code": code, "message": message}})
 
 
-class FakeEntityStore:
-    """Drupal's entity tools as findings §"Family 1" describes them, in memory.
+def handle_string(token: str, metadata: dict[str, Any]) -> str:
+    """How the server hands out a handle: a sentence, with the metadata as JSON."""
+    return f"Entity object handle token: {token}. Entity metadata: {json.dumps(metadata, separators=(',', ':'))}"
 
-    Handles are session-scoped and single-use for writes: field_set_value
-    returns a NEW handle and retires the old one (the findings' "always use
-    the newest token" rule), so a chain that reuses a stale handle fails.
-    Argument and response key names are provisional (findings vocabulary);
-    R4 Task 1 corrects them from the recorded schemas.
+
+class FakeEntityStore:
+    """The site's entity tools, answering with the recorded names and shapes.
+
+    Handles are global (they outlive their session) and immutable snapshots:
+    field_set_value returns a NEW handle with the change, and the old one
+    still answers — with the entity as it was before. A chain that keeps
+    using an old handle silently loses its earlier changes.
     """
 
-    TOKEN_KEY = "token"
-
-    def __init__(self, nodes: dict[int, dict[str, Any]] | None = None, *, prefix: str = "demo_") -> None:
-        self.nodes: dict[int, dict[str, Any]] = dict(nodes or {})  # nid -> {"type", "bundle", "fields": {...}}
+    def __init__(self, nodes: dict[int, dict[str, Any]] | None = None, *, prefix: str = "tool_api__demo_") -> None:
+        self.nodes: dict[int, dict[str, Any]] = dict(nodes or {})  # nid -> {"bundle", "fields": {...}}
         self.saves: list[dict[str, Any]] = []
+        self.handles: dict[str, dict[str, Any]] = {}
         self.prefix = prefix
         self._handle_ids = itertools.count(1)
 
@@ -172,43 +210,59 @@ class FakeEntityStore:
             f"{p}entity_save": self._save,
         }
 
-    def _issue(self, state: dict[str, Any], entity: dict[str, Any]) -> str:
-        token = f"{{{{entity:{entity['type']}:{entity.get('id', 'new')}:h{next(self._handle_ids)}}}}}"
-        state.setdefault("handles", {})[token] = entity
-        return token
+    def _issue(self, entity: dict[str, Any]) -> str:
+        token = f"{{{{entity:{next(self._handle_ids):06x}}}}}"
+        self.handles[token] = entity
+        return handle_string(
+            token,
+            {
+                "entity_type": entity["type"],
+                "bundle": entity["bundle"],
+                "id": str(entity["id"]) if entity.get("id") else "new",
+                "langcode": "en",
+                "revision_id": str(entity["id"]) if entity.get("id") else None,
+            },
+        )
 
-    def _resolve(self, state: dict[str, Any], token: Any) -> dict[str, Any]:
-        entity = state.get("handles", {}).get(token)
+    def _resolve(self, token: Any) -> dict[str, Any]:
+        entity = self.handles.get(token)
         if entity is None:
-            raise FakeToolError(f"Unknown or stale entity handle: {token}")
+            raise FakeToolError("Tool plugin access denied.")
         return entity
 
-    def _load(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
-        nid = int(arguments["id"])
+    def _load(self, arguments: dict[str, Any], state: dict[str, Any]) -> Reply:
+        nid = arguments["entity_id"]
         if nid not in self.nodes:
-            raise FakeToolError(f"No {arguments['entity_type']} with id {nid}")
+            raise FakeToolError("Tool plugin access denied.")  # the real server can't tell missing from forbidden
         node = self.nodes[nid]
-        entity = {"type": arguments["entity_type"], "bundle": node["bundle"], "id": nid, "fields": dict(node["fields"])}
-        token = self._issue(state, entity)
-        return {self.TOKEN_KEY: token, "type": entity["type"], "bundle": entity["bundle"], "id": nid, "revision": 1}
+        entity = {"type": arguments["entity_type_id"], "bundle": node["bundle"], "id": nid, "fields": dict(node["fields"])}
+        return Reply({"loaded_entity": self._issue(entity)}, f"Successfully loaded node entity with ID {nid}")
 
     def _values(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
-        return {"fields": dict(self._resolve(state, arguments[self.TOKEN_KEY])["fields"])}
+        fields = dict(self._resolve(arguments["entity"])["fields"])
+        wanted = arguments.get("fields")
+        if wanted:
+            fields = {wanted: fields.get(wanted)} if "," not in wanted else {}
+        return {"field_values": fields}
 
     def _stub(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
-        entity = {"type": arguments["entity_type"], "bundle": arguments["bundle"], "fields": {}}
-        return {self.TOKEN_KEY: self._issue(state, entity), "type": entity["type"], "bundle": entity["bundle"]}
+        base = dict(arguments.get("base_fields") or {})
+        entity = {"type": arguments["entity_type_id"], "bundle": arguments["bundle"], "fields": base}
+        return {"created_entity": self._issue(entity)}
 
     def _set(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
-        old = arguments[self.TOKEN_KEY]
-        entity = self._resolve(state, old)
-        updated = {**entity, "fields": {**entity["fields"], arguments["field"]: arguments["value"]}}
-        del state["handles"][old]  # retired: the newest token is the only valid one
-        return {self.TOKEN_KEY: self._issue(state, updated)}
+        value = arguments["value"]
+        if not isinstance(value, dict):
+            raise FakeToolError("Invalid type. Expected `object`")
+        entity = self._resolve(arguments["entity"])
+        stored = value.get("value") if set(value) <= {"value", "format"} else value
+        updated = {**entity, "fields": {**entity["fields"], arguments["field_name"]: stored}}
+        return {"updated_entity": self._issue(updated)}  # the old handle keeps the old snapshot
 
-    def _save(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
-        entity = self._resolve(state, arguments[self.TOKEN_KEY])
+    def _save(self, arguments: dict[str, Any], state: dict[str, Any]) -> Reply:
+        entity = self._resolve(arguments["entity"])
         nid = entity.get("id") or (max(self.nodes, default=0) + 1)
         self.nodes[nid] = {"bundle": entity["bundle"], "fields": dict(entity["fields"])}
         self.saves.append({"id": nid, **entity})
-        return {"type": entity["type"], "bundle": entity["bundle"], "id": nid, "revision": 1}
+        saved = {**entity, "id": nid}
+        return Reply({"saved_entity": self._issue(saved)}, f"Successfully created node entity with ID {nid}")

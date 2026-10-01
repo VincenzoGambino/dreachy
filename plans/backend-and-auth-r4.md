@@ -68,6 +68,20 @@ Still proposed, not yet ruled: the R4.2 and R4.3 spec amendments (divergences 1 
 
 **Correction found at Task 2 start:** `mcp` 2.0.0 is built on **`httpx2`** (2.10.0), a separate package from `httpx`. The SDK's client injection, the test `MockTransport` and the exceptions to catch all come from `httpx2`, and its `create_mcp_http_client(headers=, timeout=, auth=)` builds clients with MCP-friendly timeouts. The Task 2 code below is written against `httpx2` accordingly.
 
+## Corrections from Task 1 (2026-10-01)
+
+Task 1's recordings (`tests/fixtures/mcp/`, findings "Verified from Dreachy") overrule the provisional text below wherever they disagree:
+
+1. **Envelope.** Every tool answers `{"success", "message", "data"}`, and failures are `success: false` with `isError: false`. `ToolCaller.call` returns `data` and raises `McpToolError` on `success: false`; `call_with_message` also returns the message (list totals). *Done in Task 1 Step 4.*
+2. **A refused token is a 401 with an HTML body**, which the SDK reports as a generic -32603. `McpSession` watches HTTP statuses with a response hook. *Done.*
+3. **Handles outlive their session and are immutable snapshots.** An old handle isn't refused; it silently lacks later changes. The chain helpers parse the handle from the server's sentence ("Entity object handle token: … Entity metadata: {json}"), `Handle` carries the metadata, and `save` returns it (the id is a digit string). `ChainMapping` loses `token_key`; `stub_args` takes `base_fields`; `values_args` takes one optional field. *Done.*
+4. **Task 4 argument builders**, as served: `entity_list(entity_type_id, bundle, amount, offset, sort_field, sort_order, fields)` (`fields` takes ONE name); `search_index(index, search_words, amount, page, check_access, …)`; `entity_load_by_id(entity_type_id, entity_id: int)`; `entity_field_values(entity, fields)`; `entity_field_value_definitions(entity_type_id, bundle)`; `entity_stub(entity_type_id, bundle, base_fields)`; `field_set_value(entity, field_name, value: object)`; `entity_save(entity)`. The served names carry a `tool_api__` prefix, so suffix discovery holds. The search tool's schema has no index `enum`: the index comes from `DREACHY_MCP_SEARCH_INDEX` (sandbox: `content_vector`).
+5. **Task 5.** There is no status filter; `fields: "status"` on `entity_list` returns each item's status in the same call. Field values are flat: text is a value string (HTML, no format); `created` and `changed` are unix-timestamp strings. Search hits carry `title`, `type`, `description` and `preview`, and repeat per chunk **and per language**, so dedupe by NID and keep the site language. Bundle list: see ruling request A.
+6. **Task 6.** Setting `moderation_state` explicitly is wrong: a stub is already `draft`, and on a workflow without draft→draft (this sandbox's `article`) the set fails validation. See ruling request B for the replacement. Text goes in as `{value, format: plain_text}` (`basic_html` was refused). The body field is per-bundle (`description` on most bundles here), and required fields block the save (ruling request C).
+7. **Task 6, pending (Ruling 4):** two single-field lists of the latest 20 by `changed` (`status`, then `moderation_state`), joined by id: pending means status `0` and not archived, as in R3. That's two calls, not 2N.
+8. **Task 8.** Every served tool says `readOnlyHint: false`, reads included, so on this site every extra needs `confirmed`. That is the plan's fail-safe default, now the norm. The hard deny-list also takes `destructiveHint: true` and names containing `discard` (`canvas_discard_auto_save`). `canvas_publish_auto_saves` and `canvas_set_homepage` say `destructiveHint: false`; they're denied by name, as planned.
+9. **Fake fidelity.** `tests/_fake_mcp.py` answers with the recorded names, shapes, envelope, 401 forms and handle semantics. `Raw` replays a recorded result verbatim, and the tests use it on the fixtures.
+
 ## Review Focus
 
 1. **A write chain breaks mid-way** (stub created, a field set fails, save fails, or save succeeds but the check fails). Expected: nothing is saved before `save`, and a note that comes back published is an error. → Task 6, `test_a_chain_broken_before_save_writes_nothing` and `test_a_note_the_site_published_over_mcp_is_an_error`.
@@ -80,8 +94,8 @@ Still proposed, not yet ruled: the R4.2 and R4.3 spec amendments (divergences 1 
 
 ### Task 0: Branch, findings, plan
 
-- [ ] Confirm `git status -sb` shows `## feat/r4-mcp-backend`, then run `uv run pytest -q` and expect **195 passed**.
-- [ ] Commit `docs/mcp-findings.md`: Vincenzo's inspection, unchanged, plus the appended "Confirmed first-hand" section. Also commit this plan and `scripts/live/run_on_laptop.py` (R3 test infrastructure that was never committed):
+- [x] Confirm `git status -sb` shows `## feat/r4-mcp-backend`, then run `uv run pytest -q` and expect **195 passed**.
+- [x] Commit `docs/mcp-findings.md`: Vincenzo's inspection, unchanged, plus the appended "Confirmed first-hand" section. Also commit this plan and `scripts/live/run_on_laptop.py` (R3 test infrastructure that was never committed):
 
 ```bash
 git add docs/mcp-findings.md plans/backend-and-auth-r4.md scripts/live/run_on_laptop.py
@@ -101,7 +115,7 @@ The findings' honest limits come first: this task exercises the server **from Dr
 - Create: `tests/fixtures/mcp/` (`initialize.json`, `tools_list.json`, `responses/*.json`), the recorded fixtures Tasks 2–8 test against
 - Modify: `docs/mcp-findings.md` (a new "Verified from Dreachy" section, with pinned versions)
 
-- [ ] **Step 1: Write `scripts/live/mcp_probe.py`.** It reads the same `DREACHY_*` settings as the app (base URL, OAuth client, `DREACHY_OAUTH_SCOPE`) and gets a token through drupal-api-client. Then it runs, through the `mcp` SDK, **read-only calls only**:
+- [x] **Step 1: Write `scripts/live/mcp_probe.py`.** It reads the same `DREACHY_*` settings as the app (base URL, OAuth client, `DREACHY_OAUTH_SCOPE`) and gets a token through drupal-api-client. Then it runs, through the `mcp` SDK, **read-only calls only**:
    1. `initialize`, saving the protocol version, `serverInfo` (name and version, which pins the module) and capabilities;
    2. `tools/list`, saving every tool's name, input schema, output schema and annotations;
    3. `entity_list` for `node` with a bundle filter, `created` descending sort and a limit, then the same with a status filter. Record whether status filtering is accepted (findings §6);
@@ -113,10 +127,10 @@ The findings' honest limits come first: this task exercises the server **from Dr
    9. timing: the wall-clock cost of `initialize` and of a 3-call chain.
 
    Each response is saved to `tests/fixtures/mcp/responses/<step>.json`, with tokens and secrets redacted.
-- [ ] **Step 2: Run it** against the DrupalForge sandbox. Record **write** behaviour separately, only once Ruling 6's consumer has `demo:content:write`: `entity_stub`, then `field_set_value` (title, body, `moderation_state=draft` on a moderated bundle), then `entity_save`. Re-load the result and record `status` and `moderation_state`. One unpublished draft is created, titled "Dreachy MCP probe <time>".
-- [ ] **Step 3: Pin the facts** in `docs/mcp-findings.md` under "Verified from Dreachy (date)": the `mcp_server` version, the protocol version, `mcp` 2.0.0, the answers to every §6 question, and the measured latency.
-- [ ] **Step 4: Rule.** Correct Task 4's provisional argument builders to the recorded schemas; each correction gets a `Ruling:` line in the progress file. Decide Ruling 4 (pending) with Vincenzo.
-- [ ] **Step 5: Commit** the probe, the fixtures and the doc.
+- [x] **Step 2: Run it** against the DrupalForge sandbox. Record **write** behaviour separately, only once Ruling 6's consumer has `demo:content:write`: `entity_stub`, then `field_set_value` (title, body, `moderation_state=draft` on a moderated bundle), then `entity_save`. Re-load the result and record `status` and `moderation_state`. One unpublished draft is created, titled "Dreachy MCP probe <time>".
+- [x] **Step 3: Pin the facts** in `docs/mcp-findings.md` under "Verified from Dreachy (date)": the `mcp_server` version, the protocol version, `mcp` 2.0.0, the answers to every §6 question, and the measured latency.
+- [x] **Step 4: Rule.** Correct Task 4's provisional argument builders to the recorded schemas; each correction gets a `Ruling:` line in the progress file. Decide Ruling 4 (pending) with Vincenzo.
+- [x] **Step 5: Commit** the probe, the fixtures and the doc.
 
 *Tasks 2–3 don't depend on Task 1 and can start in parallel; Tasks 4–8 start from its fixtures.*
 
