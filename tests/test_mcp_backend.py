@@ -313,3 +313,26 @@ def test_get_article_wont_read_an_unrelated_nearest_match(discovered) -> None:
     assert backend.get_article("budget plans", include_unpublished=True)["title"] == "Budget draft"
     assert backend.get_article("day") is None  # too short to tell: exact titles only
     assert backend.get_article("How to apply") is None  # matches Admissions' text, not its title
+
+
+# -- latency (Task 10) -----------------------------------------------------
+
+
+def test_the_watchers_poll_is_one_round_of_two_list_calls(discovered) -> None:
+    backend, site = discovered()
+    site.calls.clear()
+
+    assert backend.latest_created() == "2026-09-21T14:13:20+00:00"  # Open day: the newest published
+    assert sorted(args["fields"] for _, _, args in site.calls) == ["created", "status"]
+
+
+def test_recent_reads_text_only_for_the_types_it_returns(discovered) -> None:
+    store = _store()
+    store.nodes[6]["fields"]["created"] = "1700000000"  # Open day (news) is no longer the newest
+    backend, site = discovered(store)
+    site.calls.clear()
+
+    assert [n["title"] for n in backend.get_recent_nodes(1)] == ["Admissions"]
+    fields = {args["fields"] for _, _, args in site.calls}
+    assert "news_subhead" not in fields  # a news-only text field: no news item returned
+    assert {"description", "preview_text"} <= fields

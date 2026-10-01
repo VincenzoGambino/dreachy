@@ -172,13 +172,10 @@ class McpBackend(Backend):
 
         return self._session.run_shared(run)
 
-    async def _window(
-        self, caller: ToolCaller, mapping: McpMapping, types: Schema, *, sort: str, amount: int
-    ) -> list[dict[str, Any]]:
-        """Node dicts for the newest *amount* nodes by *sort*, enabled types
-        only: one list call per field, joined by id."""
-        text_fields = {name for t in types.values() for name in (*t.text_fields, t.summary_field) if name}
-        fields = [*_NODE_FIELDS, *sorted(text_fields)]
+    async def _lists(
+        self, caller: ToolCaller, mapping: McpMapping, fields: list[str], *, sort: str, amount: int
+    ) -> list[list[dict[str, Any]]]:
+        """One entity_list per field over the same window, ≤ mcp_concurrency at once."""
         lists = await _gather(
             self.config.mcp_concurrency,
             [
@@ -186,19 +183,66 @@ class McpBackend(Backend):
                 for f in fields
             ],
         )
-        # Only items the status list saw: one that appeared between the calls
-        # (or moved at the window's edge) has no status, and mustn't pass for
-        # unpublished — fields[0] is "status".
-        listed_status = {str((item.get("_metadata") or {}).get("id")) for item in lists[0].get("results") or []}
-        items: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {}
-        for listed in lists:
-            for item in listed.get("results") or []:
-                meta = item.get("_metadata") or {}
-                if str(meta.get("id")) not in listed_status:
-                    continue
-                _, values = items.setdefault(str(meta.get("id")), (meta, {}))
-                values.update({k: v for k, v in item.items() if k != "_metadata"})
-        return [node_dict(meta, values, types[meta.get("bundle")]) for meta, values in items.values() if meta.get("bundle") in types]
+        return [listed.get("results") or [] for listed in lists]
+
+    async def _first_pass(
+        self, caller: ToolCaller, mapping: McpMapping, types: Schema, *, sort: str, amount: int, published: bool | None
+    ) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+        """The window's enabled-type items, in *sort* order, with their status
+        and sort value — kept by *published* (None: either)."""
+        status_list, sort_list = await self._lists(caller, mapping, ["status", sort], sort=sort, amount=amount)
+        sorted_by = {str((i.get("_metadata") or {}).get("id")): i.get(sort) for i in sort_list}
+        kept = []
+        # The status list decides: an item that appeared after it was read
+        # has no status, and mustn't pass for unpublished.
+        for item in status_list:
+            meta = item.get("_metadata") or {}
+            if meta.get("bundle") not in types:
+                continue
+            if published is not None and _published(item.get("status")) != published:
+                continue
+            kept.append((meta, {"status": item.get("status"), sort: sorted_by.get(str(meta.get("id")))}))
+        return kept
+
+    async def _window(
+        self,
+        caller: ToolCaller,
+        mapping: McpMapping,
+        types: Schema,
+        *,
+        sort: str,
+        amount: int,
+        limit: int,
+        published: bool | None,
+    ) -> list[dict[str, Any]]:
+        """Node dicts for the first *limit* enabled-type items among the
+        newest *amount* by *sort*. Two passes of list calls (one per field):
+        status and the sort field pick the items, then only the fields they
+        need — text fields of their own types alone."""
+        chosen = (await self._first_pass(caller, mapping, types, sort=sort, amount=amount, published=published))[:limit]
+        if not chosen:
+            return []
+        wanted = {str(meta.get("id")): (meta, values) for meta, values in chosen}
+        text_fields = {
+            name for meta, _ in chosen for name in (*types[meta["bundle"]].text_fields, types[meta["bundle"]].summary_field) if name
+        }
+        rest = [f for f in _NODE_FIELDS if f not in ("status", sort)] + sorted(text_fields)
+        for listed in await self._lists(caller, mapping, rest, sort=sort, amount=amount):
+            for item in listed:
+                entry = wanted.get(str((item.get("_metadata") or {}).get("id")))
+                if entry is not None:
+                    entry[1].update({k: v for k, v in item.items() if k != "_metadata"})
+        return [node_dict(meta, values, types[meta["bundle"]]) for meta, values in wanted.values()]
+
+    def latest_created(self) -> str | None:
+        """The watcher's poll: one round of two list calls (status, created)."""
+        types = self._types()
+
+        async def chain(caller: ToolCaller, mapping: McpMapping) -> str | None:
+            kept = await self._first_pass(caller, mapping, types, sort="created", amount=10, published=True)
+            return _iso(kept[0][1].get("created")) if kept else None
+
+        return self._read(chain)
 
     async def _read_hit(self, caller: ToolCaller, mapping: McpMapping, nid: int, types: Schema) -> dict[str, Any] | None:
         handle = await load(caller, mapping, "node", nid)
@@ -272,7 +316,8 @@ class McpBackend(Backend):
         amount = min(self.config.mcp_window, max(10, limit * 5))
 
         async def chain(caller: ToolCaller, mapping: McpMapping) -> list[dict[str, Any]]:
-            return await self._window(caller, mapping, types, sort="created", amount=amount)
+            published = None if include_unpublished else True
+            return await self._window(caller, mapping, types, sort="created", amount=amount, limit=limit, published=published)
 
         nodes = [n for n in self._read(chain) if n["status"] or include_unpublished]
         nodes.sort(key=lambda n: n["created"] or "", reverse=True)
@@ -345,7 +390,7 @@ class McpBackend(Backend):
         amount = min(limit, self.config.mcp_pending_window)
 
         async def chain(caller: ToolCaller, mapping: McpMapping) -> list[dict[str, Any]]:
-            return await self._window(caller, mapping, types, sort="changed", amount=amount)
+            return await self._window(caller, mapping, types, sort="changed", amount=amount, limit=limit, published=False)
 
         nodes = [n for n in self._read(chain) if not n["status"] and n["moderation_state"] != _ARCHIVED_STATE]
         nodes.sort(key=lambda n: n["changed"] or "", reverse=True)
@@ -445,12 +490,15 @@ class McpBackend(Backend):
             elif is_denied(tool):
                 logger.warning("Site action %s is never allowed (Dreachy never publishes, deletes or discards)", name)
             else:
-                properties = (tool.input_schema or {}).get("properties") or {}
+                schema = tool.input_schema or {}
+                required = tuple(schema.get("required") or ())
+                properties = schema.get("properties") or {}
                 actions[name] = SiteAction(
                     name,
                     tool.description or "",
                     bool(tool.annotations and tool.annotations.read_only_hint is True),
-                    tuple(properties),
+                    (*required, *(p for p in properties if p not in required)),
+                    required,
                 )
         self._actions = actions
         return dict(actions)

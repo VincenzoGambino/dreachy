@@ -41,7 +41,8 @@ class DrupalSiteAction(Tool):
         lines = []
         for action in get_client().known_site_actions().values():
             kind = "read-only" if action.read_only else "changes the site: ask first"
-            params = f"; arguments: {', '.join(action.parameters)}" if action.parameters else ""
+            names = [f"{name} (required)" if name in action.required else name for name in action.parameters]
+            params = f"; arguments: {', '.join(names)}" if names else ""
             lines.append(f"- {action.name}: {action.description[:_DESCRIPTION_CHARS]} ({kind}{params})")
         return (
             "Run one of the site actions the installer allowed, only when the person asks for it. Actions that "

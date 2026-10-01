@@ -56,6 +56,7 @@ class SiteAction:
     # Only a tool that says so is read-only: anything else asks first.
     read_only: bool
     parameters: tuple[str, ...] = ()
+    required: tuple[str, ...] = ()
 
 
 class Backend(ABC):
@@ -168,6 +169,12 @@ class Backend(ABC):
         The watcher polls this with limit=1. Published content only unless
         include_unpublished — which no tool sets (R3's editorial tools will).
         """
+
+    def latest_created(self) -> str | None:
+        """When the newest published content of the enabled types was
+        created (the watcher's poll); None when there is none."""
+        nodes = self.get_recent_nodes(limit=1)
+        return nodes[0]["created"] if nodes else None
 
     @abstractmethod
     def find_content(

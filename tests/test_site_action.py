@@ -289,3 +289,12 @@ def test_an_unexpected_failure_finding_the_actions_is_an_error_not_a_crash(backe
     backend.site_actions = broken
 
     assert "error" in _call(backend, action="tool_api__canvas_list_targets", arguments={}, confirmed=True)
+
+
+def test_the_spec_says_which_arguments_are_required(backend_for) -> None:
+    # Found live: canvas_list_targets requires target_type, and the spec didn't say.
+    backend = backend_for(_site(), ("tool_api__canvas_list_targets",))
+    backend.site_actions()
+    shared._client = backend
+
+    assert "arguments: target_type (required), limit, offset" in DrupalSiteAction().spec()["description"]

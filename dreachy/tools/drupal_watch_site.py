@@ -39,8 +39,7 @@ def _watched(client: Backend) -> tuple:
 
 
 async def _latest_created(client: Backend) -> str | None:
-    nodes = await asyncio.to_thread(client.get_recent_nodes, limit=1)
-    return nodes[0]["created"] if nodes else None
+    return await asyncio.to_thread(client.latest_created)
 
 
 async def _sleep_unless_client_changes(seconds: float, client: Backend) -> None:
