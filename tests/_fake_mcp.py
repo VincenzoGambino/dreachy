@@ -142,3 +142,73 @@ def _result(request_id: Any, result: dict[str, Any], headers: dict[str, str] | N
 
 def _error(request_id: Any, code: int, message: str) -> httpx2.Response:
     return httpx2.Response(200, json={"jsonrpc": "2.0", "id": request_id, "error": {"code": code, "message": message}})
+
+
+class FakeEntityStore:
+    """Drupal's entity tools as findings §"Family 1" describes them, in memory.
+
+    Handles are session-scoped and single-use for writes: field_set_value
+    returns a NEW handle and retires the old one (the findings' "always use
+    the newest token" rule), so a chain that reuses a stale handle fails.
+    Argument and response key names are provisional (findings vocabulary);
+    R4 Task 1 corrects them from the recorded schemas.
+    """
+
+    TOKEN_KEY = "token"
+
+    def __init__(self, nodes: dict[int, dict[str, Any]] | None = None, *, prefix: str = "demo_") -> None:
+        self.nodes: dict[int, dict[str, Any]] = dict(nodes or {})  # nid -> {"type", "bundle", "fields": {...}}
+        self.saves: list[dict[str, Any]] = []
+        self.prefix = prefix
+        self._handle_ids = itertools.count(1)
+
+    def tools(self) -> dict[str, ToolFn]:
+        p = self.prefix
+        return {
+            f"{p}entity_load_by_id": self._load,
+            f"{p}entity_field_values": self._values,
+            f"{p}entity_stub": self._stub,
+            f"{p}field_set_value": self._set,
+            f"{p}entity_save": self._save,
+        }
+
+    def _issue(self, state: dict[str, Any], entity: dict[str, Any]) -> str:
+        token = f"{{{{entity:{entity['type']}:{entity.get('id', 'new')}:h{next(self._handle_ids)}}}}}"
+        state.setdefault("handles", {})[token] = entity
+        return token
+
+    def _resolve(self, state: dict[str, Any], token: Any) -> dict[str, Any]:
+        entity = state.get("handles", {}).get(token)
+        if entity is None:
+            raise FakeToolError(f"Unknown or stale entity handle: {token}")
+        return entity
+
+    def _load(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+        nid = int(arguments["id"])
+        if nid not in self.nodes:
+            raise FakeToolError(f"No {arguments['entity_type']} with id {nid}")
+        node = self.nodes[nid]
+        entity = {"type": arguments["entity_type"], "bundle": node["bundle"], "id": nid, "fields": dict(node["fields"])}
+        token = self._issue(state, entity)
+        return {self.TOKEN_KEY: token, "type": entity["type"], "bundle": entity["bundle"], "id": nid, "revision": 1}
+
+    def _values(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+        return {"fields": dict(self._resolve(state, arguments[self.TOKEN_KEY])["fields"])}
+
+    def _stub(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+        entity = {"type": arguments["entity_type"], "bundle": arguments["bundle"], "fields": {}}
+        return {self.TOKEN_KEY: self._issue(state, entity), "type": entity["type"], "bundle": entity["bundle"]}
+
+    def _set(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+        old = arguments[self.TOKEN_KEY]
+        entity = self._resolve(state, old)
+        updated = {**entity, "fields": {**entity["fields"], arguments["field"]: arguments["value"]}}
+        del state["handles"][old]  # retired: the newest token is the only valid one
+        return {self.TOKEN_KEY: self._issue(state, updated)}
+
+    def _save(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+        entity = self._resolve(state, arguments[self.TOKEN_KEY])
+        nid = entity.get("id") or (max(self.nodes, default=0) + 1)
+        self.nodes[nid] = {"bundle": entity["bundle"], "fields": dict(entity["fields"])}
+        self.saves.append({"id": nid, **entity})
+        return {"type": entity["type"], "bundle": entity["bundle"], "id": nid, "revision": 1}
