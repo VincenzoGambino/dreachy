@@ -36,8 +36,11 @@ Found and fixed during the run:
 - The site-action spec didn't say which arguments are required
   (`canvas_list_targets` needs `target_type`); it does now.
 
-Still open, site side: the OAuth consumer still runs as **uid 1 (admin)**
-— both drafts are authored by `admin`, and `system_status` succeeds.
+On the sandbox the OAuth consumer runs as **uid 1 (admin)**, by choice —
+both drafts are authored by `admin`, and `system_status` succeeds. Any
+account works; for security, a real site shouldn't use user 1
+(`docs/drupal-setup.md` §9).
+
 `DREACHY_NOTE_TYPE=article` in the instance `.env` refuses every note on
 this sandbox (no article content; on the previous instance its workflow
 also had no draft→draft transition): clear it, or list `article` under the

@@ -136,8 +136,9 @@ Recordings are in `tests/fixtures/mcp/`; file numbers below refer to
   this doc, succeeds (10), and the probe draft's author is `admin`, uid 1
   (36-uid). The scopes gate which tools are reachable, not the account's
   privilege: every read is an admin read, `check_access` included.
-  **Least-privilege fix (site-side): point the consumer at a dedicated
-  editor account.**
+  The account is the installer's choice (the consumer's **User** field);
+  for security, don't use user 1 — `docs/drupal-setup.md` §9. The sandbox
+  keeps uid 1 by choice.
 - A bad or expired token gets **HTTP 401 with an HTML body** from Simple
   OAuth (`WWW-Authenticate: Bearer realm="OAuth", error="access_denied"`), not
   the module's JSON-RPC -32001 (that one is only for a missing token). The
