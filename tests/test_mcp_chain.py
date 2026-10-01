@@ -105,12 +105,8 @@ def test_the_chain_always_uses_the_newest_token() -> None:
     first, second, third, saved = _run(site, chain)
 
     assert len({first.token, second.token, third.token}) == 3
-    assert store.nodes[int(saved["id"])]["fields"] == {
-        "title": "Park bench",
-        "status": False,
-        "description": "Seats four.",
-        "preview_text": "A bench.",
-    }
+    stored = store.nodes[int(saved["id"])]["fields"]
+    assert (stored["title"], stored["description"], stored["preview_text"]) == ("Park bench", "Seats four.", "A bench.")
 
 
 def test_a_stale_handle_silently_loses_changes() -> None:

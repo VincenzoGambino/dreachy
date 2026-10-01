@@ -213,6 +213,7 @@ class FakeEntityStore:
         prefix: str = "tool_api__demo_",
         definitions: dict[str, dict[str, Any]] | None = None,
         index: str = "content_vector",
+        workflows: dict[str, dict[str, Any]] | None = None,
     ) -> None:
         self.nodes: dict[int, dict[str, Any]] = dict(nodes or {})  # nid -> {"bundle", "uuid"?, "fields": {...}}
         self.saves: list[dict[str, Any]] = []
@@ -222,6 +223,13 @@ class FakeEntityStore:
         self.definitions = definitions or {}
         self.index = index
         self.searches: list[dict[str, Any]] = []
+        # bundle -> {"default": state, "draft_to_draft": bool, "refuse_draft": bool};
+        # a bundle without one is unmoderated.
+        self.workflows = workflows or {}
+        # Required fields the SITE fills on save (the sandbox's ai_automator_status).
+        self.site_filled = {"ai_automator_status"}
+        self.publishes_everything = False  # a misconfigured site: every save goes live
+        self.refused_fields: set[str] = set()  # field_set_value refuses these
         self._handle_ids = itertools.count(1)
 
     def tools(self) -> dict[str, ToolFn]:
@@ -343,6 +351,9 @@ class FakeEntityStore:
 
     def _stub(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
         base = dict(arguments.get("base_fields") or {})
+        workflow = self.workflows.get(arguments["bundle"])
+        base["moderation_state"] = workflow["default"] if workflow else None
+        base.setdefault("status", True)  # a stub is published until told otherwise (recorded: 42b)
         entity = {"type": arguments["entity_type_id"], "bundle": arguments["bundle"], "fields": base}
         return {"created_entity": self._issue(entity)}
 
@@ -351,14 +362,48 @@ class FakeEntityStore:
         if not isinstance(value, dict):
             raise FakeToolError("Invalid type. Expected `object`")
         entity = self._resolve(arguments["entity"])
+        name = arguments["field_name"]
+        if name in self.refused_fields:
+            raise FakeToolError("Tool plugin access denied.")
         stored = value.get("value") if set(value) <= {"value", "format"} else value
-        updated = {**entity, "fields": {**entity["fields"], arguments["field_name"]: stored}}
+        if name == "moderation_state":
+            self._check_transition(entity, stored, "Field validation failed")
+        updated = {**entity, "fields": {**entity["fields"], name: stored}}
         return {"updated_entity": self._issue(updated)}  # the old handle keeps the old snapshot
+
+    def _check_transition(self, entity: dict[str, Any], new: Any, prefix: str) -> None:
+        workflow = self.workflows.get(entity["bundle"])
+        if not workflow:
+            return
+        current = entity["fields"].get("moderation_state")
+        refused = new == "draft" and (workflow.get("refuse_draft") or (current == "draft" and not workflow.get("draft_to_draft", True)))
+        if refused:
+            placeholder = "&lt;em class=&quot;placeholder&quot;&gt;{}&lt;/em&gt;"
+            raise FakeToolError(
+                f"{prefix}: Invalid state transition from {placeholder.format(str(current).title())} to {placeholder.format('Draft')}"
+            )
 
     def _save(self, arguments: dict[str, Any], state: dict[str, Any]) -> Reply:
         entity = self._resolve(arguments["entity"])
+        fields = dict(entity["fields"])
+        definitions = (self.definitions.get(entity["bundle"]) or {}).get("field_definitions") or {}
+        for name, definition in definitions.items():
+            if definition.get("required") and name not in self.site_filled and not fields.get(name):
+                raise FakeToolError(f"Entity validation failed: {name}: This value should not be null.")
+        workflow = self.workflows.get(entity["bundle"])
+        if workflow and not entity.get("id") and fields.get("moderation_state") == "draft" and not workflow.get("draft_to_draft", True):
+            self._check_transition({**entity, "fields": {**fields, "moderation_state": "draft"}}, "draft", "Entity validation failed: moderation_state")
+        if workflow:
+            fields["status"] = "1" if fields.get("moderation_state") == "published" else "0"
+        else:
+            fields["status"] = "1" if fields.get("status") not in (False, "0", 0) else "0"
+        if self.publishes_everything:
+            fields["status"] = "1"
+        fields.update({name: "finished" for name in self.site_filled if name in definitions})
+        fields.setdefault("created", "1790900000")
+        fields.setdefault("changed", fields["created"])
         nid = entity.get("id") or (max(self.nodes, default=0) + 1)
-        self.nodes[nid] = {"bundle": entity["bundle"], "fields": dict(entity["fields"])}
-        self.saves.append({"id": nid, **entity})
-        saved = {**entity, "id": nid}
+        self.nodes[nid] = {"bundle": entity["bundle"], "fields": fields}
+        self.saves.append({"id": nid, **entity, "fields": fields})
+        saved = {**entity, "id": nid, "fields": fields}
         return Reply({"saved_entity": self._issue(saved)}, f"Successfully created node entity with ID {nid}")

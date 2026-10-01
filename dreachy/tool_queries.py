@@ -89,7 +89,8 @@ def drupal_pending_content(client: Backend) -> dict[str, Any]:
 
 
 def drupal_create_note(client: Backend, *, title: str, body: str) -> dict[str, Any]:
-    # The installer's note type, else the first enabled type (spec R3.3).
-    content_type = client.config.note_type or next(iter(client.schema))
+    # The installer's note type, else the enabled type that needs the least
+    # filling in — the first enabled type over JSON:API (spec R3.3, R4 Ruling C).
+    content_type = client.note_type()
     node = client.create_draft(content_type, title, body)
     return {"saved": "draft", "title": node["title"], "type": node["type"]}

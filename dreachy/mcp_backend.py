@@ -34,7 +34,7 @@ from mcp.shared.exceptions import MCPError
 from .backend import Backend, DreachySiteError
 from .client import _strip_html
 from .config import Config
-from .mcp_chain import field_values, load
+from .mcp_chain import Handle, field_values, load, save, set_value, stub
 from .mcp_mapping import McpMapping, discover_mapping
 from .mcp_session import HttpClientFactory, McpSession, McpToolError, ToolCaller, _leaf
 from .schema import Schema, TypeSchema, humanize, type_schema_from_definitions
@@ -45,6 +45,10 @@ T = TypeVar("T")
 
 _SUMMARY_FALLBACK_CHARS = 200
 _ARCHIVED_STATE = "archived"
+_DRAFT_STATE = "draft"
+# As over JSON:API: core's fallback format, usable by every role (the
+# sandbox refused basic_html).
+_NOTE_TEXT_FORMAT = "plain_text"
 # The SDK's code for an HTTP error answer; the sandbox's 503 under load.
 _SERVER_ERROR = -32603
 _HIT_ID = re.compile(r"node/(\d+)")
@@ -299,10 +303,109 @@ class McpBackend(Backend):
 
         return self._read(chain)
 
-    # -- editorial (Task 6) ------------------------------------------------
+    # -- editorial ---------------------------------------------------------
+
+    def can_edit(self) -> bool:
+        """Logged in, a token granted, and the server offers the write tools."""
+        if not self.config.uses_oauth:
+            return False
+
+        async def chain(caller: ToolCaller, mapping: McpMapping) -> bool:
+            return mapping.can_write
+
+        try:
+            return self._read(chain)
+        except DreachySiteError as exc:
+            # The type only: an exception's text is no place to risk credentials.
+            logger.warning("Editing is unavailable over MCP (%s)", type(exc).__name__)
+            return False
 
     def get_pending_nodes(self, limit: int | None = None) -> list[dict[str, Any]]:
-        raise NotImplementedError("R4 Task 6")
+        """Pending among the most recently changed ~20 items (Ruling 4): the
+        server can't filter on status, but lists it per item in one call."""
+        limit = limit or self.config.pending_sample_limit
+        types = self._types()
+        amount = min(limit, self.config.mcp_pending_window)
+
+        async def chain(caller: ToolCaller, mapping: McpMapping) -> list[dict[str, Any]]:
+            return await self._window(caller, mapping, types, sort="changed", amount=amount)
+
+        nodes = [n for n in self._read(chain) if not n["status"] and n["moderation_state"] != _ARCHIVED_STATE]
+        nodes.sort(key=lambda n: n["changed"] or "", reverse=True)
+        return nodes[:limit]
 
     def create_draft(self, content_type: str, title: str, body: str) -> dict[str, Any]:
-        raise NotImplementedError("R4 Task 6")
+        """One unpublished node, in a session of its own (Ruling 2).
+
+        Draft-only is checked BEFORE saving (Ruling B): the stub's moderation
+        state is read and set to draft if it isn't — if that's refused,
+        nothing is saved — and an unmoderated stub must be unpublished. The
+        saved node is re-read after, and a published one is an error.
+        Required text fields get the note's text; Dreachy invents no other
+        value, so a field the site won't fill shows in the refusal (Ruling C).
+        """
+        # As over JSON:API: only a discovered schema says which field holds
+        # the text, and _types() first retries a failed discovery when due.
+        types = self._types()
+        type_schema = types.get(content_type) if self.schema_discovered else None
+        if type_schema is None:
+            raise DreachySiteError(f"notes can't be saved as {content_type!r} on this site right now")
+
+        async def chain(caller: ToolCaller) -> dict[str, Any]:
+            mapping = await self._mapped(caller)
+            if not mapping.can_write:
+                raise DreachySiteError("this site's MCP server offers no way to save content")
+            handle = await stub(caller, mapping, "node", content_type, {"title": title, "status": False})
+            handle = await self._make_draft(caller, mapping, handle)
+            for name in (type_schema.text_fields[0], *type_schema.required_text):
+                value = {"value": body, "format": _NOTE_TEXT_FORMAT} if name == type_schema.text_fields[0] else {"value": body}
+                try:
+                    handle = await set_value(caller, mapping, handle, name, value)
+                except McpToolError as exc:
+                    raise DreachySiteError(f"the site wouldn't take the note's text in {name}, so nothing was saved ({_reason(exc)})") from exc
+            try:
+                saved = await save(caller, mapping, handle)
+            except McpToolError as exc:
+                raise _save_refused(exc, type_schema) from exc
+            reread = await load(caller, mapping, "node", saved["id"])
+            values = await field_values(caller, mapping, reread)
+            return node_dict({"bundle": content_type, "id": saved["id"]}, values, type_schema)
+
+        node = self._session.run(chain)
+        if node["status"]:
+            logger.error("drupal_create_note: the site published %s despite a draft request", node["id"])
+            raise DreachySiteError(
+                "the site published the note instead of keeping it as a draft — tell whoever looks after the site"
+            )
+        return node
+
+    async def _make_draft(self, caller: ToolCaller, mapping: McpMapping, handle: Handle) -> Handle:
+        state = (await field_values(caller, mapping, handle, "moderation_state")).get("moderation_state")
+        if state == _DRAFT_STATE:
+            return handle
+        if state is None:  # unmoderated: status decides, and the stub asked for unpublished
+            if not _published((await field_values(caller, mapping, handle, "status")).get("status")):
+                return handle
+            field, value = "status", {"value": False}
+        else:
+            field, value = "moderation_state", {"value": _DRAFT_STATE}
+        try:
+            return await set_value(caller, mapping, handle, field, value)
+        except McpToolError as exc:
+            raise DreachySiteError(f"the site wouldn't let the note be a draft, so nothing was saved ({_reason(exc)})") from exc
+
+
+def _reason(exc: McpToolError) -> str:
+    """The server's own words, without the tool name McpToolError puts first."""
+    return str(exc).split(": ", 1)[-1]
+
+
+def _save_refused(exc: McpToolError, type_schema: TypeSchema) -> DreachySiteError:
+    reason = _reason(exc).removeprefix("Entity validation failed: ")
+    named = next((name for name in type_schema.required_other if name in reason), None)
+    if named:
+        return DreachySiteError(
+            f"the site needs {named} filled in for a {type_schema.label.lower()}, which I can't do from a dictated "
+            f"note — nothing was saved"
+        )
+    return DreachySiteError(f"the site rejected the note, so nothing was saved ({reason})")

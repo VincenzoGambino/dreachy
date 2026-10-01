@@ -188,6 +188,15 @@ class Backend(ABC):
         "archived" state) isn't pending and is left out.
         """
 
+    def note_type(self) -> str:
+        """The type notes are saved as: the installer's choice, else the
+        enabled type needing the fewest fields besides title and text
+        (R4 Ruling C) — the first enabled type when that ties, as in R3."""
+        if self.config.note_type:
+            return self.config.note_type
+        schema = self.schema
+        return min(schema, key=lambda t: len(schema[t].required_text) + len(schema[t].required_other), default="")
+
     @abstractmethod
     def create_draft(self, content_type: str, title: str, body: str) -> dict[str, Any]:
         """Save one unpublished node and return its node dict.
