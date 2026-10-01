@@ -1,0 +1,8 @@
+{
+  "call": {
+    "arguments": {},
+    "name": "tool_api__demo_does_not_exist"
+  },
+  "exception": "MCPError: Tool not found: \"tool_api__demo_does_not_exist\".",
+  "seconds": 1.185
+}

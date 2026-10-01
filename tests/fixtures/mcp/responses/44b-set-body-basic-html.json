@@ -1,0 +1,29 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:c18567}}",
+      "field_name": "body",
+      "value": {
+        "format": "basic_html",
+        "value": "<p>x</p>"
+      }
+    },
+    "name": "tool_api__demo_field_set_value"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": false,\n    \"message\": \"Tool plugin access denied.\",\n    \"data\": []\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": [],
+      "message": "Tool plugin access denied.",
+      "success": false
+    }
+  },
+  "seconds": 0.47
+}

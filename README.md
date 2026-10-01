@@ -27,8 +27,8 @@ about a website — it *is* the site's editorial voice, given a body:
 
 Dreachy is a thin wrapper: all the conversation, voice, and hardware plumbing comes from
 [`reachy_mini_conversation_app`](https://github.com/pollen-robotics/reachy_mini_conversation_app);
-this package only supplies its own persona (a bundled profile) and five tools that talk to a
-Drupal site over JSON:API.
+this package only supplies its own persona (a bundled profile) and its tools, which talk to a
+Drupal site over JSON:API or, in **MCP mode**, through the site's own MCP server (see below).
 
 ## Requirements
 
@@ -44,6 +44,8 @@ Drupal site over JSON:API.
     Configuration — so any content model works without code changes. The **Umami demo
     profile**'s `article`/`page`/`recipe` mapping remains the built-in fallback for when the
     site can't be read.
+- Or, for **MCP mode**: the site's `mcp_server` module and an OAuth client for it — see
+  **MCP mode** below and [`docs/drupal-setup.md`](docs/drupal-setup.md) §9.
 - A Reachy Mini, and a Hugging Face token for the realtime voice/LLM backend (same requirement
   as `reachy_mini_conversation_app` itself).
 
@@ -77,6 +79,8 @@ the Reachy Mini dashboard (the gear/settings icon next to the app) and set:
   Changing the site URL removes the saved login, so it's never sent to a different site.
   With the login working, Dreachy can also list pending content and save dictated notes as
   unpublished drafts; choose the note type there too (see `docs/drupal-setup.md` §8).
+  The same section chooses the backend — JSON:API (default) or the site's MCP server — and
+  holds MCP mode's settings (see **MCP mode**).
 - **Extra instructions** (optional) — free text appended to Dreachy's built-in persona (tone,
   language, anything else). Built-in guardrails (e.g. "only answer from site content") stay in
   force either way, since this is appended, not a replacement. Takes effect the next time the
@@ -89,6 +93,59 @@ Dreachy's own settings page touches.
 If you'd rather configure it by hand (e.g. scripting a fresh install), these settings are backed
 by a `.env` file at `~/.local/share/dreachy/.env` on the robot — see
 [`.env.example`](.env.example).
+
+## MCP mode
+
+Dreachy can talk to the site through the site's own MCP server (the Drupal `mcp_server`
+module) instead of JSON:API. Choose it under **Advanced** on the settings page. Search, the
+watcher, notes and pending work as before; three things change:
+
+- **Search by meaning.** "Find content" uses the site's Search API index (often a vector
+  index), so it finds what a question is *about*, not only titles containing a word, and
+  answers best match first rather than newest first.
+- **MCP-only sites.** A site with JSON:API switched off can still be embodied.
+- **Site actions** (optional). The installer may allow a few of the site's extra MCP tools
+  (for example Drupal Canvas's) by name; Dreachy runs one only when asked, and asks "shall I
+  go ahead?" before anything that changes the site. Anything that publishes, sets the
+  homepage or a site default, deletes or discards is never available, whatever is listed —
+  and the entity write tools are never extras: notes go only through their own draft checks.
+
+**What it needs:** the `mcp_server` module at `/mcp` (or another address on the same site),
+the site login (OAuth client credentials with the MCP scopes; `docs/drupal-setup.md` §9),
+and the **search index** name the site's MCP search tool should use (for example
+`content_vector`).
+
+**Settings** (Advanced, or the instance `.env`): `DREACHY_BACKEND=mcp`;
+`DREACHY_MCP_ENDPOINT` (optional, must be on the site's own address — the site login goes
+with every request); `DREACHY_MCP_SEARCH_INDEX`; `DREACHY_MCP_BUNDLES` (optional content
+types); `DREACHY_MCP_EXTRA_TOOLS` (optional site actions). `DREACHY_MCP_MAPPING`, a JSON
+object, can name the site's tools when their names don't follow the usual pattern
+(`.env` only). Changing the backend takes effect at once for reads; which tools exist
+(notes, site actions) is decided when Dreachy starts.
+
+**Limits of MCP mode:**
+
+- **Paths are searched, not looked up.** MCP has no lookup by URL path or exact title:
+  "read me /about-us" searches for the path's last part, "about us". An exact title among
+  the results wins; otherwise Dreachy reads a result only if its title has every word asked
+  for (of four letters or more, leaving out words like "page" or "article") — never just the
+  nearest match.
+- **Search covers what the index covers.** A content type outside the search index can't be
+  found or read aloud, though "what's new" still lists it.
+- **Content types with no content yet are invisible.** Dreachy finds the types from a listing
+  of all the site's content — at start, after every settings save and on each retry — unless
+  you list them under **Content types (optional)**, which a large site should do.
+- **Pending looks at the 20 most recently changed items.** The MCP tools can't filter by
+  status, so older drafts aren't counted.
+- **Notes need every required field to be one Dreachy can fill.** It fills required text
+  fields with the note's text and never invents any other value; when the site refuses the
+  save it names the missing field aloud, and nothing is saved. By default notes go to the
+  type that needs the fewest extra fields. A type whose workflow can't save a new item as a
+  draft refuses notes the same way.
+- **It's slower.** Each MCP call takes 0.5–3.5 seconds on the sandbox. Dreachy keeps one
+  connection open for reads and makes at most three calls at a time; measured on the sandbox,
+  "what's new" takes about 5 seconds, reading aloud 5–6, a search 7–8 and saving a note about
+  9 (the watcher's background check about 1).
 
 ## Known issues
 
@@ -115,7 +172,9 @@ by a `.env` file at `~/.local/share/dreachy/.env` on the robot — see
 - **`drupal_read_article` occasionally acknowledges without reading.** The model says it will
   fetch the article and then ends the turn without calling the tool. Asking a second time works.
 - **Site pulse counts are approximate.** Core JSON:API has no collection count, so counts are
-  capped at `pulse_sample_limit` (50) items per content type.
+  capped at `pulse_sample_limit` (50) items per content type. In MCP mode the count is the
+  published items of the chosen types among the site's 50 newest, so it undercounts more when
+  only some types are chosen.
 
 ## Development
 

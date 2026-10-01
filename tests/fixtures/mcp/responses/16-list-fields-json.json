@@ -1,0 +1,58 @@
+{
+  "call": {
+    "arguments": {
+      "amount": 3,
+      "entity_type_id": "node",
+      "fields": "[\"title\", \"status\", \"created\"]",
+      "sort_field": "changed",
+      "sort_order": "DESC"
+    },
+    "name": "tool_api__demo_entity_list"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Returned 3 Content(node) entities out of a total 141. This means that if you want to list the rest you should offset 3 and set amount to 138.\",\n    \"data\": {\n        \"results\": [\n            {\n                \"_metadata\": {\n                    \"id\": \"95\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Fall open day draws the largest attendance on record\",\n                    \"uuid\": \"fba8bc0a-29bb-56e6-8034-8ab7147be53d\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"83\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Environmental Science\",\n                    \"uuid\": \"52ebfd79-4cf0-5e2b-8bbb-ba5eee07eab9\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"52\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Miriam Frost\",\n                    \"uuid\": \"d6f279a6-bfd0-5e3b-85d4-51a48ed259c5\"\n                }\n            }\n        ]\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "results": [
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "95",
+              "label": "Fall open day draws the largest attendance on record",
+              "type": "node",
+              "uuid": "fba8bc0a-29bb-56e6-8034-8ab7147be53d"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "83",
+              "label": "Environmental Science",
+              "type": "node",
+              "uuid": "52ebfd79-4cf0-5e2b-8bbb-ba5eee07eab9"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "52",
+              "label": "Dr. Miriam Frost",
+              "type": "node",
+              "uuid": "d6f279a6-bfd0-5e3b-85d4-51a48ed259c5"
+            }
+          }
+        ]
+      },
+      "message": "Returned 3 Content(node) entities out of a total 141. This means that if you want to list the rest you should offset 3 and set amount to 138.",
+      "success": true
+    }
+  },
+  "seconds": 2.03
+}

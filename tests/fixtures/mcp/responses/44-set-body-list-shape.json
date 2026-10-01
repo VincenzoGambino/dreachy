@@ -1,0 +1,17 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:c18567}}",
+      "field_name": "body",
+      "value": {
+        "0": {
+          "format": "basic_html",
+          "value": "<p>x</p>"
+        }
+      }
+    },
+    "name": "tool_api__demo_field_set_value"
+  },
+  "exception": "MCPError: Invalid parameters for tool 'tool_api__demo_field_set_value': Property '/value': Invalid type. Expected `object`, but received `array`.",
+  "seconds": 0.463
+}

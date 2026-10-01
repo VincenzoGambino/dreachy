@@ -19,6 +19,7 @@ import logging
 import threading
 import time
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from types import TracebackType
 from typing import Any
 
@@ -44,6 +45,18 @@ class DreachyAuthError(DreachySiteError):
     tools report it, and the watcher backs off. The message never includes
     credentials.
     """
+
+
+@dataclass(frozen=True)
+class SiteAction:
+    """An allowlisted extra the site offers (R4, MCP only)."""
+
+    name: str
+    description: str
+    # Only a tool that says so is read-only: anything else asks first.
+    read_only: bool
+    parameters: tuple[str, ...] = ()
+    required: tuple[str, ...] = ()
 
 
 class Backend(ABC):
@@ -157,6 +170,12 @@ class Backend(ABC):
         include_unpublished — which no tool sets (R3's editorial tools will).
         """
 
+    def latest_created(self) -> str | None:
+        """When the newest published content of the enabled types was
+        created (the watcher's poll); None when there is none."""
+        nodes = self.get_recent_nodes(limit=1)
+        return nodes[0]["created"] if nodes else None
+
     @abstractmethod
     def find_content(
         self, keyword: str, content_type: str | None = None, *, include_unpublished: bool = False
@@ -188,6 +207,15 @@ class Backend(ABC):
         "archived" state) isn't pending and is left out.
         """
 
+    def note_type(self) -> str:
+        """The type notes are saved as: the installer's choice, else the
+        enabled type needing the fewest fields besides title and text
+        (R4 Ruling C) — the first enabled type when that ties, as in R3."""
+        if self.config.note_type:
+            return self.config.note_type
+        schema = self.schema
+        return min(schema, key=lambda t: len(schema[t].required_text) + len(schema[t].required_other), default="")
+
     @abstractmethod
     def create_draft(self, content_type: str, title: str, body: str) -> dict[str, Any]:
         """Save one unpublished node and return its node dict.
@@ -195,6 +223,19 @@ class Backend(ABC):
         Never publishes. Raises DreachySiteError when the site refuses, and
         when the result came back published — that's an error, not a success.
         """
+
+    # -- site actions (R4): allowlisted MCP extras --------------------------
+
+    def site_actions(self) -> dict[str, SiteAction]:
+        """The extras Dreachy may run on request (may ask the site once)."""
+        return {}
+
+    def known_site_actions(self) -> dict[str, SiteAction]:
+        """site_actions() as last found, without the network (tool specs)."""
+        return {}
+
+    def run_site_action(self, name: str, arguments: dict[str, Any], *, confirmed: bool) -> dict[str, Any]:
+        raise DreachySiteError("site actions need the MCP backend")
 
     def get_site_pulse(self) -> dict[str, Any]:
         """Node counts and latest activity timestamp.

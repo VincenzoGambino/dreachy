@@ -1,0 +1,58 @@
+{
+  "call": {
+    "arguments": {
+      "amount": 3,
+      "bundle": "standard_page",
+      "entity_type_id": "node",
+      "sort_field": "created",
+      "sort_order": "DESC"
+    },
+    "name": "tool_api__demo_entity_list"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Returned 3 Content(node) entities out of a total 13. This means that if you want to list the rest you should offset 3 and set amount to 10.\",\n    \"data\": {\n        \"results\": [\n            {\n                \"_metadata\": {\n                    \"id\": \"141\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Reset Your Password in 3 Steps\",\n                    \"uuid\": \"9f4a6d15-3c82-4e07-b5d9-6a13e8f2c744\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"140\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Account Setup Information\",\n                    \"uuid\": \"5c7e2b08-91a4-4d3f-8e61-0fb95c6a7d22\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"139\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Information\",\n                    \"uuid\": \"3a1d9c42-7f18-4b6e-9c05-2e8b71a4d301\"\n                }\n            }\n        ]\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "results": [
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "141",
+              "label": "Reset Your Password in 3 Steps",
+              "type": "node",
+              "uuid": "9f4a6d15-3c82-4e07-b5d9-6a13e8f2c744"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "140",
+              "label": "Account Setup Information",
+              "type": "node",
+              "uuid": "5c7e2b08-91a4-4d3f-8e61-0fb95c6a7d22"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "139",
+              "label": "Information",
+              "type": "node",
+              "uuid": "3a1d9c42-7f18-4b6e-9c05-2e8b71a4d301"
+            }
+          }
+        ]
+      },
+      "message": "Returned 3 Content(node) entities out of a total 13. This means that if you want to list the rest you should offset 3 and set amount to 10.",
+      "success": true
+    }
+  },
+  "seconds": 1.13
+}

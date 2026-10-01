@@ -1,0 +1,31 @@
+{
+  "call": {
+    "arguments": {
+      "base_fields": {
+        "status": false,
+        "title": "Dreachy MCP probe 2026-10-01 14:19"
+      },
+      "bundle": "standard_page",
+      "entity_type_id": "node"
+    },
+    "name": "tool_api__demo_entity_stub"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Successfully created unsaved node entity\",\n    \"data\": {\n        \"created_entity\": \"Entity object handle token: {{entity:1b76d0}}. Entity metadata: {\\\"entity_type\\\":\\\"node\\\",\\\"bundle\\\":\\\"standard_page\\\",\\\"id\\\":\\\"new\\\",\\\"langcode\\\":\\\"en\\\",\\\"revision_id\\\":null}\"\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "created_entity": "Entity object handle token: {{entity:1b76d0}}. Entity metadata: {\"entity_type\":\"node\",\"bundle\":\"standard_page\",\"id\":\"new\",\"langcode\":\"en\",\"revision_id\":null}"
+      },
+      "message": "Successfully created unsaved node entity",
+      "success": true
+    }
+  },
+  "seconds": 3.069
+}

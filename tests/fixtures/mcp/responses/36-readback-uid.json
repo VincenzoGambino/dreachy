@@ -1,0 +1,36 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:7b6e39}}",
+      "fields": "uid"
+    },
+    "name": "tool_api__demo_entity_field_values"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Retrieved 1 field values from node entity 142.\",\n    \"data\": {\n        \"field_values\": {\n            \"uid\": {\n                \"target_id\": \"1\",\n                \"entity\": {\n                    \"id\": \"1\",\n                    \"label\": \"admin\",\n                    \"type\": \"user\"\n                }\n            }\n        }\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "field_values": {
+          "uid": {
+            "entity": {
+              "id": "1",
+              "label": "admin",
+              "type": "user"
+            },
+            "target_id": "1"
+          }
+        }
+      },
+      "message": "Retrieved 1 field values from node entity 142.",
+      "success": true
+    }
+  },
+  "seconds": 0.484
+}

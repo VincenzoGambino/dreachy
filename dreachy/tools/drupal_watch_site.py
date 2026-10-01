@@ -33,14 +33,14 @@ _CLIENT_CHECK_SECONDS = 1.0
 
 
 def _watched(client: Backend) -> tuple:
-    """What the watcher's baseline belongs to: the site, and which types count."""
+    """What the watcher's baseline belongs to: the site, which types count,
+    and the backend (R4: JSON:API and MCP dates needn't compare)."""
     config = client.config
-    return (config.base_url, config.default_locale, tuple(config.enabled_types))
+    return (config.base_url, config.default_locale, tuple(config.enabled_types), config.backend)
 
 
 async def _latest_created(client: Backend) -> str | None:
-    nodes = await asyncio.to_thread(client.get_recent_nodes, limit=1)
-    return nodes[0]["created"] if nodes else None
+    return await asyncio.to_thread(client.latest_created)
 
 
 async def _sleep_unless_client_changes(seconds: float, client: Backend) -> None:

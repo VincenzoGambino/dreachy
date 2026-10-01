@@ -1,0 +1,30 @@
+{
+  "call": {
+    "arguments": {
+      "amount": 3,
+      "bundle": "article",
+      "entity_type_id": "node",
+      "sort_field": "created",
+      "sort_order": "DESC"
+    },
+    "name": "tool_api__demo_entity_list"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"No entities found matching the criteria.\",\n    \"data\": {\n        \"results\": []\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "results": []
+      },
+      "message": "No entities found matching the criteria.",
+      "success": true
+    }
+  },
+  "seconds": 2.71
+}

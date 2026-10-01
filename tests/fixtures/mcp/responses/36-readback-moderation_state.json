@@ -1,0 +1,29 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:7b6e39}}",
+      "fields": "moderation_state"
+    },
+    "name": "tool_api__demo_entity_field_values"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Retrieved 1 field values from node entity 142.\",\n    \"data\": {\n        \"field_values\": {\n            \"moderation_state\": \"draft\"\n        }\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "field_values": {
+          "moderation_state": "draft"
+        }
+      },
+      "message": "Retrieved 1 field values from node entity 142.",
+      "success": true
+    }
+  },
+  "seconds": 0.461
+}

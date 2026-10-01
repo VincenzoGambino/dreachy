@@ -156,10 +156,12 @@ Goal: same five tools over the Drupal MCP module; discovered extras optional.
    moves fast and the doc is the changelog anchor.
 2. `McpBackend(Backend)`: MCP client session to the site's server, mapping the
    five interface methods onto the server's tools. Reuse `AuthProvider` if the
-   module's auth allows; document the gap if it doesn't.
+   module's auth allows; document the gap if it doesn't. *(Amended 2026-10-01
+   — see Amendments.)*
 3. Discovered extra tools: OFF by default. `DREACHY_MCP_EXTRA_TOOLS=allowlist`
    (comma-separated tool names) to expose more; any write-capable discovered
    tool gets the same confirmed-assent rule as R3. Never auto-expose writes.
+   *(Amended 2026-10-01 — see Amendments.)*
 4. Settings page: backend selector (JSON:API / MCP), backed by
    `DREACHY_BACKEND=jsonapi|mcp` (deferred here from R2), and an MCP endpoint
    field.
@@ -216,7 +218,8 @@ as them until they log out or go idle. Design decisions *(recorded
 ## Out of scope
 
 Speaker identification (voice is rejected as an identity factor — see R6),
-publish/update/delete tools, non-Drupal backends, changes to the reaction system, packaging changes beyond version
+publish/update/delete tools *(amended 2026-10-01: tools with immediately-live
+effects — see Amendments)*, non-Drupal backends, changes to the reaction system, packaging changes beyond version
 bumps.
 
 ## Definition of done (per release)
@@ -273,3 +276,28 @@ Explicit changes to this spec, made after reading the source (see
   moderation state on moderated types (Content Moderation forbids setting
   `status` there). Forward drafts in pending content are out of scope
   (Tracked separately).
+- **2026-10-01 — R4.2 interface methods.** "The five interface methods" is
+  now every `Backend` method: R1 and R2's five reads (`get_schema`,
+  `get_recent_nodes`, `find_content`, `get_article`, `get_site_pulse`),
+  R3's `get_pending_nodes`, `create_draft` and `can_edit`, and `close` —
+  nine in all. `McpBackend` implements all of them, so all seven tools and
+  the watcher run on either backend.
+- **2026-10-01 — R4.3 discovered extras through one proxy tool.** Allowlisted
+  extras aren't registered as tools of their own: one tool,
+  `drupal_site_action` (`action` from the allowlist, `arguments`,
+  `confirmed`), runs them. It is registered only on the MCP backend with a
+  non-empty effective allowlist (`DREACHY_MCP_EXTRA_TOOLS` ∩ the server's
+  tools ∖ the hard deny-list). An extra is read-only only when the server
+  marks it so (`readOnlyHint`); anything else needs `confirmed=true` after
+  the person's spoken yes, as in R3.
+- **2026-10-01 — Out of scope, publish/update/delete.** Out of scope means
+  tools with **immediately-live effects**. Staging tools — writes that land
+  in a draft store and go live only when someone publishes them, such as
+  Drupal Canvas's auto-save writes — are allowlistable extras under the
+  write-assent rule (R4.3). Tools that make staged changes live (publishing
+  auto-saves), tools with immediately-live site-wide effects (setting the
+  homepage or a site default), and destructive tools (delete, discard, or
+  any the server marks `destructiveHint`) stay hard-denied whatever the
+  allowlist says. Extras are never asked to go live (`published` is never
+  sent true), and the entity write tools are never extras: notes go only
+  through `create_draft`'s draft checks.

@@ -1,0 +1,30 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:c18567}}",
+      "field_name": "title",
+      "value": {
+        "value": "Dreachy probe renamed"
+      }
+    },
+    "name": "tool_api__demo_field_set_value"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Successfully set field \\\"title\\\" on node entity.\",\n    \"data\": {\n        \"updated_entity\": \"Entity object handle token: {{entity:5b7ba7}}. Entity metadata: {\\\"entity_type\\\":\\\"node\\\",\\\"bundle\\\":\\\"article\\\",\\\"id\\\":\\\"new\\\",\\\"langcode\\\":\\\"en\\\",\\\"revision_id\\\":null}\"\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "updated_entity": "Entity object handle token: {{entity:5b7ba7}}. Entity metadata: {\"entity_type\":\"node\",\"bundle\":\"article\",\"id\":\"new\",\"langcode\":\"en\",\"revision_id\":null}"
+      },
+      "message": "Successfully set field \"title\" on node entity.",
+      "success": true
+    }
+  },
+  "seconds": 0.539
+}

@@ -1,0 +1,26 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:e1a044}}"
+    },
+    "name": "tool_api__demo_entity_save"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Successfully created node entity with ID 142\",\n    \"data\": {\n        \"saved_entity\": \"Entity object handle token: {{entity:d63e46}}. Entity metadata: {\\\"entity_type\\\":\\\"node\\\",\\\"bundle\\\":\\\"standard_page\\\",\\\"id\\\":\\\"142\\\",\\\"langcode\\\":\\\"en\\\",\\\"revision_id\\\":\\\"142\\\"}\"\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "saved_entity": "Entity object handle token: {{entity:d63e46}}. Entity metadata: {\"entity_type\":\"node\",\"bundle\":\"standard_page\",\"id\":\"142\",\"langcode\":\"en\",\"revision_id\":\"142\"}"
+      },
+      "message": "Successfully created node entity with ID 142",
+      "success": true
+    }
+  },
+  "seconds": 5.414
+}

@@ -1,0 +1,29 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:1b76d0}}",
+      "fields": "description"
+    },
+    "name": "tool_api__demo_entity_field_values"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Retrieved 1 field values from node entity (new unsaved entity).\",\n    \"data\": {\n        \"field_values\": {\n            \"description\": null\n        }\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "field_values": {
+          "description": null
+        }
+      },
+      "message": "Retrieved 1 field values from node entity (new unsaved entity).",
+      "success": true
+    }
+  },
+  "seconds": 0.53
+}

@@ -24,11 +24,12 @@ from pathlib import Path
 from typing import Literal
 
 import dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
 
-from dreachy.config import Config, parse_types
+from dreachy.config import Config, parse_types, same_site
+from dreachy.mcp_backend import McpBackend
 from dreachy.tools._shared import get_client, reset_client
 
 logger = logging.getLogger(__name__)
@@ -41,6 +42,10 @@ _EDITORIAL_TOOLS = ("drupal_pending_content", "drupal_create_note")
 # are registered only when the site login works (spec R3.1). Settings saves
 # re-render the profile with the same decision.
 _editorial_enabled = False
+# R4: drupal_site_action, only on the MCP backend with allowlisted extras
+# (decided at start, like the editorial tools).
+_SITE_ACTION_TOOL = "drupal_site_action"
+_site_actions_enabled = False
 
 
 def _instance_path() -> Path:
@@ -98,6 +103,13 @@ def _render_profile() -> None:
             tools.rstrip("\n")
             + "\n\n# Editorial tools: registered because the site login works (spec R3).\n"
             + "\n".join(_EDITORIAL_TOOLS)
+            + "\n"
+        )
+    if _site_actions_enabled:
+        tools = (
+            tools.rstrip("\n")
+            + "\n\n# Site actions: the MCP backend with allowlisted extras (spec R4).\n"
+            + _SITE_ACTION_TOOL
             + "\n"
         )
     (dest / "tools.txt").write_text(tools)
@@ -180,6 +192,28 @@ class _EditorialPayload(BaseModel):
     note_type: str | None = None
 
 
+class _BackendPayload(BaseModel):
+    # None = field absent: leave the saved value alone.
+    backend: Literal["jsonapi", "mcp"] | None = None
+    mcp_endpoint: str | None = None
+    mcp_search_index: str | None = None
+    mcp_bundles: list[str] | None = None
+    mcp_extra_tools: list[str] | None = None
+
+
+def _backend_status() -> dict:
+    config = Config.from_env()
+    return {
+        "backend": config.backend,
+        # What the tools use right now: a settings save swaps it at once.
+        "active": "mcp" if isinstance(get_client(), McpBackend) else "jsonapi",
+        "mcp_endpoint": config.mcp_endpoint,
+        "mcp_search_index": config.mcp_search_index,
+        "mcp_bundles": list(config.mcp_bundles),
+        "mcp_extra_tools": list(config.mcp_extra_tools),
+    }
+
+
 def _editorial_status() -> dict:
     return {"available": _editorial_enabled, "note_type": os.environ.get("DREACHY_NOTE_TYPE", "")}
 
@@ -211,8 +245,8 @@ def _auth_status() -> dict:
 def _register_settings_routes(settings_app: FastAPI) -> None:
     """Wire the settings page's routes onto the app's own FastAPI instance.
 
-    GET/POST /api/config, GET /api/schema, GET /api/status, GET/POST /api/auth
-    and GET/POST /api/editorial.
+    GET/POST /api/config, GET /api/schema, GET /api/status, GET/POST /api/auth,
+    GET/POST /api/editorial and GET/POST /api/backend.
     """
 
     @settings_app.get("/api/config")
@@ -290,6 +324,31 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             reset_client()  # the next note is saved as this type
         return _editorial_status()
 
+    @settings_app.get("/api/backend")
+    def get_backend() -> dict:
+        return _backend_status()
+
+    @settings_app.post("/api/backend")
+    def save_backend(payload: _BackendPayload) -> dict:
+        endpoint = payload.mcp_endpoint.strip() if payload.mcp_endpoint is not None else None
+        if endpoint and not same_site(endpoint, os.environ.get("DREACHY_BASE_URL", "")):
+            # The site's access token goes with every MCP request.
+            raise HTTPException(status_code=400, detail="The MCP endpoint must be on the site's own address.")
+        updates = {
+            "DREACHY_BACKEND": payload.backend,
+            "DREACHY_MCP_ENDPOINT": endpoint,
+            "DREACHY_MCP_SEARCH_INDEX": payload.mcp_search_index.strip() if payload.mcp_search_index is not None else None,
+            "DREACHY_MCP_BUNDLES": ",".join(parse_types(",".join(payload.mcp_bundles))) if payload.mcp_bundles is not None else None,
+            "DREACHY_MCP_EXTRA_TOOLS": (
+                ",".join(parse_types(",".join(payload.mcp_extra_tools))) if payload.mcp_extra_tools is not None else None
+            ),
+        }
+        for key, value in updates.items():
+            if value is not None:
+                _set_env(key, value)
+        reset_client()  # the next request uses the chosen backend
+        return _backend_status()
+
     @settings_app.post("/api/config")
     def save_config(payload: _ConfigPayload) -> dict:
         env_path = _instance_path() / ".env"
@@ -325,6 +384,12 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             os.environ.pop("DREACHY_OAUTH_CLIENT_SECRET", None)
             login_cleared = True
 
+        endpoint = os.environ.get("DREACHY_MCP_ENDPOINT", "")
+        if base_url_changed and endpoint and not same_site(endpoint, base_url):
+            # An MCP endpoint belongs to the site it's on: the site login goes with it.
+            dotenv.unset_key(str(env_path), "DREACHY_MCP_ENDPOINT")
+            os.environ.pop("DREACHY_MCP_ENDPOINT", None)
+
         types_changed = False
         if types is not None and types != os.environ.get("DREACHY_TYPES", ""):
             _set_env("DREACHY_TYPES", types)
@@ -358,9 +423,19 @@ def _editorial_available() -> bool:
         return False
 
 
+def _site_actions_available() -> bool:
+    """Whether to register drupal_site_action: allowlisted extras exist now.
+    Also fills the backend's cache, which the tool's spec is built from."""
+    try:
+        return bool(get_client().site_actions())
+    except Exception:
+        logger.exception("Couldn't check the site actions at start; they stay off")
+        return False
+
+
 def _start_up(settings_app: FastAPI | None) -> None:
     """Everything Dreachy does before handing over to the conversation app."""
-    global _editorial_enabled
+    global _editorial_enabled, _site_actions_enabled
     _load_instance_env()
     _configure_environment()
     # Routes before discovery: a saved URL that hangs keeps discovery waiting
@@ -369,6 +444,7 @@ def _start_up(settings_app: FastAPI | None) -> None:
         _register_settings_routes(settings_app)
     _warm_schema()
     _editorial_enabled = _editorial_available()
+    _site_actions_enabled = _site_actions_available()
     # Last: tools.txt depends on the login check. The conversation app reads
     # the profile only after _start_up returns.
     _render_profile()

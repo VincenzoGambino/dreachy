@@ -1,0 +1,1306 @@
+{
+  "call": {
+    "arguments": {
+      "amount": 0,
+      "entity_type_id": "node"
+    },
+    "name": "tool_api__demo_entity_list"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Returned 142 Content(node) entities out of a total 142\",\n    \"data\": {\n        \"results\": [\n            {\n                \"_metadata\": {\n                    \"id\": \"1\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Research at Northmoor\",\n                    \"uuid\": \"c4686683-b42c-593e-b5b3-2cccfeeee7eb\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"2\",\n                    \"type\": \"node\",\n                    \"bundle\": \"landing_page\",\n                    \"label\": \"Student Life\",\n                    \"uuid\": \"b55022da-c3dc-53bb-93bd-69b899f23b66\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"3\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"How to Apply\",\n                    \"uuid\": \"34701446-8969-5c35-a1c3-4c88ad120b20\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"4\",\n                    \"type\": \"node\",\n                    \"bundle\": \"facility\",\n                    \"label\": \"Prentice Coastal Field Station\",\n                    \"uuid\": \"54022199-f235-51e0-85ab-22a31682758a\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"5\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Admissions\",\n                    \"uuid\": \"7be38a68-9c76-5c6a-9f39-8441eb795f39\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"6\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Privacy Notice\",\n                    \"uuid\": \"b4fa430a-b312-5f83-87d9-7acf6b0b07e0\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"7\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Tuition and Financial Aid\",\n                    \"uuid\": \"d716cf80-ecef-58c6-bd7f-3b3a7fdb3f50\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"8\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Accessibility\",\n                    \"uuid\": \"7073f436-f58a-501b-ae5a-c4fd0627c1d7\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"9\",\n                    \"type\": \"node\",\n                    \"bundle\": \"facility\",\n                    \"label\": \"Marine Robotics and Test Basin\",\n                    \"uuid\": \"f8a41f62-c993-501b-87a3-d92ba6c99d9b\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"10\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"About Northmoor\",\n                    \"uuid\": \"25586080-3fb5-5a15-8f6a-edf581c946d5\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"11\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Visit Campus\",\n                    \"uuid\": \"7062f624-4786-5293-95c0-30f740678637\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"12\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Try the AI Features\",\n                    \"uuid\": \"8726d52a-af7d-5bd5-b852-36bcb1bb100d\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"13\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Rosa Delgado\",\n                    \"uuid\": \"79b499c5-37ea-5419-ba49-6aad1bea14f5\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"14\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"James McAllister\",\n                    \"uuid\": \"61d74bb2-f8a5-553e-a785-9893d0250a7f\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"15\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Oliver Brandt\",\n                    \"uuid\": \"0d8be11d-579c-5d8c-b656-113ee6a8409f\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"16\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Tom Whitfield\",\n                    \"uuid\": \"1edc11c4-5f22-5c47-af87-06f2c7ec64d3\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"17\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Contact Us\",\n                    \"uuid\": \"93c41c4c-fdb5-5a93-838d-0f7f79fc8ce6\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"18\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Priya Iyer\",\n                    \"uuid\": \"66e4865a-9d84-5f0b-91e7-702eb985fe22\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"19\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Fluid Mechanics\",\n                    \"uuid\": \"a5a64709-80d2-5e9d-b733-cb198276ab28\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"20\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Autonomous Marine Systems\",\n                    \"uuid\": \"9e6379dc-f67e-57f3-bf3f-fc876d1fb6ef\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"21\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Naval Architecture\",\n                    \"uuid\": \"5a6866dc-ebd2-5a54-ba55-a2f5b95a92b4\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"22\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Lena Scholz\",\n                    \"uuid\": \"b1ab5ecd-9f62-563b-8679-df69a7e2e234\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"23\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Marine Mammal Biology\",\n                    \"uuid\": \"a4eace49-a5ff-5ab8-81d1-df164352ec07\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"24\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Population Dynamics of Marine Mammals\",\n                    \"uuid\": \"18412b85-8a49-5891-8c1f-2dfffa386f61\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"25\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Daniel Okonkwo\",\n                    \"uuid\": \"08001209-a8c4-57a6-bd74-6e2f5132d613\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"26\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Statics and Marine Structures\",\n                    \"uuid\": \"b2a99209-be88-56b1-a2fb-02a3b5ec105b\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"27\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Coastal Engineering Design\",\n                    \"uuid\": \"f1e73a16-f250-5777-8404-e3cce9ca3e2a\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"28\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Samuel Hartley\",\n                    \"uuid\": \"0db842b9-18a6-5278-9060-54323d204473\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"29\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Underwater Robotics\",\n                    \"uuid\": \"08a19924-65fc-5fb0-9eb0-4643c636e68f\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"30\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Sofia Marchetti\",\n                    \"uuid\": \"48ea5ca5-7474-5e18-a465-6d3010733f39\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"31\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Marine Botany and Algae\",\n                    \"uuid\": \"b9d70815-5738-5d76-aa37-4d46d94bb195\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"32\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Elena Reyes\",\n                    \"uuid\": \"eb8bf91d-4391-5adc-b6ca-b955beef3a83\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"33\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Data Analysis for Ocean Science\",\n                    \"uuid\": \"b6e46bda-1d4b-5ccf-a605-c7a5e82fd734\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"34\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Marine Mammal Science\",\n                    \"uuid\": \"d1efba8c-3b07-59be-9311-fd8627a725ba\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"35\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Physical Oceanography\",\n                    \"uuid\": \"a04b9561-71e9-559e-a825-10e31ef2e11c\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"36\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Advanced Ocean Modeling\",\n                    \"uuid\": \"72393afe-f5e9-54b1-a4c4-293579b1332a\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"37\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Ocean Observing Systems\",\n                    \"uuid\": \"df165516-8b1e-57a1-a08b-7567a9570775\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"38\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Nathaniel Brooks\",\n                    \"uuid\": \"f5e2f2e5-90c6-567d-8a1e-76af4122e94f\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"39\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Introduction to Ocean Policy\",\n                    \"uuid\": \"bd3a24d8-202a-511c-8f2e-dbbdcdb818af\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"40\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Marine Law and Governance\",\n                    \"uuid\": \"6b087ed7-d904-54b2-a654-d4ebef55b918\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"41\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Ocean Engineering\",\n                    \"uuid\": \"7abe2da3-457e-5bbc-b6c5-6523fd3910a7\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"42\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Marcus Obi\",\n                    \"uuid\": \"cdbcf1d5-ebf3-53ba-b949-f33fb3c65c1c\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"43\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Marine Molecular Ecology\",\n                    \"uuid\": \"5207165f-18ed-59b7-965e-e61a1e381a6d\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"44\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Introduction to Marine Biology\",\n                    \"uuid\": \"9ad9b208-9c7c-59a9-931f-71302e624453\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"45\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Aisha Tanaka\",\n                    \"uuid\": \"8aed3b0a-6189-5218-adc9-6c647ccfddcd\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"46\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Coral Reef Ecology\",\n                    \"uuid\": \"13bcefe5-4487-5b29-8376-039d62dc65a7\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"47\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Invertebrate Zoology\",\n                    \"uuid\": \"47788c51-4971-5412-89af-d3576ff4d3de\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"48\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Farida Haddad\",\n                    \"uuid\": \"a56e0593-c687-50f1-b844-bb436a7c239a\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"49\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Ocean Circulation and Climate\",\n                    \"uuid\": \"c0079ed8-cda3-5957-b266-ae565cf8d3df\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"50\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Climate Change and Coasts\",\n                    \"uuid\": \"8e1e01e1-c93e-5e95-ba4b-76a20b5c17d6\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"51\",\n                    \"type\": \"node\",\n                    \"bundle\": \"facility\",\n                    \"label\": \"R/V Cascadia Strait\",\n                    \"uuid\": \"4a7be898-4190-5069-be47-f489b47020af\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"52\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Miriam Frost\",\n                    \"uuid\": \"d6f279a6-bfd0-5e3b-85d4-51a48ed259c5\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"53\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Fisheries Policy and Management\",\n                    \"uuid\": \"466b4860-0ab5-5068-9cb6-8d408f397c6f\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"54\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Fish Biology\",\n                    \"uuid\": \"796b40c7-2cc3-5f27-871d-05ecec1996b6\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"55\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Fisheries Stock Assessment\",\n                    \"uuid\": \"7b5067d0-e22c-5f3d-8e0a-7ead1a6bb74d\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"56\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Grace Adeyemi\",\n                    \"uuid\": \"e00fb27d-f974-5475-a847-9a363f6e4b8e\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"57\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Coastal Community Resilience\",\n                    \"uuid\": \"55cc466a-b208-5c06-ade7-82a94b5a6c99\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"58\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Hana Vasquez\",\n                    \"uuid\": \"f91efaec-6be2-5132-a4aa-a5569bb5153b\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"59\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Introduction to Oceanography\",\n                    \"uuid\": \"6b9c1773-678c-50b9-b0f5-4856d8105a97\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"60\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Marine Engineering\",\n                    \"uuid\": \"633ed597-9c7e-5a83-bd8b-7b558ed774f9\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"61\",\n                    \"type\": \"node\",\n                    \"bundle\": \"department\",\n                    \"label\": \"Department of Marine Engineering\",\n                    \"uuid\": \"cf02692a-eae0-5c64-b114-86ac93cf12e6\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"62\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Chemical Oceanography\",\n                    \"uuid\": \"7a8a1b0d-2848-5a62-8e05-878552a3583b\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"63\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Tobias Wren\",\n                    \"uuid\": \"d016c0d8-4b6d-5b80-abf3-0a29541f00d4\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"64\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Paleoceanography\",\n                    \"uuid\": \"e0465826-e0c5-51b5-be24-deeb5450f200\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"65\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Oceanography\",\n                    \"uuid\": \"9bd8e105-5fe6-5088-910c-aee14c9d6d24\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"66\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Coastal Geomorphology\",\n                    \"uuid\": \"171f66ff-b345-5bec-9b64-e6fabb82a556\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"67\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Earth Systems\",\n                    \"uuid\": \"04c9f7f7-ed58-526f-998e-0090638abf72\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"68\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Oceanography\",\n                    \"uuid\": \"7d0b0779-686e-519c-8e76-a29caa238bee\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"69\",\n                    \"type\": \"node\",\n                    \"bundle\": \"event\",\n                    \"label\": \"Community Tour of R/V Cascadia Strait\",\n                    \"uuid\": \"82130828-4a80-5557-9f4d-90ee421e8667\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"70\",\n                    \"type\": \"node\",\n                    \"bundle\": \"event\",\n                    \"label\": \"Public Lecture: What We Still Do Not Know About the Deep Ocean\",\n                    \"uuid\": \"9e23bcf4-71ad-59c5-bf07-eb395109363f\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"71\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Sedimentology\",\n                    \"uuid\": \"f3bab108-6083-59ea-8ea0-bda555ae29b0\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"72\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Marine Geophysics\",\n                    \"uuid\": \"154d6b5a-a0a8-5219-b225-8dd1b673abec\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"73\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Marine Geoscience\",\n                    \"uuid\": \"94d2210f-818b-5c2e-a897-bcc0b5b95f38\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"74\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Clara Ndungu\",\n                    \"uuid\": \"01b10c48-1032-5a6f-9ad1-12ec862397de\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"75\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Water Quality and Pollution\",\n                    \"uuid\": \"6da61132-4a48-5566-bed7-b19f3c243774\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"76\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Environmental Science Foundations\",\n                    \"uuid\": \"1506086e-631f-5b13-b786-6badfde045bb\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"77\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Marine Biology\",\n                    \"uuid\": \"a0ce1f8d-a439-5136-ae79-9bf7a24ff18f\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"78\",\n                    \"type\": \"node\",\n                    \"bundle\": \"event\",\n                    \"label\": \"Undergraduate Research Symposium\",\n                    \"uuid\": \"7e0b7a5d-786c-58fc-b435-5d69bdf682a4\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"79\",\n                    \"type\": \"node\",\n                    \"bundle\": \"event\",\n                    \"label\": \"Marine Mammal Science Seminar Series\",\n                    \"uuid\": \"bb177797-345d-54e6-b05f-c19ff5a6d273\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"80\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Marine Policy\",\n                    \"uuid\": \"e016866d-52b3-54f6-a445-9639a5b61185\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"81\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Environmental Impact Assessment\",\n                    \"uuid\": \"272dcbbb-8efb-5b1d-8d8f-60b34b9e86fa\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"82\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Estuarine Systems\",\n                    \"uuid\": \"9c35fdaa-0a20-5705-a19d-22be57c78e2f\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"83\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Environmental Science\",\n                    \"uuid\": \"52ebfd79-4cf0-5e2b-8bbb-ba5eee07eab9\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"84\",\n                    \"type\": \"node\",\n                    \"bundle\": \"landing_page\",\n                    \"label\": \"Life Sciences\",\n                    \"uuid\": \"01a21afd-3bb0-59ed-b98f-729602e886a4\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"85\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Yuki Nakamura\",\n                    \"uuid\": \"106b204e-1a1d-5a1f-bb91-1f70ed622582\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"86\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Shellfish Culture\",\n                    \"uuid\": \"2f7a14f8-a2e7-5be1-93e3-610a03e48638\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"87\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Sustainable Aquaculture Systems\",\n                    \"uuid\": \"709d3b48-2ba6-596f-9e31-52cea4238081\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"88\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Principles of Aquaculture\",\n                    \"uuid\": \"3f4419e2-c424-5c40-a521-ec73d7a96574\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"89\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Aquaculture and Fisheries\",\n                    \"uuid\": \"5e04d8b8-fbbf-5566-9700-bad8005d73d1\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"90\",\n                    \"type\": \"node\",\n                    \"bundle\": \"department\",\n                    \"label\": \"Department of Life Sciences\",\n                    \"uuid\": \"45faa9d4-acaa-5ad2-b952-c76770b0fb15\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"91\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Twenty years of transects show recovery is not a return\",\n                    \"uuid\": \"0719c8e3-47f0-545c-abc8-8476fcbfd7d0\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"92\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Seagrass restoration plots hold through a second winter\",\n                    \"uuid\": \"fb747318-e201-5b6b-921f-b319764bf5e7\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"93\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Sofia Marchetti joins the marine conservation faculty\",\n                    \"uuid\": \"12eed8dd-b924-5a99-ae53-194878453b2f\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"94\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Prentice Coastal Field Station adds year-round housing\",\n                    \"uuid\": \"12c0ec1e-401e-5023-84ec-0ca7fd4a8ada\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"95\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Fall open day draws the largest attendance on record\",\n                    \"uuid\": \"fba8bc0a-29bb-56e6-8034-8ab7147be53d\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"96\",\n                    \"type\": \"node\",\n                    \"bundle\": \"event\",\n                    \"label\": \"Fall Open Day\",\n                    \"uuid\": \"33748eee-f0cd-5c66-a511-709ff7405207\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"97\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Coastal Resilience\",\n                    \"uuid\": \"3f16f854-f660-55f0-98d0-b0c86317a03f\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"98\",\n                    \"type\": \"node\",\n                    \"bundle\": \"event\",\n                    \"label\": \"Coastal Resilience Conference\",\n                    \"uuid\": \"4fa45571-484b-53ba-8e0a-e6753488c52e\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"99\",\n                    \"type\": \"node\",\n                    \"bundle\": \"department\",\n                    \"label\": \"Department of Ocean and Earth Sciences\",\n                    \"uuid\": \"753b7e90-3352-5cb5-84b0-7f889dc502af\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"100\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"A tribute to a founding member of the oceanography faculty\",\n                    \"uuid\": \"b0b74692-4c08-55e0-86e6-430b9136e267\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"101\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Assessing what the January storm did to the shoreline\",\n                    \"uuid\": \"6363e7a2-1320-5a22-9b44-505df223d44a\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"102\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"A sediment core reopens a question about the last warm period\",\n                    \"uuid\": \"8477aeb0-927f-5c6f-b94d-8665251aaabb\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"103\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Estuary survey finds microplastics concentrated in three inlets\",\n                    \"uuid\": \"1d20065a-a6ea-5075-bc3b-92bf9de9925f\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"104\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"R/V Cascadia Strait returns from six-week Arctic cruise\",\n                    \"uuid\": \"3973544e-fbee-5272-872e-07e5d4e7411c\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"105\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Autonomous glider completes an unattended shelf crossing\",\n                    \"uuid\": \"c891cdd8-38f9-53c1-9748-cf6938400888\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"106\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Marine Robotics and Test Basin opens to student projects\",\n                    \"uuid\": \"495a9221-a67a-5f00-9919-10950245ad68\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"107\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Engineering team places in an autonomous vehicle competition\",\n                    \"uuid\": \"71c23b5a-b59b-5007-99ec-6c5faf650667\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"108\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Marine Resource Economics\",\n                    \"uuid\": \"00b17ca5-9395-59bc-af31-46b13411e83d\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"109\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Marine Resource Management\",\n                    \"uuid\": \"8e1502fb-7332-58cb-b0bc-8b734b3ce1a1\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"110\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"From stock assessment class to managing a fishery\",\n                    \"uuid\": \"168c705b-3ec3-560d-a60f-5c597a7c61f5\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"111\",\n                    \"type\": \"node\",\n                    \"bundle\": \"event\",\n                    \"label\": \"Graduate Programs Information Session\",\n                    \"uuid\": \"b6335341-2137-5ad1-b7fd-cf65756e4ebf\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"112\",\n                    \"type\": \"node\",\n                    \"bundle\": \"department\",\n                    \"label\": \"Department of Marine Policy and Economics\",\n                    \"uuid\": \"1b2aa7f7-7f3c-5d8c-ad1c-8d9fc65cdd1a\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"113\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Policy clinic students testify at a state hearing\",\n                    \"uuid\": \"2d4421ff-b3b2-5735-bcaa-cfb09884402c\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"114\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"New scholarship fund for students from coastal communities\",\n                    \"uuid\": \"3cbb2618-db3a-5f74-9466-00343537b39b\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"115\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Commencement 2026\",\n                    \"uuid\": \"4314225f-8c2f-50da-b86e-feec2484fccd\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"116\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"First cohort graduates from MS Marine Mammal Science\",\n                    \"uuid\": \"87623fb9-4044-5667-ac02-1f362d5329bf\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"117\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Halloran Foundation grant funds coastal resilience work\",\n                    \"uuid\": \"0a34654c-8380-5d5a-8158-a1a478a6f013\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"118\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Aquaculture program partners with a regional shellfish hatchery\",\n                    \"uuid\": \"af85de93-e045-562c-a2f4-40c40e385263\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"119\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Undergraduate's oyster monitor goes into the water at Prentice\",\n                    \"uuid\": \"86513bf9-0ce1-5d34-878e-734b0d874758\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"120\",\n                    \"type\": \"node\",\n                    \"bundle\": \"event\",\n                    \"label\": \"Alumni Networking Reception\",\n                    \"uuid\": \"f0960453-2380-553b-8c9d-0746b1beb7f4\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"121\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Metering: follow token usage and costs inside Drupal\",\n                    \"uuid\": \"08f0540d-72a1-5378-932a-ea79fd7dd736\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"122\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Content classification: tags for every page, generated from the text\",\n                    \"uuid\": \"09512cab-6fe5-5597-a2be-d645925dc7bc\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"123\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI disclosure: telling readers when AI wrote the first draft\",\n                    \"uuid\": \"101ad7b8-e98e-5150-8574-b65b5598742b\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"124\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Extend your demo: more AI credits, or your own AI key\",\n                    \"uuid\": \"1ef4d91e-26e4-5f96-a0d0-0623113dc295\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"125\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Ask AI: ask the site a question, get a cited answer\",\n                    \"uuid\": \"26109288-c3ca-5a00-820e-207da7a78d6b\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"126\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI image validation: what the media library refuses\",\n                    \"uuid\": \"297f1167-91d8-53c5-be60-32ff73853b08\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"127\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI for images: alt text, focal point, description and tags\",\n                    \"uuid\": \"4ad0b5fd-55ac-52e5-9a01-f08a36483150\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"128\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Comment Moderation: every comment read by the model before it is published\",\n                    \"uuid\": \"5520809c-fbd8-579c-9322-6fcea01ca370\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"129\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Claude.ai and MCP: work with site content from a chat\",\n                    \"uuid\": \"7f0fa282-55a1-530c-b622-021627205cd4\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"130\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Canvas AI: build pages and components by chat\",\n                    \"uuid\": \"8f60fabd-fbf8-590a-ae5d-eb01687b7c1a\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"131\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Observability: see every request, and what a guardrail blocked\",\n                    \"uuid\": \"998f0c86-ab38-5405-9fca-d6a574050c3e\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"132\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Content Review: every page scored against the style guide\",\n                    \"uuid\": \"a570c064-bf42-575f-b476-2ef49dd54c91\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"133\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Translate: one-click Spanish translations\",\n                    \"uuid\": \"d2dbb35f-4382-5511-8eaa-3926ca6a1ba0\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"134\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"How Northmoor uses AI in its newsroom\",\n                    \"uuid\": \"36e8683f-2d26-453f-8e73-f552434fcd4c\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"135\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"State budget carries $38 million for Northmoor's coastal research\",\n                    \"uuid\": \"e5f695d1-66d7-4d08-9221-885f3f6668b6\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"136\",\n                    \"type\": \"node\",\n                    \"bundle\": \"student_announcement\",\n                    \"label\": \"Selling board\",\n                    \"uuid\": \"7b8595ba-c7b4-5f3c-9c8a-81857d3d2257\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"137\",\n                    \"type\": \"node\",\n                    \"bundle\": \"student_announcement\",\n                    \"label\": \"Faculty and student soiree tonight\",\n                    \"uuid\": \"107e2a53-93b0-5b8f-a970-307f3d10cd05\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"138\",\n                    \"type\": \"node\",\n                    \"bundle\": \"student_announcement\",\n                    \"label\": \"Research assistants wanted for the Prentice transect survey\",\n                    \"uuid\": \"287a33e4-3b27-5b73-99bb-91545ca9552e\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"139\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Information\",\n                    \"uuid\": \"3a1d9c42-7f18-4b6e-9c05-2e8b71a4d301\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"140\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Account Setup Information\",\n                    \"uuid\": \"5c7e2b08-91a4-4d3f-8e61-0fb95c6a7d22\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"141\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Reset Your Password in 3 Steps\",\n                    \"uuid\": \"9f4a6d15-3c82-4e07-b5d9-6a13e8f2c744\"\n                }\n            },\n            {\n                \"_metadata\": {\n                    \"id\": \"142\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Dreachy MCP probe 2026-10-01 14:19\",\n                    \"uuid\": \"45dc8c05-00c9-49df-9017-8e0d3bb63557\"\n                }\n            }\n        ]\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "results": [
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "1",
+              "label": "Research at Northmoor",
+              "type": "node",
+              "uuid": "c4686683-b42c-593e-b5b3-2cccfeeee7eb"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "landing_page",
+              "id": "2",
+              "label": "Student Life",
+              "type": "node",
+              "uuid": "b55022da-c3dc-53bb-93bd-69b899f23b66"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "3",
+              "label": "How to Apply",
+              "type": "node",
+              "uuid": "34701446-8969-5c35-a1c3-4c88ad120b20"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "facility",
+              "id": "4",
+              "label": "Prentice Coastal Field Station",
+              "type": "node",
+              "uuid": "54022199-f235-51e0-85ab-22a31682758a"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "5",
+              "label": "Admissions",
+              "type": "node",
+              "uuid": "7be38a68-9c76-5c6a-9f39-8441eb795f39"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "6",
+              "label": "Privacy Notice",
+              "type": "node",
+              "uuid": "b4fa430a-b312-5f83-87d9-7acf6b0b07e0"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "7",
+              "label": "Tuition and Financial Aid",
+              "type": "node",
+              "uuid": "d716cf80-ecef-58c6-bd7f-3b3a7fdb3f50"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "8",
+              "label": "Accessibility",
+              "type": "node",
+              "uuid": "7073f436-f58a-501b-ae5a-c4fd0627c1d7"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "facility",
+              "id": "9",
+              "label": "Marine Robotics and Test Basin",
+              "type": "node",
+              "uuid": "f8a41f62-c993-501b-87a3-d92ba6c99d9b"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "10",
+              "label": "About Northmoor",
+              "type": "node",
+              "uuid": "25586080-3fb5-5a15-8f6a-edf581c946d5"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "11",
+              "label": "Visit Campus",
+              "type": "node",
+              "uuid": "7062f624-4786-5293-95c0-30f740678637"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "12",
+              "label": "Try the AI Features",
+              "type": "node",
+              "uuid": "8726d52a-af7d-5bd5-b852-36bcb1bb100d"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "13",
+              "label": "Rosa Delgado",
+              "type": "node",
+              "uuid": "79b499c5-37ea-5419-ba49-6aad1bea14f5"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "14",
+              "label": "James McAllister",
+              "type": "node",
+              "uuid": "61d74bb2-f8a5-553e-a785-9893d0250a7f"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "15",
+              "label": "Oliver Brandt",
+              "type": "node",
+              "uuid": "0d8be11d-579c-5d8c-b656-113ee6a8409f"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "16",
+              "label": "Tom Whitfield",
+              "type": "node",
+              "uuid": "1edc11c4-5f22-5c47-af87-06f2c7ec64d3"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "17",
+              "label": "Contact Us",
+              "type": "node",
+              "uuid": "93c41c4c-fdb5-5a93-838d-0f7f79fc8ce6"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "18",
+              "label": "Dr. Priya Iyer",
+              "type": "node",
+              "uuid": "66e4865a-9d84-5f0b-91e7-702eb985fe22"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "19",
+              "label": "Fluid Mechanics",
+              "type": "node",
+              "uuid": "a5a64709-80d2-5e9d-b733-cb198276ab28"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "20",
+              "label": "Autonomous Marine Systems",
+              "type": "node",
+              "uuid": "9e6379dc-f67e-57f3-bf3f-fc876d1fb6ef"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "21",
+              "label": "Naval Architecture",
+              "type": "node",
+              "uuid": "5a6866dc-ebd2-5a54-ba55-a2f5b95a92b4"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "22",
+              "label": "Dr. Lena Scholz",
+              "type": "node",
+              "uuid": "b1ab5ecd-9f62-563b-8679-df69a7e2e234"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "23",
+              "label": "Marine Mammal Biology",
+              "type": "node",
+              "uuid": "a4eace49-a5ff-5ab8-81d1-df164352ec07"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "24",
+              "label": "Population Dynamics of Marine Mammals",
+              "type": "node",
+              "uuid": "18412b85-8a49-5891-8c1f-2dfffa386f61"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "25",
+              "label": "Dr. Daniel Okonkwo",
+              "type": "node",
+              "uuid": "08001209-a8c4-57a6-bd74-6e2f5132d613"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "26",
+              "label": "Statics and Marine Structures",
+              "type": "node",
+              "uuid": "b2a99209-be88-56b1-a2fb-02a3b5ec105b"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "27",
+              "label": "Coastal Engineering Design",
+              "type": "node",
+              "uuid": "f1e73a16-f250-5777-8404-e3cce9ca3e2a"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "28",
+              "label": "Dr. Samuel Hartley",
+              "type": "node",
+              "uuid": "0db842b9-18a6-5278-9060-54323d204473"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "29",
+              "label": "Underwater Robotics",
+              "type": "node",
+              "uuid": "08a19924-65fc-5fb0-9eb0-4643c636e68f"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "30",
+              "label": "Dr. Sofia Marchetti",
+              "type": "node",
+              "uuid": "48ea5ca5-7474-5e18-a465-6d3010733f39"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "31",
+              "label": "Marine Botany and Algae",
+              "type": "node",
+              "uuid": "b9d70815-5738-5d76-aa37-4d46d94bb195"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "32",
+              "label": "Dr. Elena Reyes",
+              "type": "node",
+              "uuid": "eb8bf91d-4391-5adc-b6ca-b955beef3a83"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "33",
+              "label": "Data Analysis for Ocean Science",
+              "type": "node",
+              "uuid": "b6e46bda-1d4b-5ccf-a605-c7a5e82fd734"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "34",
+              "label": "Marine Mammal Science",
+              "type": "node",
+              "uuid": "d1efba8c-3b07-59be-9311-fd8627a725ba"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "35",
+              "label": "Physical Oceanography",
+              "type": "node",
+              "uuid": "a04b9561-71e9-559e-a825-10e31ef2e11c"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "36",
+              "label": "Advanced Ocean Modeling",
+              "type": "node",
+              "uuid": "72393afe-f5e9-54b1-a4c4-293579b1332a"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "37",
+              "label": "Ocean Observing Systems",
+              "type": "node",
+              "uuid": "df165516-8b1e-57a1-a08b-7567a9570775"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "38",
+              "label": "Dr. Nathaniel Brooks",
+              "type": "node",
+              "uuid": "f5e2f2e5-90c6-567d-8a1e-76af4122e94f"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "39",
+              "label": "Introduction to Ocean Policy",
+              "type": "node",
+              "uuid": "bd3a24d8-202a-511c-8f2e-dbbdcdb818af"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "40",
+              "label": "Marine Law and Governance",
+              "type": "node",
+              "uuid": "6b087ed7-d904-54b2-a654-d4ebef55b918"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "41",
+              "label": "Ocean Engineering",
+              "type": "node",
+              "uuid": "7abe2da3-457e-5bbc-b6c5-6523fd3910a7"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "42",
+              "label": "Dr. Marcus Obi",
+              "type": "node",
+              "uuid": "cdbcf1d5-ebf3-53ba-b949-f33fb3c65c1c"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "43",
+              "label": "Marine Molecular Ecology",
+              "type": "node",
+              "uuid": "5207165f-18ed-59b7-965e-e61a1e381a6d"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "44",
+              "label": "Introduction to Marine Biology",
+              "type": "node",
+              "uuid": "9ad9b208-9c7c-59a9-931f-71302e624453"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "45",
+              "label": "Dr. Aisha Tanaka",
+              "type": "node",
+              "uuid": "8aed3b0a-6189-5218-adc9-6c647ccfddcd"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "46",
+              "label": "Coral Reef Ecology",
+              "type": "node",
+              "uuid": "13bcefe5-4487-5b29-8376-039d62dc65a7"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "47",
+              "label": "Invertebrate Zoology",
+              "type": "node",
+              "uuid": "47788c51-4971-5412-89af-d3576ff4d3de"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "48",
+              "label": "Dr. Farida Haddad",
+              "type": "node",
+              "uuid": "a56e0593-c687-50f1-b844-bb436a7c239a"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "49",
+              "label": "Ocean Circulation and Climate",
+              "type": "node",
+              "uuid": "c0079ed8-cda3-5957-b266-ae565cf8d3df"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "50",
+              "label": "Climate Change and Coasts",
+              "type": "node",
+              "uuid": "8e1e01e1-c93e-5e95-ba4b-76a20b5c17d6"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "facility",
+              "id": "51",
+              "label": "R/V Cascadia Strait",
+              "type": "node",
+              "uuid": "4a7be898-4190-5069-be47-f489b47020af"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "52",
+              "label": "Dr. Miriam Frost",
+              "type": "node",
+              "uuid": "d6f279a6-bfd0-5e3b-85d4-51a48ed259c5"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "53",
+              "label": "Fisheries Policy and Management",
+              "type": "node",
+              "uuid": "466b4860-0ab5-5068-9cb6-8d408f397c6f"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "54",
+              "label": "Fish Biology",
+              "type": "node",
+              "uuid": "796b40c7-2cc3-5f27-871d-05ecec1996b6"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "55",
+              "label": "Fisheries Stock Assessment",
+              "type": "node",
+              "uuid": "7b5067d0-e22c-5f3d-8e0a-7ead1a6bb74d"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "56",
+              "label": "Dr. Grace Adeyemi",
+              "type": "node",
+              "uuid": "e00fb27d-f974-5475-a847-9a363f6e4b8e"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "57",
+              "label": "Coastal Community Resilience",
+              "type": "node",
+              "uuid": "55cc466a-b208-5c06-ade7-82a94b5a6c99"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "58",
+              "label": "Dr. Hana Vasquez",
+              "type": "node",
+              "uuid": "f91efaec-6be2-5132-a4aa-a5569bb5153b"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "59",
+              "label": "Introduction to Oceanography",
+              "type": "node",
+              "uuid": "6b9c1773-678c-50b9-b0f5-4856d8105a97"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "60",
+              "label": "Marine Engineering",
+              "type": "node",
+              "uuid": "633ed597-9c7e-5a83-bd8b-7b558ed774f9"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "department",
+              "id": "61",
+              "label": "Department of Marine Engineering",
+              "type": "node",
+              "uuid": "cf02692a-eae0-5c64-b114-86ac93cf12e6"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "62",
+              "label": "Chemical Oceanography",
+              "type": "node",
+              "uuid": "7a8a1b0d-2848-5a62-8e05-878552a3583b"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "63",
+              "label": "Dr. Tobias Wren",
+              "type": "node",
+              "uuid": "d016c0d8-4b6d-5b80-abf3-0a29541f00d4"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "64",
+              "label": "Paleoceanography",
+              "type": "node",
+              "uuid": "e0465826-e0c5-51b5-be24-deeb5450f200"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "65",
+              "label": "Oceanography",
+              "type": "node",
+              "uuid": "9bd8e105-5fe6-5088-910c-aee14c9d6d24"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "66",
+              "label": "Coastal Geomorphology",
+              "type": "node",
+              "uuid": "171f66ff-b345-5bec-9b64-e6fabb82a556"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "67",
+              "label": "Earth Systems",
+              "type": "node",
+              "uuid": "04c9f7f7-ed58-526f-998e-0090638abf72"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "68",
+              "label": "Oceanography",
+              "type": "node",
+              "uuid": "7d0b0779-686e-519c-8e76-a29caa238bee"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "event",
+              "id": "69",
+              "label": "Community Tour of R/V Cascadia Strait",
+              "type": "node",
+              "uuid": "82130828-4a80-5557-9f4d-90ee421e8667"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "event",
+              "id": "70",
+              "label": "Public Lecture: What We Still Do Not Know About the Deep Ocean",
+              "type": "node",
+              "uuid": "9e23bcf4-71ad-59c5-bf07-eb395109363f"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "71",
+              "label": "Sedimentology",
+              "type": "node",
+              "uuid": "f3bab108-6083-59ea-8ea0-bda555ae29b0"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "72",
+              "label": "Marine Geophysics",
+              "type": "node",
+              "uuid": "154d6b5a-a0a8-5219-b225-8dd1b673abec"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "73",
+              "label": "Marine Geoscience",
+              "type": "node",
+              "uuid": "94d2210f-818b-5c2e-a897-bcc0b5b95f38"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "74",
+              "label": "Dr. Clara Ndungu",
+              "type": "node",
+              "uuid": "01b10c48-1032-5a6f-9ad1-12ec862397de"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "75",
+              "label": "Water Quality and Pollution",
+              "type": "node",
+              "uuid": "6da61132-4a48-5566-bed7-b19f3c243774"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "76",
+              "label": "Environmental Science Foundations",
+              "type": "node",
+              "uuid": "1506086e-631f-5b13-b786-6badfde045bb"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "77",
+              "label": "Marine Biology",
+              "type": "node",
+              "uuid": "a0ce1f8d-a439-5136-ae79-9bf7a24ff18f"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "event",
+              "id": "78",
+              "label": "Undergraduate Research Symposium",
+              "type": "node",
+              "uuid": "7e0b7a5d-786c-58fc-b435-5d69bdf682a4"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "event",
+              "id": "79",
+              "label": "Marine Mammal Science Seminar Series",
+              "type": "node",
+              "uuid": "bb177797-345d-54e6-b05f-c19ff5a6d273"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "80",
+              "label": "Marine Policy",
+              "type": "node",
+              "uuid": "e016866d-52b3-54f6-a445-9639a5b61185"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "81",
+              "label": "Environmental Impact Assessment",
+              "type": "node",
+              "uuid": "272dcbbb-8efb-5b1d-8d8f-60b34b9e86fa"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "82",
+              "label": "Estuarine Systems",
+              "type": "node",
+              "uuid": "9c35fdaa-0a20-5705-a19d-22be57c78e2f"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "83",
+              "label": "Environmental Science",
+              "type": "node",
+              "uuid": "52ebfd79-4cf0-5e2b-8bbb-ba5eee07eab9"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "landing_page",
+              "id": "84",
+              "label": "Life Sciences",
+              "type": "node",
+              "uuid": "01a21afd-3bb0-59ed-b98f-729602e886a4"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "85",
+              "label": "Dr. Yuki Nakamura",
+              "type": "node",
+              "uuid": "106b204e-1a1d-5a1f-bb91-1f70ed622582"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "86",
+              "label": "Shellfish Culture",
+              "type": "node",
+              "uuid": "2f7a14f8-a2e7-5be1-93e3-610a03e48638"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "87",
+              "label": "Sustainable Aquaculture Systems",
+              "type": "node",
+              "uuid": "709d3b48-2ba6-596f-9e31-52cea4238081"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "88",
+              "label": "Principles of Aquaculture",
+              "type": "node",
+              "uuid": "3f4419e2-c424-5c40-a521-ec73d7a96574"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "89",
+              "label": "Aquaculture and Fisheries",
+              "type": "node",
+              "uuid": "5e04d8b8-fbbf-5566-9700-bad8005d73d1"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "department",
+              "id": "90",
+              "label": "Department of Life Sciences",
+              "type": "node",
+              "uuid": "45faa9d4-acaa-5ad2-b952-c76770b0fb15"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "91",
+              "label": "Twenty years of transects show recovery is not a return",
+              "type": "node",
+              "uuid": "0719c8e3-47f0-545c-abc8-8476fcbfd7d0"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "92",
+              "label": "Seagrass restoration plots hold through a second winter",
+              "type": "node",
+              "uuid": "fb747318-e201-5b6b-921f-b319764bf5e7"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "93",
+              "label": "Sofia Marchetti joins the marine conservation faculty",
+              "type": "node",
+              "uuid": "12eed8dd-b924-5a99-ae53-194878453b2f"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "94",
+              "label": "Prentice Coastal Field Station adds year-round housing",
+              "type": "node",
+              "uuid": "12c0ec1e-401e-5023-84ec-0ca7fd4a8ada"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "95",
+              "label": "Fall open day draws the largest attendance on record",
+              "type": "node",
+              "uuid": "fba8bc0a-29bb-56e6-8034-8ab7147be53d"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "event",
+              "id": "96",
+              "label": "Fall Open Day",
+              "type": "node",
+              "uuid": "33748eee-f0cd-5c66-a511-709ff7405207"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "97",
+              "label": "Coastal Resilience",
+              "type": "node",
+              "uuid": "3f16f854-f660-55f0-98d0-b0c86317a03f"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "event",
+              "id": "98",
+              "label": "Coastal Resilience Conference",
+              "type": "node",
+              "uuid": "4fa45571-484b-53ba-8e0a-e6753488c52e"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "department",
+              "id": "99",
+              "label": "Department of Ocean and Earth Sciences",
+              "type": "node",
+              "uuid": "753b7e90-3352-5cb5-84b0-7f889dc502af"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "100",
+              "label": "A tribute to a founding member of the oceanography faculty",
+              "type": "node",
+              "uuid": "b0b74692-4c08-55e0-86e6-430b9136e267"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "101",
+              "label": "Assessing what the January storm did to the shoreline",
+              "type": "node",
+              "uuid": "6363e7a2-1320-5a22-9b44-505df223d44a"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "102",
+              "label": "A sediment core reopens a question about the last warm period",
+              "type": "node",
+              "uuid": "8477aeb0-927f-5c6f-b94d-8665251aaabb"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "103",
+              "label": "Estuary survey finds microplastics concentrated in three inlets",
+              "type": "node",
+              "uuid": "1d20065a-a6ea-5075-bc3b-92bf9de9925f"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "104",
+              "label": "R/V Cascadia Strait returns from six-week Arctic cruise",
+              "type": "node",
+              "uuid": "3973544e-fbee-5272-872e-07e5d4e7411c"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "105",
+              "label": "Autonomous glider completes an unattended shelf crossing",
+              "type": "node",
+              "uuid": "c891cdd8-38f9-53c1-9748-cf6938400888"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "106",
+              "label": "Marine Robotics and Test Basin opens to student projects",
+              "type": "node",
+              "uuid": "495a9221-a67a-5f00-9919-10950245ad68"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "107",
+              "label": "Engineering team places in an autonomous vehicle competition",
+              "type": "node",
+              "uuid": "71c23b5a-b59b-5007-99ec-6c5faf650667"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "108",
+              "label": "Marine Resource Economics",
+              "type": "node",
+              "uuid": "00b17ca5-9395-59bc-af31-46b13411e83d"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "109",
+              "label": "Marine Resource Management",
+              "type": "node",
+              "uuid": "8e1502fb-7332-58cb-b0bc-8b734b3ce1a1"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "110",
+              "label": "From stock assessment class to managing a fishery",
+              "type": "node",
+              "uuid": "168c705b-3ec3-560d-a60f-5c597a7c61f5"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "event",
+              "id": "111",
+              "label": "Graduate Programs Information Session",
+              "type": "node",
+              "uuid": "b6335341-2137-5ad1-b7fd-cf65756e4ebf"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "department",
+              "id": "112",
+              "label": "Department of Marine Policy and Economics",
+              "type": "node",
+              "uuid": "1b2aa7f7-7f3c-5d8c-ad1c-8d9fc65cdd1a"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "113",
+              "label": "Policy clinic students testify at a state hearing",
+              "type": "node",
+              "uuid": "2d4421ff-b3b2-5735-bcaa-cfb09884402c"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "114",
+              "label": "New scholarship fund for students from coastal communities",
+              "type": "node",
+              "uuid": "3cbb2618-db3a-5f74-9466-00343537b39b"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "115",
+              "label": "Commencement 2026",
+              "type": "node",
+              "uuid": "4314225f-8c2f-50da-b86e-feec2484fccd"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "116",
+              "label": "First cohort graduates from MS Marine Mammal Science",
+              "type": "node",
+              "uuid": "87623fb9-4044-5667-ac02-1f362d5329bf"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "117",
+              "label": "Halloran Foundation grant funds coastal resilience work",
+              "type": "node",
+              "uuid": "0a34654c-8380-5d5a-8158-a1a478a6f013"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "118",
+              "label": "Aquaculture program partners with a regional shellfish hatchery",
+              "type": "node",
+              "uuid": "af85de93-e045-562c-a2f4-40c40e385263"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "119",
+              "label": "Undergraduate's oyster monitor goes into the water at Prentice",
+              "type": "node",
+              "uuid": "86513bf9-0ce1-5d34-878e-734b0d874758"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "event",
+              "id": "120",
+              "label": "Alumni Networking Reception",
+              "type": "node",
+              "uuid": "f0960453-2380-553b-8c9d-0746b1beb7f4"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "121",
+              "label": "AI Metering: follow token usage and costs inside Drupal",
+              "type": "node",
+              "uuid": "08f0540d-72a1-5378-932a-ea79fd7dd736"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "122",
+              "label": "Content classification: tags for every page, generated from the text",
+              "type": "node",
+              "uuid": "09512cab-6fe5-5597-a2be-d645925dc7bc"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "123",
+              "label": "AI disclosure: telling readers when AI wrote the first draft",
+              "type": "node",
+              "uuid": "101ad7b8-e98e-5150-8574-b65b5598742b"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "124",
+              "label": "Extend your demo: more AI credits, or your own AI key",
+              "type": "node",
+              "uuid": "1ef4d91e-26e4-5f96-a0d0-0623113dc295"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "125",
+              "label": "Ask AI: ask the site a question, get a cited answer",
+              "type": "node",
+              "uuid": "26109288-c3ca-5a00-820e-207da7a78d6b"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "126",
+              "label": "AI image validation: what the media library refuses",
+              "type": "node",
+              "uuid": "297f1167-91d8-53c5-be60-32ff73853b08"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "127",
+              "label": "AI for images: alt text, focal point, description and tags",
+              "type": "node",
+              "uuid": "4ad0b5fd-55ac-52e5-9a01-f08a36483150"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "128",
+              "label": "AI Comment Moderation: every comment read by the model before it is published",
+              "type": "node",
+              "uuid": "5520809c-fbd8-579c-9322-6fcea01ca370"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "129",
+              "label": "Claude.ai and MCP: work with site content from a chat",
+              "type": "node",
+              "uuid": "7f0fa282-55a1-530c-b622-021627205cd4"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "130",
+              "label": "Canvas AI: build pages and components by chat",
+              "type": "node",
+              "uuid": "8f60fabd-fbf8-590a-ae5d-eb01687b7c1a"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "131",
+              "label": "AI Observability: see every request, and what a guardrail blocked",
+              "type": "node",
+              "uuid": "998f0c86-ab38-5405-9fca-d6a574050c3e"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "132",
+              "label": "AI Content Review: every page scored against the style guide",
+              "type": "node",
+              "uuid": "a570c064-bf42-575f-b476-2ef49dd54c91"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "133",
+              "label": "AI Translate: one-click Spanish translations",
+              "type": "node",
+              "uuid": "d2dbb35f-4382-5511-8eaa-3926ca6a1ba0"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "134",
+              "label": "How Northmoor uses AI in its newsroom",
+              "type": "node",
+              "uuid": "36e8683f-2d26-453f-8e73-f552434fcd4c"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "135",
+              "label": "State budget carries $38 million for Northmoor's coastal research",
+              "type": "node",
+              "uuid": "e5f695d1-66d7-4d08-9221-885f3f6668b6"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "student_announcement",
+              "id": "136",
+              "label": "Selling board",
+              "type": "node",
+              "uuid": "7b8595ba-c7b4-5f3c-9c8a-81857d3d2257"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "student_announcement",
+              "id": "137",
+              "label": "Faculty and student soiree tonight",
+              "type": "node",
+              "uuid": "107e2a53-93b0-5b8f-a970-307f3d10cd05"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "student_announcement",
+              "id": "138",
+              "label": "Research assistants wanted for the Prentice transect survey",
+              "type": "node",
+              "uuid": "287a33e4-3b27-5b73-99bb-91545ca9552e"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "139",
+              "label": "Information",
+              "type": "node",
+              "uuid": "3a1d9c42-7f18-4b6e-9c05-2e8b71a4d301"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "140",
+              "label": "Account Setup Information",
+              "type": "node",
+              "uuid": "5c7e2b08-91a4-4d3f-8e61-0fb95c6a7d22"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "141",
+              "label": "Reset Your Password in 3 Steps",
+              "type": "node",
+              "uuid": "9f4a6d15-3c82-4e07-b5d9-6a13e8f2c744"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "142",
+              "label": "Dreachy MCP probe 2026-10-01 14:19",
+              "type": "node",
+              "uuid": "45dc8c05-00c9-49df-9017-8e0d3bb63557"
+            }
+          }
+        ]
+      },
+      "message": "Returned 142 Content(node) entities out of a total 142",
+      "success": true
+    }
+  },
+  "seconds": 4.022
+}

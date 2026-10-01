@@ -1,0 +1,185 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:47c0cb}}"
+    },
+    "name": "tool_api__demo_entity_field_values"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Retrieved 41 field values from node entity 5.\",\n    \"data\": {\n        \"field_values\": {\n            \"nid\": \"5\",\n            \"uuid\": \"7be38a68-9c76-5c6a-9f39-8441eb795f39\",\n            \"vid\": \"5\",\n            \"langcode\": \"en\",\n            \"type\": {\n                \"target_id\": \"standard_page\",\n                \"entity\": {\n                    \"id\": \"standard_page\",\n                    \"label\": \"Standard Page\",\n                    \"type\": \"node_type\"\n                }\n            },\n            \"revision_timestamp\": \"1790629220\",\n            \"revision_uid\": {\n                \"target_id\": \"1\",\n                \"entity\": {\n                    \"id\": \"1\",\n                    \"label\": \"admin\",\n                    \"type\": \"user\"\n                }\n            },\n            \"revision_log\": null,\n            \"status\": \"1\",\n            \"uid\": {\n                \"target_id\": \"1\",\n                \"entity\": {\n                    \"id\": \"1\",\n                    \"label\": \"admin\",\n                    \"type\": \"user\"\n                }\n            },\n            \"title\": \"Admissions\",\n            \"created\": \"1735689600\",\n            \"changed\": \"1790629220\",\n            \"promote\": \"0\",\n            \"sticky\": \"0\",\n            \"default_langcode\": \"1\",\n            \"revision_default\": \"1\",\n            \"revision_translation_affected\": \"1\",\n            \"moderation_state\": \"published\",\n            \"metatag\": [\n                {\n                    \"tag\": \"meta\",\n                    \"attributes\": {\n                        \"name\": \"title\",\n                        \"content\": \"Admissions | Drupal AI Demo\"\n                    }\n                },\n                {\n                    \"tag\": \"link\",\n                    \"attributes\": {\n                        \"rel\": \"canonical\",\n                        \"href\": \"https://prod-cd9108-f20348-j4f8nqnixxkb.drupalforge.app/mcp\"\n                    }\n                },\n                {\n                    \"tag\": \"link\",\n                    \"attributes\": {\n                        \"rel\": \"shortlink\",\n                        \"href\": \"https://prod-cd9108-f20348-j4f8nqnixxkb.drupalforge.app/\"\n                    }\n                },\n                {\n                    \"tag\": \"meta\",\n                    \"attributes\": {\n                        \"name\": \"referrer\",\n                        \"content\": \"unsafe-url\"\n                    }\n                },\n                {\n                    \"tag\": \"meta\",\n                    \"attributes\": {\n                        \"name\": \"rights\",\n                        \"content\": \"Copyright \u00a9 All rights reserved.\"\n                    }\n                },\n                {\n                    \"tag\": \"meta\",\n                    \"attributes\": {\n                        \"property\": \"og:site_name\",\n                        \"content\": \"Drupal AI Demo\"\n                    }\n                },\n                {\n                    \"tag\": \"meta\",\n                    \"attributes\": {\n                        \"property\": \"og:type\",\n                        \"content\": \"article\"\n                    }\n                },\n                {\n                    \"tag\": \"meta\",\n                    \"attributes\": {\n                        \"property\": \"og:url\",\n                        \"content\": \"https://prod-cd9108-f20348-j4f8nqnixxkb.drupalforge.app/mcp\"\n                    }\n                },\n                {\n                    \"tag\": \"meta\",\n                    \"attributes\": {\n                        \"property\": \"og:title\",\n                        \"content\": \"Admissions\"\n                    }\n                },\n                {\n                    \"tag\": \"meta\",\n                    \"attributes\": {\n                        \"property\": \"og:updated_time\",\n                        \"content\": \"2026-09-28T21:00:20+00:00\"\n                    }\n                },\n                {\n                    \"tag\": \"meta\",\n                    \"attributes\": {\n                        \"name\": \"twitter:card\",\n                        \"content\": \"summary_large_image\"\n                    }\n                },\n                {\n                    \"tag\": \"meta\",\n                    \"attributes\": {\n                        \"name\": \"twitter:title\",\n                        \"content\": \"Admissions\"\n                    }\n                }\n            ],\n            \"path\": {\n                \"alias\": \"/standard-page/admissions\",\n                \"pid\": \"5\",\n                \"langcode\": \"en\"\n            },\n            \"publish_on\": null,\n            \"unpublish_on\": null,\n            \"publish_state\": null,\n            \"unpublish_state\": null,\n            \"menu_link\": null,\n            \"deleted\": null,\n            \"content_translation_source\": \"und\",\n            \"content_translation_outdated\": \"0\",\n            \"ai_automator_status\": null,\n            \"ai_disclosure\": null,\n            \"description\": \"<p>This page covers the shape of admission at Northmoor. The detail for your situation is on the linked pages, and the admissions office answers questions directly.</p>\\n<h2>Undergraduate admission</h2>\\n<p>We admit for fall entry in all seven undergraduate programs, and for spring entry in Environmental Science and Marine Policy.</p>\\n<p>Applications are reviewed as a whole. High school coursework and grades matter most, and the specific requirements differ by program \u2014 Oceanography and Marine Engineering require calculus and mean it, while Marine Biology recommends physics and does not require it. Each program page states its own requirements.</p>\\n<p>We read personal statements carefully. A statement describing why this subject and why a specialized institution is more useful to us than a general account of academic achievement.</p>\\n<p>Applicants who fall short on one requirement are sometimes admitted with a first-semester condition attached rather than declined. If your record is unusual, apply and explain it.</p>\\n<h2>Graduate admission</h2>\\n<p>The five graduate programs work differently from one another, and the difference matters.</p>\\n<p><strong>The doctoral program admits by supervisor.</strong> Find the person whose work you want to do and write to them before you apply. Applications arriving without that conversation are at a real disadvantage, because the decision is made by the prospective supervisor and turns on research fit and funding.</p>\\n<p><strong>The research master's programs</strong> \u2014 Marine Mammal Science and Ocean Engineering \u2014 expect a specific undergraduate background and are explicit about what it is. Contact with a prospective supervisor helps here too.</p>\\n<p><strong>The professional master's programs</strong> \u2014 Coastal Resilience and Marine Resource Management \u2014 are deliberately open on discipline and weight professional experience heavily.</p>\\n<p>Graduate applications close in January for fall entry.</p>\\n<h2>A note on graduate-level specializations</h2>\\n<p>Several subjects people write to us about are graduate programs rather than undergraduate ones. Marine mammal science is the most common. If that is what you want to do, the route is an undergraduate degree in marine biology first \u2014 here or elsewhere \u2014 and then a graduate application. That is the normal path, not a consolation.</p>\\n<h2>What it costs</h2>\\n<p>Tuition, fees and financial aid are set out in full on the <a href=\\\"/standard-page/tuition-and-financial-aid\\\">tuition and financial aid page</a>. Costs are published there and nowhere else on this site, so that there is one figure rather than several that drift.</p>\\n<p>Financial aid questions go to the aid team through the admissions office. Please ask early; the aid timeline runs ahead of the admission timeline.</p>\\n<h2>Deadlines</h2>\\n<p>Undergraduate applications for fall entry close on 15 January. Spring entry closes on 1 October. Graduate applications close on 15 January for fall entry.</p>\\n<h2>Talking to us</h2>\\n<p>Rosa Delgado's office handles all admission inquiries, undergraduate and graduate. Visiting is strongly encouraged \u2014 see the <a href=\\\"/standard-page/visit-campus\\\">visit page</a> for open days and campus tours.</p>\\n\",\n            \"field_ai_seo_analysis\": null,\n            \"field_content_tags\": null,\n            \"field_llms_txt_content_section\": null,\n            \"field_seo_analysis\": null,\n            \"field_seo_description\": null,\n            \"field_seo_image\": null,\n            \"field_seo_title\": null,\n            \"main_image\": {\n                \"target_id\": \"9\",\n                \"entity\": {\n                    \"id\": \"9\",\n                    \"label\": \"Northmoor University \u2014 Aerial-Style Coastline Campus Cluster (Landing Hero)\",\n                    \"type\": \"media\"\n                }\n            },\n            \"preview_text\": \"How to apply, what we look for, and what it costs. Start here whether you are applying as an undergraduate or for graduate study.\"\n        }\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "field_values": {
+          "ai_automator_status": null,
+          "ai_disclosure": null,
+          "changed": "1790629220",
+          "content_translation_outdated": "0",
+          "content_translation_source": "und",
+          "created": "1735689600",
+          "default_langcode": "1",
+          "deleted": null,
+          "description": "<p>This page covers the shape of admission at Northmoor. The detail for your situation is on the linked pages, and the admissions office answers questions directly.</p>\n<h2>Undergraduate admission</h2>\n<p>We admit for fall entry in all seven undergraduate programs, and for spring entry in Environmental Science and Marine Policy.</p>\n<p>Applications are reviewed as a whole. High school coursework and grades matter most, and the specific requirements differ by program \u2014 Oceanography and Marine Engineering require calculus and mean it, while Marine Biology recommends physics and does not require it. Each program page states its own requirements.</p>\n<p>We read personal statements carefully. A statement describing why this subject and why a specialized institution is more useful to us than a general account of academic achievement.</p>\n<p>Applicants who fall short on one requirement are sometimes admitted with a first-semester condition attached rather than declined. If your record is unusual, apply and explain it.</p>\n<h2>Graduate admission</h2>\n<p>The five graduate programs work differently from one another, and the difference matters.</p>\n<p><strong>The doctoral program admits by supervisor.</strong> Find the person whose work you want to do and write to them before you apply. Applications arriving without that conversation are at a real disadvantage, because the decision is made by the prospective supervisor and turns on research fit and funding.</p>\n<p><strong>The research master's programs</strong> \u2014 Marine Mammal Science and Ocean Engineering \u2014 expect a specific undergraduate background and are explicit about what it is. Contact with a prospective supervisor helps here too.</p>\n<p><strong>The professional master's programs</strong> \u2014 Coastal Resilience and Marine Resource Management \u2014 are deliberately open on discipline and weight professional experience heavily.</p>\n<p>Graduate applications close in January for fall entry.</p>\n<h2>A note on graduate-level specializations</h2>\n<p>Several subjects people write to us about are graduate programs rather than undergraduate ones. Marine mammal science is the most common. If that is what you want to do, the route is an undergraduate degree in marine biology first \u2014 here or elsewhere \u2014 and then a graduate application. That is the normal path, not a consolation.</p>\n<h2>What it costs</h2>\n<p>Tuition, fees and financial aid are set out in full on the <a href=\"/standard-page/tuition-and-financial-aid\">tuition and financial aid page</a>. Costs are published there and nowhere else on this site, so that there is one figure rather than several that drift.</p>\n<p>Financial aid questions go to the aid team through the admissions office. Please ask early; the aid timeline runs ahead of the admission timeline.</p>\n<h2>Deadlines</h2>\n<p>Undergraduate applications for fall entry close on 15 January. Spring entry closes on 1 October. Graduate applications close on 15 January for fall entry.</p>\n<h2>Talking to us</h2>\n<p>Rosa Delgado's office handles all admission inquiries, undergraduate and graduate. Visiting is strongly encouraged \u2014 see the <a href=\"/standard-page/visit-campus\">visit page</a> for open days and campus tours.</p>\n",
+          "field_ai_seo_analysis": null,
+          "field_content_tags": null,
+          "field_llms_txt_content_section": null,
+          "field_seo_analysis": null,
+          "field_seo_description": null,
+          "field_seo_image": null,
+          "field_seo_title": null,
+          "langcode": "en",
+          "main_image": {
+            "entity": {
+              "id": "9",
+              "label": "Northmoor University \u2014 Aerial-Style Coastline Campus Cluster (Landing Hero)",
+              "type": "media"
+            },
+            "target_id": "9"
+          },
+          "menu_link": null,
+          "metatag": [
+            {
+              "attributes": {
+                "content": "Admissions | Drupal AI Demo",
+                "name": "title"
+              },
+              "tag": "meta"
+            },
+            {
+              "attributes": {
+                "href": "https://prod-cd9108-f20348-j4f8nqnixxkb.drupalforge.app/mcp",
+                "rel": "canonical"
+              },
+              "tag": "link"
+            },
+            {
+              "attributes": {
+                "href": "https://prod-cd9108-f20348-j4f8nqnixxkb.drupalforge.app/",
+                "rel": "shortlink"
+              },
+              "tag": "link"
+            },
+            {
+              "attributes": {
+                "content": "unsafe-url",
+                "name": "referrer"
+              },
+              "tag": "meta"
+            },
+            {
+              "attributes": {
+                "content": "Copyright \u00a9 All rights reserved.",
+                "name": "rights"
+              },
+              "tag": "meta"
+            },
+            {
+              "attributes": {
+                "content": "Drupal AI Demo",
+                "property": "og:site_name"
+              },
+              "tag": "meta"
+            },
+            {
+              "attributes": {
+                "content": "article",
+                "property": "og:type"
+              },
+              "tag": "meta"
+            },
+            {
+              "attributes": {
+                "content": "https://prod-cd9108-f20348-j4f8nqnixxkb.drupalforge.app/mcp",
+                "property": "og:url"
+              },
+              "tag": "meta"
+            },
+            {
+              "attributes": {
+                "content": "Admissions",
+                "property": "og:title"
+              },
+              "tag": "meta"
+            },
+            {
+              "attributes": {
+                "content": "2026-09-28T21:00:20+00:00",
+                "property": "og:updated_time"
+              },
+              "tag": "meta"
+            },
+            {
+              "attributes": {
+                "content": "summary_large_image",
+                "name": "twitter:card"
+              },
+              "tag": "meta"
+            },
+            {
+              "attributes": {
+                "content": "Admissions",
+                "name": "twitter:title"
+              },
+              "tag": "meta"
+            }
+          ],
+          "moderation_state": "published",
+          "nid": "5",
+          "path": {
+            "alias": "/standard-page/admissions",
+            "langcode": "en",
+            "pid": "5"
+          },
+          "preview_text": "How to apply, what we look for, and what it costs. Start here whether you are applying as an undergraduate or for graduate study.",
+          "promote": "0",
+          "publish_on": null,
+          "publish_state": null,
+          "revision_default": "1",
+          "revision_log": null,
+          "revision_timestamp": "1790629220",
+          "revision_translation_affected": "1",
+          "revision_uid": {
+            "entity": {
+              "id": "1",
+              "label": "admin",
+              "type": "user"
+            },
+            "target_id": "1"
+          },
+          "status": "1",
+          "sticky": "0",
+          "title": "Admissions",
+          "type": {
+            "entity": {
+              "id": "standard_page",
+              "label": "Standard Page",
+              "type": "node_type"
+            },
+            "target_id": "standard_page"
+          },
+          "uid": {
+            "entity": {
+              "id": "1",
+              "label": "admin",
+              "type": "user"
+            },
+            "target_id": "1"
+          },
+          "unpublish_on": null,
+          "unpublish_state": null,
+          "uuid": "7be38a68-9c76-5c6a-9f39-8441eb795f39",
+          "vid": "5"
+        }
+      },
+      "message": "Retrieved 41 field values from node entity 5.",
+      "success": true
+    }
+  },
+  "seconds": 0.547
+}

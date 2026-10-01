@@ -1,0 +1,231 @@
+{
+  "call": {
+    "arguments": {
+      "amount": 20,
+      "entity_type_id": "node",
+      "fields": "moderation_state",
+      "sort_field": "changed",
+      "sort_order": "DESC"
+    },
+    "name": "tool_api__demo_entity_list"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Returned 20 Content(node) entities out of a total 141. This means that if you want to list the rest you should offset 20 and set amount to 121.\",\n    \"data\": {\n        \"results\": [\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"95\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"Fall open day draws the largest attendance on record\",\n                    \"uuid\": \"fba8bc0a-29bb-56e6-8034-8ab7147be53d\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"83\",\n                    \"type\": \"node\",\n                    \"bundle\": \"program\",\n                    \"label\": \"Environmental Science\",\n                    \"uuid\": \"52ebfd79-4cf0-5e2b-8bbb-ba5eee07eab9\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"52\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Miriam Frost\",\n                    \"uuid\": \"d6f279a6-bfd0-5e3b-85d4-51a48ed259c5\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"139\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Information\",\n                    \"uuid\": \"3a1d9c42-7f18-4b6e-9c05-2e8b71a4d301\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"140\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Account Setup Information\",\n                    \"uuid\": \"5c7e2b08-91a4-4d3f-8e61-0fb95c6a7d22\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"141\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Reset Your Password in 3 Steps\",\n                    \"uuid\": \"9f4a6d15-3c82-4e07-b5d9-6a13e8f2c744\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"133\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Translate: one-click Spanish translations\",\n                    \"uuid\": \"d2dbb35f-4382-5511-8eaa-3926ca6a1ba0\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"127\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI for images: alt text, focal point, description and tags\",\n                    \"uuid\": \"4ad0b5fd-55ac-52e5-9a01-f08a36483150\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"128\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Comment Moderation: every comment read by the model before it is published\",\n                    \"uuid\": \"5520809c-fbd8-579c-9322-6fcea01ca370\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"126\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI image validation: what the media library refuses\",\n                    \"uuid\": \"297f1167-91d8-53c5-be60-32ff73853b08\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"132\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Content Review: every page scored against the style guide\",\n                    \"uuid\": \"a570c064-bf42-575f-b476-2ef49dd54c91\"\n                }\n            },\n            {\n                \"moderation_state\": null,\n                \"_metadata\": {\n                    \"id\": \"136\",\n                    \"type\": \"node\",\n                    \"bundle\": \"student_announcement\",\n                    \"label\": \"Selling board\",\n                    \"uuid\": \"7b8595ba-c7b4-5f3c-9c8a-81857d3d2257\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"122\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Content classification: tags for every page, generated from the text\",\n                    \"uuid\": \"09512cab-6fe5-5597-a2be-d645925dc7bc\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"121\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Metering: follow token usage and costs inside Drupal\",\n                    \"uuid\": \"08f0540d-72a1-5378-932a-ea79fd7dd736\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"131\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Observability: see every request, and what a guardrail blocked\",\n                    \"uuid\": \"998f0c86-ab38-5405-9fca-d6a574050c3e\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"123\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI disclosure: telling readers when AI wrote the first draft\",\n                    \"uuid\": \"101ad7b8-e98e-5150-8574-b65b5598742b\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"135\",\n                    \"type\": \"node\",\n                    \"bundle\": \"news\",\n                    \"label\": \"State budget carries $38 million for Northmoor's coastal research\",\n                    \"uuid\": \"e5f695d1-66d7-4d08-9221-885f3f6668b6\"\n                }\n            },\n            {\n                \"moderation_state\": null,\n                \"_metadata\": {\n                    \"id\": \"137\",\n                    \"type\": \"node\",\n                    \"bundle\": \"student_announcement\",\n                    \"label\": \"Faculty and student soiree tonight\",\n                    \"uuid\": \"107e2a53-93b0-5b8f-a970-307f3d10cd05\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"125\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Ask AI: ask the site a question, get a cited answer\",\n                    \"uuid\": \"26109288-c3ca-5a00-820e-207da7a78d6b\"\n                }\n            },\n            {\n                \"moderation_state\": \"published\",\n                \"_metadata\": {\n                    \"id\": \"129\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Claude.ai and MCP: work with site content from a chat\",\n                    \"uuid\": \"7f0fa282-55a1-530c-b622-021627205cd4\"\n                }\n            }\n        ]\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "results": [
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "95",
+              "label": "Fall open day draws the largest attendance on record",
+              "type": "node",
+              "uuid": "fba8bc0a-29bb-56e6-8034-8ab7147be53d"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "program",
+              "id": "83",
+              "label": "Environmental Science",
+              "type": "node",
+              "uuid": "52ebfd79-4cf0-5e2b-8bbb-ba5eee07eab9"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "52",
+              "label": "Dr. Miriam Frost",
+              "type": "node",
+              "uuid": "d6f279a6-bfd0-5e3b-85d4-51a48ed259c5"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "139",
+              "label": "Information",
+              "type": "node",
+              "uuid": "3a1d9c42-7f18-4b6e-9c05-2e8b71a4d301"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "140",
+              "label": "Account Setup Information",
+              "type": "node",
+              "uuid": "5c7e2b08-91a4-4d3f-8e61-0fb95c6a7d22"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "141",
+              "label": "Reset Your Password in 3 Steps",
+              "type": "node",
+              "uuid": "9f4a6d15-3c82-4e07-b5d9-6a13e8f2c744"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "133",
+              "label": "AI Translate: one-click Spanish translations",
+              "type": "node",
+              "uuid": "d2dbb35f-4382-5511-8eaa-3926ca6a1ba0"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "127",
+              "label": "AI for images: alt text, focal point, description and tags",
+              "type": "node",
+              "uuid": "4ad0b5fd-55ac-52e5-9a01-f08a36483150"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "128",
+              "label": "AI Comment Moderation: every comment read by the model before it is published",
+              "type": "node",
+              "uuid": "5520809c-fbd8-579c-9322-6fcea01ca370"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "126",
+              "label": "AI image validation: what the media library refuses",
+              "type": "node",
+              "uuid": "297f1167-91d8-53c5-be60-32ff73853b08"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "132",
+              "label": "AI Content Review: every page scored against the style guide",
+              "type": "node",
+              "uuid": "a570c064-bf42-575f-b476-2ef49dd54c91"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "student_announcement",
+              "id": "136",
+              "label": "Selling board",
+              "type": "node",
+              "uuid": "7b8595ba-c7b4-5f3c-9c8a-81857d3d2257"
+            },
+            "moderation_state": null
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "122",
+              "label": "Content classification: tags for every page, generated from the text",
+              "type": "node",
+              "uuid": "09512cab-6fe5-5597-a2be-d645925dc7bc"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "121",
+              "label": "AI Metering: follow token usage and costs inside Drupal",
+              "type": "node",
+              "uuid": "08f0540d-72a1-5378-932a-ea79fd7dd736"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "131",
+              "label": "AI Observability: see every request, and what a guardrail blocked",
+              "type": "node",
+              "uuid": "998f0c86-ab38-5405-9fca-d6a574050c3e"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "123",
+              "label": "AI disclosure: telling readers when AI wrote the first draft",
+              "type": "node",
+              "uuid": "101ad7b8-e98e-5150-8574-b65b5598742b"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "news",
+              "id": "135",
+              "label": "State budget carries $38 million for Northmoor's coastal research",
+              "type": "node",
+              "uuid": "e5f695d1-66d7-4d08-9221-885f3f6668b6"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "student_announcement",
+              "id": "137",
+              "label": "Faculty and student soiree tonight",
+              "type": "node",
+              "uuid": "107e2a53-93b0-5b8f-a970-307f3d10cd05"
+            },
+            "moderation_state": null
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "125",
+              "label": "Ask AI: ask the site a question, get a cited answer",
+              "type": "node",
+              "uuid": "26109288-c3ca-5a00-820e-207da7a78d6b"
+            },
+            "moderation_state": "published"
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "129",
+              "label": "Claude.ai and MCP: work with site content from a chat",
+              "type": "node",
+              "uuid": "7f0fa282-55a1-530c-b622-021627205cd4"
+            },
+            "moderation_state": "published"
+          }
+        ]
+      },
+      "message": "Returned 20 Content(node) entities out of a total 141. This means that if you want to list the rest you should offset 20 and set amount to 121.",
+      "success": true
+    }
+  },
+  "seconds": 3.611
+}

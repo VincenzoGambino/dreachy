@@ -1,0 +1,27 @@
+{
+  "call": {
+    "arguments": {
+      "entity_id": 142,
+      "entity_type_id": "node"
+    },
+    "name": "tool_api__demo_entity_load_by_id"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Successfully loaded node entity with ID 142\",\n    \"data\": {\n        \"loaded_entity\": \"Entity object handle token: {{entity:7b6e39}}. Entity metadata: {\\\"entity_type\\\":\\\"node\\\",\\\"bundle\\\":\\\"standard_page\\\",\\\"id\\\":\\\"142\\\",\\\"langcode\\\":\\\"en\\\",\\\"revision_id\\\":\\\"142\\\"}\"\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "loaded_entity": "Entity object handle token: {{entity:7b6e39}}. Entity metadata: {\"entity_type\":\"node\",\"bundle\":\"standard_page\",\"id\":\"142\",\"langcode\":\"en\",\"revision_id\":\"142\"}"
+      },
+      "message": "Successfully loaded node entity with ID 142",
+      "success": true
+    }
+  },
+  "seconds": 3.745
+}

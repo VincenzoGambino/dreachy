@@ -44,6 +44,11 @@ def _isolated_paths(tmp_path, monkeypatch):
         "DREACHY_OAUTH_CLIENT_SECRET",
         "DREACHY_OAUTH_SCOPE",
         "DREACHY_NOTE_TYPE",
+        "DREACHY_BACKEND",
+        "DREACHY_MCP_ENDPOINT",
+        "DREACHY_MCP_SEARCH_INDEX",
+        "DREACHY_MCP_BUNDLES",
+        "DREACHY_MCP_EXTRA_TOOLS",
     ):
         monkeypatch.setenv(key, "")
         monkeypatch.delenv(key)
@@ -697,3 +702,85 @@ def test_an_editorial_save_without_a_note_type_leaves_it_alone(monkeypatch) -> N
 
     assert resp.json()["note_type"] == "event"  # the save happened, and kept it
     assert os.environ["DREACHY_NOTE_TYPE"] == "event"
+
+
+# -- the backend (R4 Task 7) -----------------------------------------------
+
+
+def test_backend_settings_default_to_jsonapi() -> None:
+    client = _make_client()
+
+    assert client.get("/api/backend").json() == {
+        "backend": "jsonapi",
+        "active": "jsonapi",
+        "mcp_endpoint": "",
+        "mcp_search_index": "",
+        "mcp_bundles": [],
+        "mcp_extra_tools": [],
+    }
+
+
+def test_backend_settings_round_trip(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://site.test")
+    client = _make_client()
+    settings = {
+        "backend": "mcp",
+        "mcp_endpoint": "https://site.test/mcp",
+        "mcp_search_index": "content_vector",
+        "mcp_bundles": ["news", "standard_page"],
+        "mcp_extra_tools": ["tool_api__canvas_list_pages"],
+    }
+
+    saved = client.post("/api/backend", json=settings).json()
+
+    assert saved == {**settings, "active": "mcp"}
+    assert client.get("/api/backend").json() == saved
+    env = dotenv.dotenv_values(dreachy_main._instance_path() / ".env")
+    assert env["DREACHY_BACKEND"] == "mcp"
+    assert env["DREACHY_MCP_BUNDLES"] == "news,standard_page"
+
+
+def test_switching_backend_drops_the_cached_client(monkeypatch) -> None:
+    client = _make_client()
+    reset = []
+    monkeypatch.setattr(dreachy_main, "reset_client", lambda: reset.append(True))
+
+    client.post("/api/backend", json={"backend": "mcp"})
+
+    assert reset == [True]
+
+
+def test_absent_backend_fields_are_left_alone(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://site.test")
+    client = _make_client()
+    client.post("/api/backend", json={"backend": "mcp", "mcp_search_index": "content_vector"})
+
+    saved = client.post("/api/backend", json={"mcp_bundles": ["news"]}).json()
+
+    assert (saved["backend"], saved["mcp_search_index"], saved["mcp_bundles"]) == ("mcp", "content_vector", ["news"])
+
+
+def test_an_mcp_endpoint_on_another_host_is_refused(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://site.test")
+    client = _make_client()
+
+    resp = client.post("/api/backend", json={"mcp_endpoint": "https://elsewhere.example/mcp"})
+
+    assert resp.status_code == 400
+    assert "site's own address" in resp.json()["detail"]
+    assert client.get("/api/backend").json()["mcp_endpoint"] == ""
+
+
+def test_an_unknown_backend_is_refused() -> None:
+    assert _make_client().post("/api/backend", json={"backend": "graphql"}).status_code == 422
+
+
+def test_moving_site_clears_an_mcp_endpoint_on_the_old_site(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://site.test")
+    client = _make_client()
+    client.post("/api/backend", json={"mcp_endpoint": "https://site.test/api/mcp"})
+
+    client.post("/api/config", json={"base_url": "https://other.test"})
+
+    assert client.get("/api/backend").json()["mcp_endpoint"] == ""
+    assert not dotenv.dotenv_values(dreachy_main._instance_path() / ".env").get("DREACHY_MCP_ENDPOINT")

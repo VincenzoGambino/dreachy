@@ -1,0 +1,50 @@
+{
+  "error_bodies": [
+    [
+      503,
+      "text/plain; charset=utf-8",
+      "The website encountered an unexpected error. Try again later."
+    ],
+    [
+      503,
+      "text/plain; charset=utf-8",
+      "The website encountered an unexpected error. Try again later."
+    ]
+  ],
+  "runs": {
+    "2": [
+      {
+        "fails": [],
+        "seconds": 6.62
+      },
+      {
+        "fails": [],
+        "seconds": 13.61
+      }
+    ],
+    "3": [
+      {
+        "fails": [],
+        "seconds": 4.05
+      },
+      {
+        "fails": [],
+        "seconds": 5.34
+      }
+    ],
+    "6": [
+      {
+        "fails": [
+          "path",
+          "status"
+        ],
+        "seconds": 2.83
+      }
+    ]
+  },
+  "statuses": {
+    "200": 31,
+    "202": 1,
+    "503": 2
+  }
+}

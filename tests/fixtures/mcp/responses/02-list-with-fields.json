@@ -1,0 +1,29 @@
+{
+  "call": {
+    "arguments": {
+      "amount": 3,
+      "bundle": "article",
+      "entity_type_id": "node",
+      "fields": "title,status,created,changed,moderation_state",
+      "sort_field": "changed",
+      "sort_order": "DESC"
+    },
+    "name": "tool_api__demo_entity_list"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": false,\n    \"message\": \"Tool plugin access denied.\",\n    \"data\": []\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": [],
+      "message": "Tool plugin access denied.",
+      "success": false
+    }
+  },
+  "seconds": 0.445
+}
