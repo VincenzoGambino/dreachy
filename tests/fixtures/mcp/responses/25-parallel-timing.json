@@ -1,0 +1,28 @@
+{
+  "fields": [
+    "status",
+    "moderation_state",
+    "created",
+    "changed",
+    "description",
+    "path"
+  ],
+  "parallel_ok": {
+    "changed": true,
+    "created": true,
+    "description": "MCPError: Server returned an error response",
+    "moderation_state": true,
+    "path": "MCPError: Server returned an error response",
+    "status": true
+  },
+  "parallel_seconds": 1.51,
+  "per_call_sequential": {
+    "changed": 0.952,
+    "created": 1.169,
+    "description": 2.502,
+    "moderation_state": 1.428,
+    "path": 1.753,
+    "status": 1.292
+  },
+  "sequential_seconds": 9.1
+}

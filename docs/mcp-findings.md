@@ -271,3 +271,20 @@ Recordings are in `tests/fixtures/mcp/`; file numbers below refer to
 - So a spoken `get_article` (search → load → values) is ≈10 s with session
   setup, against well under a second over JSON:API. Pooling (now allowed)
   saves the 4 s setup.
+
+### Added while starting Tasks 4–8 (2026-10-01)
+
+- **`fields` takes exactly one name**, on `entity_list` and
+  `entity_field_values` alike: `"a,b"`, `"a, b"` and `"a b"` all return
+  items with no fields at all (no error).
+- A field a bundle doesn't have is simply absent from its items (24).
+  `path` comes back as `{"alias", "pid", "langcode"}` (23).
+- **Parallel calls in one session work, up to about 3 at once.** Six list
+  calls took 9.1 s one after another, and 4.0–5.3 s three at a time. Six at
+  once took 2.8 s, but two of them got **HTTP 503** "The website encountered
+  an unexpected error", which the SDK reports as -32603 (25, 26).
+- Field definitions carry `required` and a `value_schema`, but **no default
+  value**. Every bundle here requires `ai_automator_status` (`list_string`),
+  which the site fills in on save (`finished`, 36).
+- The search tool's description names its indexes in prose ("pass index
+  content_vector…"), and its `index` parameter has no `enum`.

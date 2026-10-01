@@ -1,0 +1,311 @@
+{
+  "call": {
+    "arguments": {
+      "amount": 20,
+      "entity_type_id": "node",
+      "fields": "path",
+      "sort_field": "created",
+      "sort_order": "DESC"
+    },
+    "name": "tool_api__demo_entity_list"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Returned 20 Content(node) entities out of a total 142. This means that if you want to list the rest you should offset 20 and set amount to 122.\",\n    \"data\": {\n        \"results\": [\n            {\n                \"path\": {\n                    \"alias\": null,\n                    \"pid\": null,\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"142\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Dreachy MCP probe 2026-10-01 14:19\",\n                    \"uuid\": \"45dc8c05-00c9-49df-9017-8e0d3bb63557\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": null,\n                    \"pid\": null,\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"139\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Information\",\n                    \"uuid\": \"3a1d9c42-7f18-4b6e-9c05-2e8b71a4d301\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": null,\n                    \"pid\": null,\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"141\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Reset Your Password in 3 Steps\",\n                    \"uuid\": \"9f4a6d15-3c82-4e07-b5d9-6a13e8f2c744\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": null,\n                    \"pid\": null,\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"140\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Account Setup Information\",\n                    \"uuid\": \"5c7e2b08-91a4-4d3f-8e61-0fb95c6a7d22\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/ai-metering\",\n                    \"pid\": \"126\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"121\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Metering: follow token usage and costs inside Drupal\",\n                    \"uuid\": \"08f0540d-72a1-5378-932a-ea79fd7dd736\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/extend-your-demo\",\n                    \"pid\": \"129\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"124\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Extend your demo: more AI credits, or your own AI key\",\n                    \"uuid\": \"1ef4d91e-26e4-5f96-a0d0-0623113dc295\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/text-classification\",\n                    \"pid\": \"133\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"128\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Comment Moderation: every comment read by the model before it is published\",\n                    \"uuid\": \"5520809c-fbd8-579c-9322-6fcea01ca370\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/student-life/announcements/faculty-and-student-soiree-tonight\",\n                    \"pid\": \"144\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"137\",\n                    \"type\": \"node\",\n                    \"bundle\": \"student_announcement\",\n                    \"label\": \"Faculty and student soiree tonight\",\n                    \"uuid\": \"107e2a53-93b0-5b8f-a970-307f3d10cd05\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/content-review\",\n                    \"pid\": \"137\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"132\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Content Review: every page scored against the style guide\",\n                    \"uuid\": \"a570c064-bf42-575f-b476-2ef49dd54c91\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/ai-search\",\n                    \"pid\": \"130\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"125\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Ask AI: ask the site a question, get a cited answer\",\n                    \"uuid\": \"26109288-c3ca-5a00-820e-207da7a78d6b\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/ai-disclosure\",\n                    \"pid\": \"128\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"123\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI disclosure: telling readers when AI wrote the first draft\",\n                    \"uuid\": \"101ad7b8-e98e-5150-8574-b65b5598742b\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/image-validation\",\n                    \"pid\": \"131\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"126\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI image validation: what the media library refuses\",\n                    \"uuid\": \"297f1167-91d8-53c5-be60-32ff73853b08\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/content-classification\",\n                    \"pid\": \"127\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"122\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Content classification: tags for every page, generated from the text\",\n                    \"uuid\": \"09512cab-6fe5-5597-a2be-d645925dc7bc\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/claude-mcp\",\n                    \"pid\": \"134\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"129\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Claude.ai and MCP: work with site content from a chat\",\n                    \"uuid\": \"7f0fa282-55a1-530c-b622-021627205cd4\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/ai-media-image\",\n                    \"pid\": \"132\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"127\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI for images: alt text, focal point, description and tags\",\n                    \"uuid\": \"4ad0b5fd-55ac-52e5-9a01-f08a36483150\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/ai-observability\",\n                    \"pid\": \"136\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"131\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Observability: see every request, and what a guardrail blocked\",\n                    \"uuid\": \"998f0c86-ab38-5405-9fca-d6a574050c3e\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/student-life/announcements/research-assistants-wanted-prentice-transect-survey\",\n                    \"pid\": \"145\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"138\",\n                    \"type\": \"node\",\n                    \"bundle\": \"student_announcement\",\n                    \"label\": \"Research assistants wanted for the Prentice transect survey\",\n                    \"uuid\": \"287a33e4-3b27-5b73-99bb-91545ca9552e\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/ai-translate\",\n                    \"pid\": \"138\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"133\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"AI Translate: one-click Spanish translations\",\n                    \"uuid\": \"d2dbb35f-4382-5511-8eaa-3926ca6a1ba0\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/ai-feature/canvas-ai\",\n                    \"pid\": \"135\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"130\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Canvas AI: build pages and components by chat\",\n                    \"uuid\": \"8f60fabd-fbf8-590a-ae5d-eb01687b7c1a\"\n                }\n            },\n            {\n                \"path\": {\n                    \"alias\": \"/student-life/announcements/selling-board\",\n                    \"pid\": \"143\",\n                    \"langcode\": \"en\"\n                },\n                \"_metadata\": {\n                    \"id\": \"136\",\n                    \"type\": \"node\",\n                    \"bundle\": \"student_announcement\",\n                    \"label\": \"Selling board\",\n                    \"uuid\": \"7b8595ba-c7b4-5f3c-9c8a-81857d3d2257\"\n                }\n            }\n        ]\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "results": [
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "142",
+              "label": "Dreachy MCP probe 2026-10-01 14:19",
+              "type": "node",
+              "uuid": "45dc8c05-00c9-49df-9017-8e0d3bb63557"
+            },
+            "path": {
+              "alias": null,
+              "langcode": "en",
+              "pid": null
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "139",
+              "label": "Information",
+              "type": "node",
+              "uuid": "3a1d9c42-7f18-4b6e-9c05-2e8b71a4d301"
+            },
+            "path": {
+              "alias": null,
+              "langcode": "en",
+              "pid": null
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "141",
+              "label": "Reset Your Password in 3 Steps",
+              "type": "node",
+              "uuid": "9f4a6d15-3c82-4e07-b5d9-6a13e8f2c744"
+            },
+            "path": {
+              "alias": null,
+              "langcode": "en",
+              "pid": null
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "140",
+              "label": "Account Setup Information",
+              "type": "node",
+              "uuid": "5c7e2b08-91a4-4d3f-8e61-0fb95c6a7d22"
+            },
+            "path": {
+              "alias": null,
+              "langcode": "en",
+              "pid": null
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "121",
+              "label": "AI Metering: follow token usage and costs inside Drupal",
+              "type": "node",
+              "uuid": "08f0540d-72a1-5378-932a-ea79fd7dd736"
+            },
+            "path": {
+              "alias": "/ai-feature/ai-metering",
+              "langcode": "en",
+              "pid": "126"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "124",
+              "label": "Extend your demo: more AI credits, or your own AI key",
+              "type": "node",
+              "uuid": "1ef4d91e-26e4-5f96-a0d0-0623113dc295"
+            },
+            "path": {
+              "alias": "/ai-feature/extend-your-demo",
+              "langcode": "en",
+              "pid": "129"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "128",
+              "label": "AI Comment Moderation: every comment read by the model before it is published",
+              "type": "node",
+              "uuid": "5520809c-fbd8-579c-9322-6fcea01ca370"
+            },
+            "path": {
+              "alias": "/ai-feature/text-classification",
+              "langcode": "en",
+              "pid": "133"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "student_announcement",
+              "id": "137",
+              "label": "Faculty and student soiree tonight",
+              "type": "node",
+              "uuid": "107e2a53-93b0-5b8f-a970-307f3d10cd05"
+            },
+            "path": {
+              "alias": "/student-life/announcements/faculty-and-student-soiree-tonight",
+              "langcode": "en",
+              "pid": "144"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "132",
+              "label": "AI Content Review: every page scored against the style guide",
+              "type": "node",
+              "uuid": "a570c064-bf42-575f-b476-2ef49dd54c91"
+            },
+            "path": {
+              "alias": "/ai-feature/content-review",
+              "langcode": "en",
+              "pid": "137"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "125",
+              "label": "Ask AI: ask the site a question, get a cited answer",
+              "type": "node",
+              "uuid": "26109288-c3ca-5a00-820e-207da7a78d6b"
+            },
+            "path": {
+              "alias": "/ai-feature/ai-search",
+              "langcode": "en",
+              "pid": "130"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "123",
+              "label": "AI disclosure: telling readers when AI wrote the first draft",
+              "type": "node",
+              "uuid": "101ad7b8-e98e-5150-8574-b65b5598742b"
+            },
+            "path": {
+              "alias": "/ai-feature/ai-disclosure",
+              "langcode": "en",
+              "pid": "128"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "126",
+              "label": "AI image validation: what the media library refuses",
+              "type": "node",
+              "uuid": "297f1167-91d8-53c5-be60-32ff73853b08"
+            },
+            "path": {
+              "alias": "/ai-feature/image-validation",
+              "langcode": "en",
+              "pid": "131"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "122",
+              "label": "Content classification: tags for every page, generated from the text",
+              "type": "node",
+              "uuid": "09512cab-6fe5-5597-a2be-d645925dc7bc"
+            },
+            "path": {
+              "alias": "/ai-feature/content-classification",
+              "langcode": "en",
+              "pid": "127"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "129",
+              "label": "Claude.ai and MCP: work with site content from a chat",
+              "type": "node",
+              "uuid": "7f0fa282-55a1-530c-b622-021627205cd4"
+            },
+            "path": {
+              "alias": "/ai-feature/claude-mcp",
+              "langcode": "en",
+              "pid": "134"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "127",
+              "label": "AI for images: alt text, focal point, description and tags",
+              "type": "node",
+              "uuid": "4ad0b5fd-55ac-52e5-9a01-f08a36483150"
+            },
+            "path": {
+              "alias": "/ai-feature/ai-media-image",
+              "langcode": "en",
+              "pid": "132"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "131",
+              "label": "AI Observability: see every request, and what a guardrail blocked",
+              "type": "node",
+              "uuid": "998f0c86-ab38-5405-9fca-d6a574050c3e"
+            },
+            "path": {
+              "alias": "/ai-feature/ai-observability",
+              "langcode": "en",
+              "pid": "136"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "student_announcement",
+              "id": "138",
+              "label": "Research assistants wanted for the Prentice transect survey",
+              "type": "node",
+              "uuid": "287a33e4-3b27-5b73-99bb-91545ca9552e"
+            },
+            "path": {
+              "alias": "/student-life/announcements/research-assistants-wanted-prentice-transect-survey",
+              "langcode": "en",
+              "pid": "145"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "133",
+              "label": "AI Translate: one-click Spanish translations",
+              "type": "node",
+              "uuid": "d2dbb35f-4382-5511-8eaa-3926ca6a1ba0"
+            },
+            "path": {
+              "alias": "/ai-feature/ai-translate",
+              "langcode": "en",
+              "pid": "138"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "130",
+              "label": "Canvas AI: build pages and components by chat",
+              "type": "node",
+              "uuid": "8f60fabd-fbf8-590a-ae5d-eb01687b7c1a"
+            },
+            "path": {
+              "alias": "/ai-feature/canvas-ai",
+              "langcode": "en",
+              "pid": "135"
+            }
+          },
+          {
+            "_metadata": {
+              "bundle": "student_announcement",
+              "id": "136",
+              "label": "Selling board",
+              "type": "node",
+              "uuid": "7b8595ba-c7b4-5f3c-9c8a-81857d3d2257"
+            },
+            "path": {
+              "alias": "/student-life/announcements/selling-board",
+              "langcode": "en",
+              "pid": "143"
+            }
+          }
+        ]
+      },
+      "message": "Returned 20 Content(node) entities out of a total 142. This means that if you want to list the rest you should offset 20 and set amount to 122.",
+      "success": true
+    }
+  },
+  "seconds": 3.155
+}
