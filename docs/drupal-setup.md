@@ -203,13 +203,17 @@ always needs the login, set up as in §2–§7 with these differences:
    `demo:content:read`, plus `demo:content:write` for notes. Add
    `demo:canvas:read` / `demo:canvas:build` only if you allow Canvas site
    actions. Scope names are the site's own choice.
-3. **The account: a dedicated editor, never an administrator.** Scopes
-   decide which *tools* the client may call; the account the client runs as
-   decides what those tools may *see and do*. Searches run with
-   `check_access` on, so Dreachy sees what that account may view — for an
-   administrator (user 1), that is everything, drafts included. Set the
-   client's **User** to the `dreachy` user of §3, with only the permissions
-   in §8 (no `administer` permissions, never `bypass node access`).
+3. **The account: your choice.** The client acts as whichever user is set
+   in its **User** field; Dreachy works with any account and does only what
+   that account may do. Scopes decide which *tools* the client may call; the
+   account decides what those tools may *see and do*. Searches run with
+   `check_access` on, so Dreachy sees what that account may view.
+
+   **For security, don't use user 1.** User 1 holds every permission
+   whatever its roles or the client's scopes, so anyone with Dreachy's
+   client secret could see everything, drafts included, through every tool
+   the scopes allow. A dedicated user, like the `dreachy` user of §3 with
+   the permissions in §8, limits that. Otherwise any account works.
 4. **Notes.** Over MCP, notes are saved with the module's entity tools
    (stub, set fields, save), so JSON:API writes (§8 step 1) aren't needed;
    the permissions in §8 step 2 still are. The note's text field gets
