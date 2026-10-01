@@ -16,7 +16,8 @@
 #   7. creates the injection article and a draft by another editor (admin)
 #   8. smoke-tests the token endpoint, then prints the settings for Dreachy
 #
-# Usage: scripts/live/ddev-r3-setup.sh [path-to-ddev-project]
+# Usage: [SKIP_SNAPSHOT=1] scripts/live/ddev-r3-setup.sh [path-to-ddev-project]
+#        SKIP_SNAPSHOT=1 skips the database snapshot (you made your own backup).
 #        (default: the sibling DDEV project, reachy/dreachy). Also suitable:
 #        ~/Work/Code/stripedcodex/headless/drupal-headless (Umami, Simple
 #        OAuth 6.1.1 and read-write JSON:API already in place). Existing keys,
@@ -45,9 +46,14 @@ say "Starting DDEV in $SITE_DIR"
 ddev start >/dev/null
 SITE_URL="$(ddev describe -j | python3 -c 'import json,sys; print(json.load(sys.stdin)["raw"]["primary_url"])')"
 
-say "Backing up: database snapshot and composer files"
 SNAPSHOT="dreachy-r3-pre-$STAMP"
-ddev snapshot --name "$SNAPSHOT" >/dev/null
+if [ "${SKIP_SNAPSHOT:-0}" = "1" ]; then
+  say "Backing up: composer files only (SKIP_SNAPSHOT=1 — you made your own database backup)"
+  SNAPSHOT=""
+else
+  say "Backing up: database snapshot and composer files"
+  ddev snapshot --name "$SNAPSHOT" >/dev/null
+fi
 mkdir -p "$BACKUP_DIR"
 cp composer.json composer.lock "$BACKUP_DIR/"
 
@@ -188,7 +194,7 @@ The secret above is local and test-only; it changes on every run. Don't commit i
 To undo everything this script did:
 
   cd $SITE_DIR
-  ddev snapshot restore $SNAPSHOT
+  ${SNAPSHOT:+ddev snapshot restore $SNAPSHOT}${SNAPSHOT:-(restore your own database backup)}
   cp $BACKUP_DIR/composer.json $BACKUP_DIR/composer.lock . && ddev composer install
 $UNDO_KEYS
 EOF
