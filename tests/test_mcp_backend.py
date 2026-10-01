@@ -304,3 +304,12 @@ def test_a_failed_discovery_keeps_the_fallback() -> None:
         assert backend.last_discovery_problem == "site_unreachable"
     finally:
         backend.close()
+
+
+def test_get_article_wont_read_an_unrelated_nearest_match(discovered) -> None:
+    # Semantic search always has a nearest hit; "read me X" must not read something else.
+    backend, _ = discovered()
+
+    assert backend.get_article("budget plans", include_unpublished=True)["title"] == "Budget draft"
+    assert backend.get_article("day") is None  # too short to tell: exact titles only
+    assert backend.get_article("How to apply") is None  # matches Admissions' text, not its title

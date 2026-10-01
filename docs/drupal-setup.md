@@ -185,3 +185,43 @@ than a type's last 50 changes aren't counted.
 
 **Not covered:** a new draft of content that's already published (Content
 Moderation's "Create New Draft" from Published) isn't counted as pending.
+
+## 9. MCP mode (optional)
+
+In MCP mode Dreachy talks to the site's **`mcp_server`** module over the
+Model Context Protocol instead of JSON:API (README, **MCP mode**). It
+always needs the login, set up as in §2–§7 with these differences:
+
+1. **The module.** Install and enable `mcp_server`; it serves `/mcp` and
+   publishes the standard OAuth discovery documents
+   (`/.well-known/oauth-protected-resource`,
+   `/.well-known/oauth-authorization-server`). Dreachy uses client
+   credentials against `/oauth/token`, exactly as in §5.
+2. **The scopes.** The client needs the module's connect scope and the
+   content scopes Dreachy uses — on the sandbox `demo:mcp:connect` and
+   `demo:content:read`, plus `demo:content:write` for notes. Add
+   `demo:canvas:read` / `demo:canvas:build` only if you allow Canvas site
+   actions. Scope names are the site's own choice.
+3. **The account: a dedicated editor, never an administrator.** Scopes
+   decide which *tools* the client may call; the account the client runs as
+   decides what those tools may *see and do*. Searches run with
+   `check_access` on, so Dreachy sees what that account may view — for an
+   administrator (user 1), that is everything, drafts included. Set the
+   client's **User** to the `dreachy` user of §3, with only the permissions
+   in §8 (no `administer` permissions, never `bypass node access`).
+4. **Notes.** Over MCP, notes are saved with the module's entity tools
+   (stub, set fields, save), so JSON:API writes (§8 step 1) aren't needed;
+   the permissions in §8 step 2 still are. Text goes in as `plain_text`.
+   Dreachy checks the new item is a draft *before* saving and re-reads it
+   after. On a moderated type, the workflow must allow saving a new item as
+   a draft (Editorial's "Create New Draft" from Draft); a workflow without
+   that transition refuses notes. Required fields other than text must have
+   a default the site fills on save.
+5. **The search index.** Tell Dreachy which Search API index its search
+   tool should use (settings page, **Search index**). A vector index gives
+   search by meaning; only content in the index can be found or read aloud.
+6. **Site actions** (optional). List the extra MCP tools Dreachy may run on
+   request under **Extra site actions**. Publishing, homepage and
+   site-default, delete and discard tools are refused whatever is listed, as
+   are the entity write tools; anything the site doesn't mark read-only asks
+   for a spoken yes first.

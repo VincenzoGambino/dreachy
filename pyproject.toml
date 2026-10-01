@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dreachy"
-version = "0.4.0"
+version = "0.5.0"
 description = "Reachy Mini becomes the embodiment of a Drupal site — answers questions about published content, reads it aloud, reports its own \"pulse\", and reacts physically to new posts."
 authors = [{ name = "Vincenzo Gambino" }]
 readme = "README.md"

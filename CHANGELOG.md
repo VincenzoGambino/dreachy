@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.5.0 — unreleased
+
+MCP backend (`specs/backend-and-auth.md`, R4).
+
+- Dreachy can talk to the site through its MCP server (`mcp_server`)
+  instead of JSON:API: choose the backend under the settings page's
+  Advanced section (`DREACHY_BACKEND=mcp`). Search uses the site's Search
+  API index — by meaning, with a vector index — and MCP-only sites work.
+- Tools are found on the site by name pattern and can be named in
+  `DREACHY_MCP_MAPPING`; searches always check access.
+- Notes over MCP: checked to be a draft before saving (nothing is saved if
+  that fails) and re-read after; required text fields get the note's text,
+  nothing else is invented; the default note type needs the fewest extra
+  fields.
+- Optional site actions (`drupal_site_action`): allowlisted extra MCP tools,
+  never anything that publishes, sets the homepage or a site default,
+  deletes or discards; writes need a spoken yes.
+- The MCP endpoint must be on the site's own address, so the site login is
+  never sent elsewhere.
+
 ## 0.4.0 — unreleased
 
 Editorial tools (`specs/backend-and-auth.md`, R3).

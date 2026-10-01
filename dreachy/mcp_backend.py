@@ -299,7 +299,8 @@ class McpBackend(Backend):
 
     def get_article(self, title_or_path: str, *, include_unpublished: bool = False) -> dict[str, Any] | None:
         """No lookup by path or title over MCP: a path's words are searched,
-        and an exact title among the hits wins (Ruling 3)."""
+        and an exact title among the hits wins (Ruling 3). Otherwise only a
+        hit whose title has a word asked for: never just the nearest one."""
         types = self._types()
         words = title_or_path.strip()
         if words.startswith("/"):
@@ -308,7 +309,10 @@ class McpBackend(Backend):
         async def chain(caller: ToolCaller, mapping: McpMapping) -> dict[str, Any] | None:
             hits = [(nid, hit) for nid, hit in await self._search(caller, mapping, words, 10) if self._hit_type(hit) in (None, *types)]
             exact = [(nid, hit) for nid, hit in hits if str(hit.get("label", "")).casefold() == words.casefold()]
-            for nid, _ in (exact or hits)[:3]:
+            # Semantic search always has a nearest hit: without an exact
+            # title, read one only if its title has a word asked for.
+            named = [(nid, hit) for nid, hit in hits if _names_it(str(hit.get("label", "")), words)]
+            for nid, _ in (exact or named)[:3]:
                 node = await self._read_hit(caller, mapping, nid, types)
                 if node is not None and (node["status"] or include_unpublished):
                     return node
@@ -476,6 +480,12 @@ class McpBackend(Backend):
         if len(text) > _ACTION_RESULT_CHARS:
             return {"message": message, "result_preview": text[:_ACTION_RESULT_CHARS]}
         return {"message": message, "result": data}
+
+
+def _names_it(label: str, words: str) -> bool:
+    """Whether a title contains a significant word (4+ letters) of a request."""
+    significant = {w for w in re.findall(r"\w+", words.casefold()) if len(w) >= 4}
+    return any(w in label.casefold() for w in significant)
 
 
 def _reason(exc: McpToolError) -> str:
