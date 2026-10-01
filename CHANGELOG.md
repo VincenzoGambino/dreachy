@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 — 2026-10-01
+
+- The landing page (also the Hugging Face Space) now describes 0.2.0: seven
+  tools, content types read from the site, the optional login, drafts and
+  pending content, and MCP mode.
+
 ## 0.2.0 — 2026-10-01
 
 Everything in `specs/backend-and-auth.md` R1–R4: Dreachy reads any

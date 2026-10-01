@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>Dreachy — ask your Drupal site how it's doing</title>
 	<meta name="description"
-		content="Dreachy gives a Drupal site a voice and a body on a Reachy Mini robot: ask what's new, have an article read aloud, and watch it react the moment something is published." />
+		content="Dreachy gives a Drupal site a voice and a body on a Reachy Mini robot: ask what's new, search the site, have an article read aloud, dictate a draft, and watch it react the moment something is published." />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link
@@ -49,7 +49,7 @@
 						your Reachy Mini</a>
 					<a class="button" href="https://github.com/VincenzoGambino/dreachy" target="_blank" rel="noopener">Read the source</a>
 				</div>
-				<p class="fineprint">MIT licensed · works with any Drupal site that exposes JSON:API</p>
+				<p class="fineprint">MIT licensed · works with any Drupal site that exposes JSON:API or Drupal's MCP server</p>
 			</div>
 
 			<div class="hero-panel">
@@ -84,20 +84,23 @@
 				<div class="panel-lead">
 					<h2>Nothing to install in Drupal.</h2>
 					<p class="intro">
-						Dreachy reads your site the way any decoupled front end would, then hands what it finds to
-						the robot's own voice and movement.
+						Out of the box, Dreachy reads your site the way any decoupled front end would, then hands
+						what it finds to the robot's own voice and movement.
 					</p>
 				</div>
 
 				<ol class="numbered">
 					<li>
 						<h3>It reads your site</h3>
-						<p>Core JSON:API, anonymous read access. No module, no API key, no write access.</p>
+						<p>Core JSON:API with anonymous read access is enough: it works out your content types, and
+							which fields to read aloud, from the site itself. A private site can give it a login, and a
+							site running Drupal's MCP server can be searched by meaning.</p>
 					</li>
 					<li>
 						<h3>You ask, it answers</h3>
-						<p>Five tools stand behind the conversation: what's new, search, read aloud, site pulse,
-							and keep watch.</p>
+						<p>Seven tools stand behind the conversation: what's new, search, read aloud, site pulse
+							and keep watch — and, once it's logged in, what's waiting to be published and a note you
+							dictate, saved as a draft.</p>
 					</li>
 					<li>
 						<h3>It keeps watching</h3>
@@ -109,7 +112,7 @@
 
 			<figure class="flow">
 				<svg viewBox="0 0 880 150" role="img"
-					aria-label="A Drupal site is read over JSON:API by five Dreachy tools, which drive the robot's speech and movement.">
+					aria-label="A Drupal site is read over JSON:API or its MCP server by seven Dreachy tools, which drive the robot's speech and movement.">
 					<defs>
 						<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
 							orient="auto-start-reverse">
@@ -126,15 +129,15 @@
 
 					<g class="node">
 						<rect x="233" y="34" width="150" height="72" rx="4" />
-						<text x="308" y="64">JSON:API</text>
-						<text x="308" y="85" class="sub">anonymous read</text>
+						<text x="308" y="64">JSON:API or MCP</text>
+						<text x="308" y="85" class="sub">read, or logged in</text>
 					</g>
 					<line x1="388" y1="70" x2="434" y2="70" marker-end="url(#arrow)" />
 
 					<g class="node accent">
 						<rect x="439" y="16" width="186" height="108" rx="4" />
 						<text x="532" y="46">Dreachy</text>
-						<text x="532" y="68" class="sub">five tools + a persona</text>
+						<text x="532" y="68" class="sub">seven tools + a persona</text>
 						<text x="532" y="90" class="sub">on the robot</text>
 					</g>
 					<line x1="630" y1="70" x2="676" y2="70" marker-end="url(#arrow)" />
@@ -148,22 +151,22 @@
 
 				<ol class="flow-stack">
 					<li><strong>Your Drupal site</strong><span>articles, pages, recipes</span></li>
-					<li><strong>JSON:API</strong><span>anonymous read</span></li>
-					<li class="accent"><strong>Dreachy</strong><span>five tools + a persona, on the robot</span></li>
+					<li><strong>JSON:API or MCP</strong><span>read, or logged in</span></li>
+					<li class="accent"><strong>Dreachy</strong><span>seven tools + a persona, on the robot</span></li>
 					<li><strong>Speech and movement</strong><span>Reachy Mini</span></li>
 				</ol>
 
 				<figcaption>
 					The robot half is borrowed: Dreachy delegates voice, hearing and motion to Pollen Robotics'
 					<a href="https://github.com/pollen-robotics/reachy_mini_conversation_app" target="_blank" rel="noopener">conversation app</a>.
-					What's new here is a persona and five tools, about two hundred lines.
+					What's new here is a persona and seven tools that ask the site questions.
 				</figcaption>
 			</figure>
 		</section>
 
 		<section id="ask">
 			<h2>What you can ask</h2>
-			<p class="intro">Five tools, phrased the way you'd actually say them out loud.</p>
+			<p class="intro">Seven tools, phrased the way you'd actually say them out loud.</p>
 
 			<div class="exchange">
 				<p class="turn you"><span class="who">you</span><span class="said">What's new on the site?</span></p>
@@ -174,8 +177,9 @@
 			<div class="exchange">
 				<p class="turn you"><span class="who">you</span><span class="said">Do we have anything on
 						mushrooms?</span></p>
-				<p class="turn it"><span class="who">Dreachy</span><span class="said">A keyword search across articles,
-						pages and recipes — and an honest "nothing yet" when there isn't.</span></p>
+				<p class="turn it"><span class="who">Dreachy</span><span class="said">A search across the site — by
+						keyword, or by meaning through Drupal's MCP server — and an honest "nothing yet" when there
+						isn't.</span></p>
 			</div>
 
 			<div class="exchange">
@@ -192,6 +196,21 @@
 			</div>
 
 			<div class="exchange">
+				<p class="turn you"><span class="who">you</span><span class="said">What's waiting to be
+						published?</span></p>
+				<p class="turn it"><span class="who">Dreachy</span><span class="said">With its login: how many drafts are
+						waiting, in which states, and the latest few by name.</span></p>
+			</div>
+
+			<div class="exchange">
+				<p class="turn you"><span class="who">you</span><span class="said">Take a note: the park bench needs
+						painting.</span></p>
+				<p class="turn it"><span class="who">Dreachy</span><span class="said">It reads it back and asks "shall I
+						save it as a draft?" Nothing is saved without your yes, and nothing is ever
+						published.</span></p>
+			</div>
+
+			<div class="exchange">
 				<p class="turn you"><span class="who">you</span><span class="said">Keep an eye on things.</span></p>
 				<p class="turn it"><span class="who">Dreachy</span><span class="said">It watches in the background. When
 						something is published, it doesn't announce it — the antennas flare and the head
@@ -205,9 +224,10 @@
 				<li>
 					<h3>Point it at a site it can reach</h3>
 					<p>
-						Any Drupal site with JSON:API on and anonymous read access. It has to be reachable from
-						the robot, so a local development URL won't do. The Umami demo profile works as-is; other
-						content models need two small edits, noted in the README.
+						Any Drupal site with JSON:API on and anonymous read access, with any content model. It has
+						to be reachable from the robot, so a local development URL won't do. For a private site,
+						drafts and notes, or search by meaning through Drupal's MCP server, see the
+						<a href="https://github.com/VincenzoGambino/dreachy/blob/main/docs/drupal-setup.md" target="_blank" rel="noopener">setup guide</a>.
 					</p>
 				</li>
 				<li>
@@ -221,8 +241,8 @@
 					<h3>Give it the site URL</h3>
 					<p>
 						Open Dreachy's settings page from the dashboard and enter the site URL, plus the language
-						prefix if the site is multilingual. It takes effect immediately, and there's no SSH
-						involved. Then say hello.
+						prefix if the site is multilingual. The site login and MCP mode are under Advanced. It
+						takes effect immediately, and there's no SSH involved. Then say hello.
 					</p>
 				</li>
 			</ol>
@@ -238,8 +258,9 @@
 						no live site, so you can work on it from a laptop on a train.
 					</p>
 					<p>
-						What it knows about a site — content types and which fields to read aloud — lives in two
-						files today. Moving that into the Drupal site itself is the next thing planned.
+						What it knows about a site — content types, and which fields to read aloud — it learns from
+						the site itself. Behind every tool sits one small interface, so the same tools run over
+						JSON:API or Drupal's MCP server.
 					</p>
 					<p class="fork-actions">
 						<a class="button primary" href="https://github.com/VincenzoGambino/dreachy" target="_blank" rel="noopener">Clone it on
@@ -248,18 +269,23 @@
 				</div>
 				<pre class="tree"><code>dreachy/
 ├─ main.py            the whole wrapper
-├─ client.py          questions for a Drupal site
-├─ config.py          what it expects to find
+├─ backend.py         what any site must answer
+├─ client.py          … over JSON:API
+├─ mcp_backend.py     … over Drupal's MCP server
+├─ schema.py          the site's content types
 ├─ profile/dreachy/   who it thinks it is
 └─ tools/
    ├─ drupal_whats_new.py
    ├─ drupal_find_content.py
    ├─ drupal_read_article.py
    ├─ drupal_site_pulse.py
-   └─ drupal_watch_site.py
+   ├─ drupal_watch_site.py
+   ├─ drupal_pending_content.py
+   ├─ drupal_create_note.py
+   └─ drupal_site_action.py
 
 $ uv run pytest
-44 passed</code></pre>
+351 passed</code></pre>
 			</div>
 		</section>
 	</main>
