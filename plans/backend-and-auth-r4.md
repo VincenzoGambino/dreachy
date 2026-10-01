@@ -64,7 +64,7 @@
 5. **Demo contrast:** Vincenzo enables JSON:API read-only on the sandbox.
 6. **Credentials:** Vincenzo creates the consumer (`demo:mcp:connect demo:content:read demo:content:write`) and supplies them before Task 1 Step 2. Tasks 0, 2 and 3 start meanwhile.
 
-Still proposed, not yet ruled: the R4.2 and R4.3 spec amendments (divergences 1 and 3).
+R4.2 and R4.3 spec amendments (divergences 1 and 3): **approved 2026-10-01**, with the out-of-scope clarification (staging tools allowlistable; going-live and destructive tools hard-denied); recorded in the spec's Amendments.
 
 **Correction found at Task 2 start:** `mcp` 2.0.0 is built on **`httpx2`** (2.10.0), a separate package from `httpx`. The SDK's client injection, the test `MockTransport` and the exceptions to catch all come from `httpx2`, and its `create_mcp_http_client(headers=, timeout=, auth=)` builds clients with MCP-friendly timeouts. The Task 2 code below is written against `httpx2` accordingly.
 
