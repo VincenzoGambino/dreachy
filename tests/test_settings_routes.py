@@ -773,3 +773,14 @@ def test_an_mcp_endpoint_on_another_host_is_refused(monkeypatch) -> None:
 
 def test_an_unknown_backend_is_refused() -> None:
     assert _make_client().post("/api/backend", json={"backend": "graphql"}).status_code == 422
+
+
+def test_moving_site_clears_an_mcp_endpoint_on_the_old_site(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://site.test")
+    client = _make_client()
+    client.post("/api/backend", json={"mcp_endpoint": "https://site.test/api/mcp"})
+
+    client.post("/api/config", json={"base_url": "https://other.test"})
+
+    assert client.get("/api/backend").json()["mcp_endpoint"] == ""
+    assert not dotenv.dotenv_values(dreachy_main._instance_path() / ".env").get("DREACHY_MCP_ENDPOINT")

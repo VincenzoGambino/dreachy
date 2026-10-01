@@ -207,7 +207,7 @@
 			<fieldset>
 				<label for="note_type">Save dictated notes as</label>
 				<select id="note_type">
-					<option value="">The first content type Dreachy talks about</option>
+					<option value="">Automatic (over MCP: the type needing the fewest extra fields)</option>
 				</select>
 				<p class="hint" id="editorial_status"></p>
 			</fieldset>
@@ -400,13 +400,15 @@
 			const resp = await fetch("/api/backend", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
+				// The MCP fields only when MCP is chosen: hidden ones from an
+				// earlier visit mustn't fail a JSON:API save.
+				body: JSON.stringify(backendInput.value === "mcp" ? {
 					backend: backendInput.value,
 					mcp_endpoint: mcpEndpointInput.value,
 					mcp_search_index: mcpSearchIndexInput.value,
 					mcp_bundles: splitNames(mcpBundlesInput.value),
 					mcp_extra_tools: splitNames(mcpExtraToolsInput.value),
-				}),
+				} : { backend: backendInput.value }),
 			});
 			if (!resp.ok) {
 				const data = await resp.json().catch(() => ({}));

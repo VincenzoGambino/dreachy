@@ -39,6 +39,8 @@ class _Site(FakeMcpSite):
 
     def _describe(self, name: str) -> dict[str, Any]:
         recorded = CANVAS.get(name)
+        if name == "tool_api__demo_peek":
+            return {**super()._describe(name), "inputSchema": {"type": "object", "properties": {"x": {"type": "integer"}}}}
         if recorded is None:
             return super()._describe(name)
         return {k: v for k, v in recorded.items() if k in ("name", "description", "inputSchema", "annotations")}
@@ -298,3 +300,14 @@ def test_the_spec_says_which_arguments_are_required(backend_for) -> None:
     shared._client = backend
 
     assert "arguments: target_type (required), limit, offset" in DrupalSiteAction().spec()["description"]
+
+
+def test_only_arguments_the_action_declares_are_sent(backend_for) -> None:
+    site = _site()
+    backend = backend_for(site, ("tool_api__canvas_create_page_variant",))
+
+    result = backend.run_site_action(
+        "tool_api__canvas_create_page_variant", {"id": "promo", "label": "Promo", "published": True, "status": True}, confirmed=True
+    )
+
+    assert result["result"]["echo"] == {"id": "promo", "label": "Promo"}

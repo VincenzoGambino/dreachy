@@ -8,7 +8,7 @@ text fields get the note's text; nothing else is ever invented (Ruling C)."""
 from __future__ import annotations
 
 import pytest
-from _fake_mcp import FakeEntityStore, FakeMcpSite, FakeTokenEndpoint
+from _fake_mcp import FakeEntityStore, FakeMcpSite, FakeTokenEndpoint, FakeToolError
 from test_mcp_backend import DEFINITIONS, JAN_2025, NEWEST, SEP_2026, _node
 
 from dreachy.backend import DreachySiteError
@@ -323,3 +323,57 @@ def test_a_token_refused_after_the_save_doesnt_save_the_note_twice() -> None:
         backend.close()
 
     assert len(store.saves) == 1
+
+
+# -- release review --------------------------------------------------------
+
+
+def test_a_moderation_state_the_account_cant_see_refuses_the_note(make) -> None:
+    # A hidden state isn't "unmoderated": with a published default, saving would publish.
+    backend, _, store = make(_store(standard_page={"default": "published"}))
+    store.hidden_fields = {"moderation_state"}
+
+    with pytest.raises(DreachySiteError, match="nothing was saved"):
+        backend.create_draft("standard_page", "Park bench", "Needs painting.")
+
+    assert store.saves == []
+
+
+def test_a_saved_note_that_cant_be_re_read_says_it_was_saved(make) -> None:
+    store = _store()
+    tools = store.tools()
+    load_tool = tools["tool_api__demo_entity_load_by_id"]
+
+    def load_after_save(arguments, state):
+        if store.saves:
+            raise FakeToolError("Tool plugin access denied.")
+        return load_tool(arguments, state)
+
+    backend, _, _ = make(store, tools={**tools, "tool_api__demo_entity_load_by_id": load_after_save})
+
+    with pytest.raises(DreachySiteError) as excinfo:
+        backend.create_draft("standard_page", "Park bench", "Needs painting.")
+
+    assert "saved" in str(excinfo.value) and "check it on the site" in str(excinfo.value)
+    assert len(store.saves) == 1
+
+
+def test_an_item_missing_from_a_later_list_is_left_out_not_guessed(make) -> None:
+    # Moved out of the window between the passes: no moderation_state, so it
+    # can't be told from archived — and no date to say how old it is.
+    store = _store()
+    tools = store.tools()
+    list_tool = tools["tool_api__demo_entity_list"]
+
+    def drop_old_notice(arguments, state):
+        answer = list_tool(arguments, state)
+        if arguments.get("fields") in ("moderation_state", "created"):
+            answer.data["results"] = [r for r in answer.data["results"] if r["_metadata"]["id"] != "7"]
+        return answer
+
+    backend, _, _ = make(store, tools={**tools, "tool_api__demo_entity_list": drop_old_notice})
+
+    pending = backend.get_pending_nodes()
+
+    assert "Old notice" not in [n["title"] for n in pending]
+    assert all(n["changed"] and n["created"] for n in pending)

@@ -197,8 +197,8 @@ class McpBackend(Backend):
         # has no status, and mustn't pass for unpublished.
         for item in status_list:
             meta = item.get("_metadata") or {}
-            if meta.get("bundle") not in types:
-                continue
+            if meta.get("bundle") not in types or not sorted_by.get(str(meta.get("id"))):
+                continue  # no sort value (missing from that list): it can't be placed
             if published is not None and _published(item.get("status")) != published:
                 continue
             kept.append((meta, {"status": item.get("status"), sort: sorted_by.get(str(meta.get("id")))}))
@@ -232,7 +232,11 @@ class McpBackend(Backend):
                 entry = wanted.get(str((item.get("_metadata") or {}).get("id")))
                 if entry is not None:
                     entry[1].update({k: v for k, v in item.items() if k != "_metadata"})
-        return [node_dict(meta, values, types[meta["bundle"]]) for meta, values in wanted.values()]
+        # An item gone from the window by the second pass has no state or
+        # dates: leave it out rather than guess (an archived item would pass
+        # for pending).
+        needed = ("moderation_state", "created", "changed")
+        return [node_dict(meta, values, types[meta["bundle"]]) for meta, values in wanted.values() if all(k in values for k in needed)]
 
     def latest_created(self) -> str | None:
         """The watcher's poll: one round of two list calls (status, created)."""
@@ -349,7 +353,8 @@ class McpBackend(Backend):
         types = self._types()
         words = title_or_path.strip()
         if words.startswith("/"):
-            words = " ".join(re.split(r"[/\-_]+", words)).strip()
+            # A path's last part names the item; the rest is usually its type.
+            words = " ".join(re.split(r"[\-_]+", words.rstrip("/").rsplit("/", 1)[-1])).strip()
 
         async def chain(caller: ToolCaller, mapping: McpMapping) -> dict[str, Any] | None:
             hits = [(nid, hit) for nid, hit in await self._search(caller, mapping, words, 10) if self._hit_type(hit) in (None, *types)]
@@ -429,8 +434,13 @@ class McpBackend(Backend):
                 saved = await save(caller, mapping, handle)
             except McpToolError as exc:
                 raise _save_refused(exc, type_schema) from exc
-            reread = await load(caller, mapping, "node", saved["id"])
-            values = await field_values(caller, mapping, reread)
+            try:
+                reread = await load(caller, mapping, "node", saved["id"])
+                values = await field_values(caller, mapping, reread)
+            except Exception as exc:  # saved, but unchecked: say so, so nobody saves it again
+                raise DreachySiteError(
+                    f"the site saved the note (item {saved['id']}) but I couldn't check it stayed a draft — check it on the site"
+                ) from exc
             return node_dict({"bundle": content_type, "id": saved["id"]}, values, type_schema), values
 
         node, values = self._session.run(chain)
@@ -448,7 +458,12 @@ class McpBackend(Backend):
         return node
 
     async def _make_draft(self, caller: ToolCaller, mapping: McpMapping, handle: Handle) -> Handle:
-        state = (await field_values(caller, mapping, handle, "moderation_state")).get("moderation_state")
+        values = await field_values(caller, mapping, handle, "moderation_state")
+        if "moderation_state" not in values:
+            # Unmoderated types answer null; NO answer means the account can't
+            # see the state — a published default would then go unnoticed.
+            raise DreachySiteError("the site wouldn't say whether the note would be a draft, so nothing was saved")
+        state = values["moderation_state"]
         if state == _DRAFT_STATE:
             return handle
         if state is None:  # unmoderated: status decides, and the stub asked for unpublished
@@ -530,10 +545,16 @@ class McpBackend(Backend):
         return {"message": message, "result": data}
 
 
+# Words people use to ask for an item, not part of its title.
+_ASKING_WORDS = {"page", "article", "story", "post", "item", "piece", "about", "called", "titled", "entry"}
+
+
 def _names_it(label: str, words: str) -> bool:
-    """Whether a title contains a significant word (4+ letters) of a request."""
-    significant = {w for w in re.findall(r"\w+", words.casefold()) if len(w) >= 4}
-    return any(w in label.casefold() for w in significant)
+    """Whether a title has every significant word (4+ letters) of a request,
+    each as the start of one of its words ("admission" matches "Admissions")."""
+    significant = {w for w in re.findall(r"\w+", words.casefold()) if len(w) >= 4} - _ASKING_WORDS
+    title_words = re.findall(r"\w+", label.casefold())
+    return bool(significant) and all(any(t.startswith(w) for t in title_words) for w in significant)
 
 
 def _reason(exc: McpToolError) -> str:
@@ -554,11 +575,12 @@ def _save_refused(exc: McpToolError, type_schema: TypeSchema) -> DreachySiteErro
 
 
 def _safe_arguments(tool: Any, arguments: dict[str, Any]) -> dict[str, Any]:
-    """check_access is always TRUE, and nothing is ever asked to go live:
+    """Declared arguments only; check_access is always TRUE, and nothing is ever asked to go live:
     `published` is never sent true, and is sent false where the tool says it
     defaults to true (canvas_create_page)."""
     properties = (tool.input_schema or {}).get("properties") or {}
-    args = {k: v for k, v in arguments.items() if k != "check_access"}
+    # Only what the tool declares: an undeclared `status` or `published` has no business there.
+    args = {k: v for k, v in arguments.items() if k in properties and k != "check_access"}
     if "check_access" in properties:
         args["check_access"] = True
     published = properties.get("published")

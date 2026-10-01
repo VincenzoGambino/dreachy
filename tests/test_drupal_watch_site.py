@@ -267,3 +267,17 @@ def test_a_settings_save_on_the_same_site_keeps_the_watchers_baseline(monkeypatc
     asyncio.run(run_test())
 
     assert played == ["perk_up"]
+
+
+def test_switching_backend_on_the_same_site_re_baselines() -> None:
+    # Timestamps from JSON:API and MCP needn't compare: a backend switch is a new baseline.
+    from dreachy.client import JsonApiBackend
+    from dreachy.config import Config
+    from dreachy.tools.drupal_watch_site import _watched
+
+    jsonapi = JsonApiBackend(Config(base_url="https://site.test"))
+    mcp_config = Config(base_url="https://site.test", backend="mcp")
+    try:
+        assert _watched(jsonapi) != _watched(type("B", (), {"config": mcp_config})())
+    finally:
+        jsonapi.close()

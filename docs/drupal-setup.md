@@ -172,7 +172,8 @@ the login works; restart Dreachy after setting it up.
      avoids it altogether, so prefer one.
 3. **Choose the note type** in Dreachy's settings page (Advanced: **Save
    dictated notes as**). The default is the first content type Dreachy talks
-   about. Notes are saved as plain text (core's `plain_text` format), which
+   about (in MCP mode, the one needing the fewest fields besides title and
+   text, §9). Notes are saved as plain text (core's `plain_text` format), which
    every role may use.
 4. Notes are authored by the `dreachy` user.
 
@@ -211,7 +212,9 @@ always needs the login, set up as in §2–§7 with these differences:
    in §8 (no `administer` permissions, never `bypass node access`).
 4. **Notes.** Over MCP, notes are saved with the module's entity tools
    (stub, set fields, save), so JSON:API writes (§8 step 1) aren't needed;
-   the permissions in §8 step 2 still are. Text goes in as `plain_text`.
+   the permissions in §8 step 2 still are. The note's text field gets
+   `plain_text`; any other required text field gets the same text in the
+   site's default format.
    Dreachy checks the new item is a draft *before* saving and re-reads it
    after. On a moderated type, the workflow must allow saving a new item as
    a draft (Editorial's "Create New Draft" from Draft); a workflow without

@@ -349,10 +349,10 @@ class FakeEntityStore:
         if entity.get("id"):  # as the real server: a saved entity's ids are fields too
             fields.setdefault("nid", str(entity["id"]))
             fields.setdefault("uuid", self.nodes.get(entity["id"], {}).get("uuid", f"uuid-{entity['id']}"))
-        fields = {k: v for k, v in fields.items() if k not in self.hidden_fields}
         wanted = arguments.get("fields")
         if wanted:
             fields = {wanted: fields.get(wanted)} if "," not in wanted else {}
+        fields = {k: v for k, v in fields.items() if k not in self.hidden_fields}
         return {"field_values": fields}
 
     def _stub(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:

@@ -126,13 +126,15 @@ object, can name the site's tools when their names don't follow the usual patter
 **Limits of MCP mode:**
 
 - **Paths are searched, not looked up.** MCP has no lookup by URL path or exact title:
-  "read me /about-us" searches for "about us". An exact title among the results wins;
-  otherwise Dreachy reads a result only if its title contains a word asked for — never just
-  the nearest match.
+  "read me /about-us" searches for the path's last part, "about us". An exact title among
+  the results wins; otherwise Dreachy reads a result only if its title has every word asked
+  for (of four letters or more, leaving out words like "page" or "article") — never just the
+  nearest match.
 - **Search covers what the index covers.** A content type outside the search index can't be
   found or read aloud, though "what's new" still lists it.
 - **Content types with no content yet are invisible.** Dreachy finds the types from a listing
-  of the site's content, unless you list them under **Content types (optional)**.
+  of all the site's content — at start, after every settings save and on each retry — unless
+  you list them under **Content types (optional)**, which a large site should do.
 - **Pending looks at the 20 most recently changed items.** The MCP tools can't filter by
   status, so older drafts aren't counted.
 - **Notes need every required field to be one Dreachy can fill.** It fills required text
@@ -170,7 +172,9 @@ object, can name the site's tools when their names don't follow the usual patter
 - **`drupal_read_article` occasionally acknowledges without reading.** The model says it will
   fetch the article and then ends the turn without calling the tool. Asking a second time works.
 - **Site pulse counts are approximate.** Core JSON:API has no collection count, so counts are
-  capped at `pulse_sample_limit` (50) items per content type.
+  capped at `pulse_sample_limit` (50) items per content type. In MCP mode the count is the
+  published items of the chosen types among the site's 50 newest, so it undercounts more when
+  only some types are chosen.
 
 ## Development
 

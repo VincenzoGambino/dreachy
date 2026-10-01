@@ -310,7 +310,7 @@ def test_get_article_wont_read_an_unrelated_nearest_match(discovered) -> None:
     # Semantic search always has a nearest hit; "read me X" must not read something else.
     backend, _ = discovered()
 
-    assert backend.get_article("budget plans", include_unpublished=True)["title"] == "Budget draft"
+    assert backend.get_article("the budget", include_unpublished=True)["title"] == "Budget draft"
     assert backend.get_article("day") is None  # too short to tell: exact titles only
     assert backend.get_article("How to apply") is None  # matches Admissions' text, not its title
 
@@ -336,3 +336,31 @@ def test_recent_reads_text_only_for_the_types_it_returns(discovered) -> None:
     fields = {args["fields"] for _, _, args in site.calls}
     assert "news_subhead" not in fields  # a news-only text field: no news item returned
     assert {"description", "preview_text"} <= fields
+
+
+def test_get_article_needs_every_word_asked_for_in_the_title(discovered) -> None:
+    store = _store()
+    store.nodes[9] = _node("news", "Park opening hours", SEP_2026, description="<p>The new library opens soon.</p>")
+    backend, _ = discovered(store)
+
+    assert backend.get_article("Opening of the new library") is None  # "library" isn't in any title
+    assert backend.get_article("admissions page")["title"] == "Admissions"  # "page" is how people ask
+    assert backend.get_article("/standard-page/admissions")["title"] == "Admissions"  # a path's last part
+    assert backend.get_article("park opening")["title"] == "Park opening hours"
+
+
+def test_a_missing_sort_date_never_reaches_the_tools(discovered) -> None:
+    store = _store()
+    tools = store.tools()
+    list_tool = tools["tool_api__demo_entity_list"]
+
+    def drop_from_created(arguments, state):
+        answer = list_tool(arguments, state)
+        if arguments.get("fields") == "created":
+            answer.data["results"] = [r for r in answer.data["results"] if r["_metadata"]["id"] != "6"]
+        return answer
+
+    store.tools = lambda: {**tools, "tool_api__demo_entity_list": drop_from_created}
+    backend, _ = discovered(store)
+
+    assert [n["title"] for n in backend.get_recent_nodes(5)] == ["Admissions"]

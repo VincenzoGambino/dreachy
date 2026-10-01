@@ -384,6 +384,12 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             os.environ.pop("DREACHY_OAUTH_CLIENT_SECRET", None)
             login_cleared = True
 
+        endpoint = os.environ.get("DREACHY_MCP_ENDPOINT", "")
+        if base_url_changed and endpoint and not same_site(endpoint, base_url):
+            # An MCP endpoint belongs to the site it's on: the site login goes with it.
+            dotenv.unset_key(str(env_path), "DREACHY_MCP_ENDPOINT")
+            os.environ.pop("DREACHY_MCP_ENDPOINT", None)
+
         types_changed = False
         if types is not None and types != os.environ.get("DREACHY_TYPES", ""):
             _set_env("DREACHY_TYPES", types)
