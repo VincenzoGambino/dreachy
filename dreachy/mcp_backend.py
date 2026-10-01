@@ -36,7 +36,7 @@ from .backend import Backend, DreachySiteError, SiteAction
 from .client import _strip_html
 from .config import Config
 from .mcp_chain import Handle, field_values, load, save, set_value, stub
-from .mcp_mapping import McpMapping, discover_mapping, is_denied
+from .mcp_mapping import McpMapping, discover_mapping, is_denied, is_entity_write
 from .mcp_session import HttpClientFactory, McpSession, McpToolError, ToolCaller, _leaf
 from .schema import Schema, TypeSchema, humanize, type_schema_from_definitions
 
@@ -87,7 +87,7 @@ def node_dict(meta: dict[str, Any], values: dict[str, Any], type_schema: TypeSch
     summary = _text(values.get(type_schema.summary_field)) if type_schema.summary_field else ""
     path = values.get("path")
     return {
-        "id": values.get("uuid") or meta.get("uuid"),
+        "id": values.get("uuid") or meta.get("uuid") or meta.get("id"),
         "title": values.get("title") or meta.get("label"),
         "type": meta.get("bundle"),
         "created": _iso(values.get("created")),
@@ -186,10 +186,16 @@ class McpBackend(Backend):
                 for f in fields
             ],
         )
+        # Only items the status list saw: one that appeared between the calls
+        # (or moved at the window's edge) has no status, and mustn't pass for
+        # unpublished — fields[0] is "status".
+        listed_status = {str((item.get("_metadata") or {}).get("id")) for item in lists[0].get("results") or []}
         items: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {}
         for listed in lists:
             for item in listed.get("results") or []:
                 meta = item.get("_metadata") or {}
+                if str(meta.get("id")) not in listed_status:
+                    continue
                 _, values = items.setdefault(str(meta.get("id")), (meta, {}))
                 values.update({k: v for k, v in item.items() if k != "_metadata"})
         return [node_dict(meta, values, types[meta.get("bundle")]) for meta, values in items.values() if meta.get("bundle") in types]
@@ -376,10 +382,16 @@ class McpBackend(Backend):
                 raise _save_refused(exc, type_schema) from exc
             reread = await load(caller, mapping, "node", saved["id"])
             values = await field_values(caller, mapping, reread)
-            return node_dict({"bundle": content_type, "id": saved["id"]}, values, type_schema)
+            return node_dict({"bundle": content_type, "id": saved["id"]}, values, type_schema), values
 
-        node = self._session.run(chain)
-        if node["status"]:
+        node, values = self._session.run(chain)
+        if "status" not in values:
+            # The safety check needs the answer: no status is no proof of a draft.
+            logger.error("drupal_create_note: can't read %s's status after saving it", node["id"])
+            raise DreachySiteError(
+                "the site saved the note but wouldn't say it's unpublished — check it on the site"
+            )
+        if node["status"] or node["moderation_state"] == "published":
             logger.error("drupal_create_note: the site published %s despite a draft request", node["id"])
             raise DreachySiteError(
                 "the site published the note instead of keeping it as a draft — tell whoever looks after the site"
@@ -418,10 +430,14 @@ class McpBackend(Backend):
 
         served = self._read(chain)
         actions: dict[str, SiteAction] = {}
+        mapping = self._mapping
+        writes = {mapping.stub, mapping.set_value, mapping.save} if mapping else set()
         for name in self.config.mcp_extra_tools:
             tool = served.get(name)
             if tool is None:
                 logger.warning("Site action %s isn't offered by this site's MCP server; ignoring it", name)
+            elif name in writes or is_entity_write(name):
+                logger.warning("Site action %s is only used for notes, through their draft checks; ignoring it", name)
             elif is_denied(tool):
                 logger.warning("Site action %s is never allowed (Dreachy never publishes, deletes or discards)", name)
             else:
@@ -490,6 +506,7 @@ def _safe_arguments(tool: Any, arguments: dict[str, Any]) -> dict[str, Any]:
     published = properties.get("published")
     if published is not None:
         defaults_live = "defaults to true" in str(published.get("description", "")).lower()
-        if args.get("published", None) not in (None, False) or ("published" not in args and defaults_live):
+        value = args.pop("published", None)  # null counts as unset: a server may read it as its default
+        if value is not None or defaults_live:
             args["published"] = False
     return args

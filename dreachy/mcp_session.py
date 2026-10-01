@@ -52,6 +52,10 @@ T = TypeVar("T")
 
 # JSON-RPC code mcp_server answers an unauthenticated request with.
 _AUTH_REQUIRED = -32001
+# JSON-RPC errors that mean the SESSION failed (an HTTP error answer, a
+# refused login, a session the server forgot); any other is the call's own
+# refusal (unknown tool, bad arguments) and leaves the session as it is.
+_SESSION_FAILURES = (-32603, _AUTH_REQUIRED, -32600)
 _REFUSED = "the site refused Dreachy's MCP login — check the site login on Dreachy's settings page"
 
 HttpClientFactory = Callable[[dict[str, str]], httpx2.AsyncClient]
@@ -62,14 +66,22 @@ class McpToolError(DreachySiteError):
 
 
 class _Unauthorised(Exception):
-    """The MCP server refused the token (retried once with a fresh one)."""
+    """The MCP server refused the token (retried once with a fresh one,
+    unless a call had already succeeded: a write must never run twice)."""
+
+    def __init__(self, *, retryable: bool = True) -> None:
+        super().__init__()
+        self.retryable = retryable
 
 
 class ToolCaller:
     """What a call chain receives: calls tools within the one open session."""
 
-    def __init__(self, session: ClientSession) -> None:
+    def __init__(self, session: ClientSession, limit: anyio.Semaphore | None = None) -> None:
         self._session = session
+        # Calls at once in this session, across every chain using it.
+        self._limit = limit or anyio.Semaphore(1_000)
+        self.succeeded = 0
 
     async def call(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         """The envelope's `data`; McpToolError when the tool failed."""
@@ -78,7 +90,13 @@ class ToolCaller:
 
     async def call_with_message(self, name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], str]:
         """The envelope's `data` and `message` (list totals, saved ids)."""
-        result = await self._session.call_tool(name, arguments)
+        async with self._limit:
+            try:
+                result = await self._session.call_tool(name, arguments)
+            except MCPError as exc:
+                if exc.code in _SESSION_FAILURES:
+                    raise
+                raise McpToolError(f"{name}: {_clean(exc.message) or 'the server refused the call'}") from exc
         if result.is_error:
             text = " ".join(getattr(item, "text", "") for item in result.content)
             raise McpToolError(f"{name}: {_clean(text) or 'the tool reported an error'}")
@@ -89,6 +107,7 @@ class ToolCaller:
         if not envelope["success"]:
             raise McpToolError(f"{name}: {message or 'the tool reported an error'}")
         data = envelope.get("data")
+        self.succeeded += 1
         return (dict(data) if isinstance(data, dict) else {}), message
 
     async def list_tools(self) -> list[mcp_types.Tool]:
@@ -153,8 +172,11 @@ class McpSession:
         self._portal: BlockingPortal | None = None
         self._shared_cm: AbstractContextManager[_Open] | None = None
         self._shared: _Open | None = None
+        self._closed = False
 
     def close(self) -> None:
+        with self._shared_lock:
+            self._closed = True  # an in-flight read's retry mustn't reopen it
         self._drop_shared()
         with self._shared_lock:
             portal_cm, self._portal_cm, self._portal = self._portal_cm, None, None
@@ -169,7 +191,11 @@ class McpSession:
         (DreachyAuthError for a refused login) — never a raw transport error."""
         try:
             return anyio.run(self._run, chain)
-        except _Unauthorised:
+        except _Unauthorised as first:
+            if not first.retryable:
+                # Refused after a call went through: running the chain again
+                # could save a note twice.
+                raise DreachyAuthError(_REFUSED, status=401) from first
             # The library retries a 401 on its own HTTP requests, not on MCP's:
             # drop the cached token and try once more with a fresh one.
             self._forget_token()
@@ -186,12 +212,14 @@ class McpSession:
 
     async def _run(self, chain: Callable[[ToolCaller], Awaitable[T]]) -> T:
         refused: list[int] = []
+        callers: list[ToolCaller] = []
         try:
             async with self._open(self._headers(), refused) as opened:
+                callers.append(opened.caller)
                 return await chain(opened.caller)
         except Exception as exc:  # the SDK wraps failures in (nested) exception groups
             if refused:
-                raise _Unauthorised() from exc
+                raise _Unauthorised(retryable=not callers or callers[0].succeeded == 0) from exc
             raise _translate(exc) from exc
 
     # -- the shared read session -------------------------------------------
@@ -203,6 +231,7 @@ class McpSession:
         the chain) is raised as it is, and the session stays."""
         for attempt in (1, 2):
             refused: list[int] = []
+            opened: _Open | None = None
             try:
                 headers = self._headers()
                 opened = self._shared_session(headers, refused)
@@ -215,7 +244,7 @@ class McpSession:
                 raise  # the chain's (or the token endpoint's) own answer
             except Exception as exc:
                 error = _Unauthorised() if refused else _translate(exc)
-                self._drop_shared()
+                self._drop_shared(opened)
                 if isinstance(error, _Unauthorised):
                     self._forget_token()
                 if attempt == 2:
@@ -226,6 +255,8 @@ class McpSession:
 
     def _shared_session(self, headers: dict[str, str], refused: list[int]) -> _Open:
         with self._shared_lock:
+            if self._closed:
+                raise DreachySiteError("the MCP connection was closed")
             if self._shared is not None:
                 return self._shared
             if self._portal is None:
@@ -238,8 +269,12 @@ class McpSession:
             self._shared_cm = cm
             return self._shared
 
-    def _drop_shared(self) -> None:
+    def _drop_shared(self, failed: _Open | None = None) -> None:
+        """Close the shared session — only the one that *failed*, if named:
+        another reader may already have replaced it with a working one."""
         with self._shared_lock:
+            if failed is not None and self._shared is not failed:
+                return
             cm, self._shared_cm, self._shared = self._shared_cm, None, None
         if cm is None:
             return
@@ -261,7 +296,8 @@ class McpSession:
             async with streamable_http_client(self.endpoint, http_client=http) as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
-                    yield _Open(ToolCaller(session), http, refused)
+                    limit = anyio.Semaphore(max(1, self.config.mcp_concurrency))
+                    yield _Open(ToolCaller(session, limit), http, refused)
 
     def _forget_token(self) -> None:
         self._auth._oauth_token_response = None  # noqa: SLF001 — plan R4 divergence 2

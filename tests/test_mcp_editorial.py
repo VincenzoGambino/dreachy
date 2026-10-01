@@ -267,3 +267,59 @@ def test_over_json_api_the_default_note_type_is_still_the_first_enabled_one() ->
     }
 
     assert backend.note_type() == "recipe"
+
+
+# -- review fixes ----------------------------------------------------------
+
+
+def test_an_item_missing_from_the_status_list_is_never_pending(make) -> None:
+    # Published between the window's per-field calls: it shows up only in the later lists.
+    store = _store()
+    tools = store.tools()
+    list_tool = tools["tool_api__demo_entity_list"]
+
+    def racing(arguments, state):
+        if arguments.get("fields") == "path" and 99 not in store.nodes:
+            store.nodes[99] = _node("news", "Freshly published", "1790999999", description="<p>Live.</p>")
+        return list_tool(arguments, state)
+
+    backend, _, _ = make(store, tools={**tools, "tool_api__demo_entity_list": racing})
+
+    assert "Freshly published" not in [n["title"] for n in backend.get_pending_nodes()]
+
+
+def test_a_saved_note_whose_status_cant_be_read_is_an_error(make) -> None:
+    backend, _, store = make()
+    store.publishes_everything = True
+    store.hidden_fields = {"status"}
+
+    with pytest.raises(DreachySiteError, match="published|unpublished"):
+        backend.create_draft("standard_page", "Park bench", "Needs painting.")
+
+
+def test_a_token_refused_after_the_save_doesnt_save_the_note_twice() -> None:
+    store = _store()
+    tokens = FakeTokenEndpoint("good-token")
+    tools = store.tools()
+    save_tool = tools["tool_api__demo_entity_save"]
+    site = FakeMcpSite({})
+
+    def save_then_rotate(arguments, state):
+        answer = save_tool(arguments, state)
+        site.token = tokens.token = "rotated"  # the old token is refused from the next request
+        return answer
+
+    site.tools = {**tools, "tool_api__demo_entity_save": save_then_rotate}
+    config = Config(
+        base_url="https://site.test", auth="oauth", oauth_client_id="dreachy", oauth_client_secret="s",
+        backend="mcp", mcp_search_index="content_vector",
+    )
+    backend = McpBackend(config, http_client_factory=site.client_factory(), token_http_client=tokens.client())
+    try:
+        assert backend.refresh_schema()
+        with pytest.raises(DreachySiteError):
+            backend.create_draft("standard_page", "Park bench", "Needs painting.")
+    finally:
+        backend.close()
+
+    assert len(store.saves) == 1

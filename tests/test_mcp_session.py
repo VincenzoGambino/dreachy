@@ -396,3 +396,66 @@ def test_a_token_renewed_early_reaches_the_open_shared_session() -> None:
 
     assert len(set(site.session_ids())) == 1
     assert site.seen_auth[-1] == f"Bearer token-{tokens.grants}"
+
+
+# -- review fixes ----------------------------------------------------------
+
+
+def test_a_late_failure_doesnt_close_the_newer_shared_session() -> None:
+    # Two readers on one session: the first to fail reopens it; the other's
+    # failure, arriving later, must not close the new one.
+    site = FakeMcpSite({"demo_a": _echo})
+    session = _session(site)
+
+    async def chain(caller):
+        return await caller.call("demo_a", {})
+
+    try:
+        session.run_shared(chain)
+        stale = session._shared  # noqa: SLF001 — what the slower reader holds
+        site.forget_sessions()
+        session.run_shared(chain)  # the faster reader: reconnects
+        session._drop_shared(stale)  # noqa: SLF001 — the slower reader's failure
+        session.run_shared(chain)
+    finally:
+        session.close()
+
+    assert len(set(site.session_ids())) == 2
+
+
+def test_a_closed_session_never_reopens() -> None:
+    site = FakeMcpSite({"demo_a": _echo})
+    session = _session(site)
+
+    async def chain(caller):
+        return await caller.call("demo_a", {})
+
+    session.run_shared(chain)
+    session.close()
+
+    with pytest.raises(DreachySiteError):
+        session.run_shared(chain)
+    assert session._portal is None  # noqa: SLF001
+    assert site.sessions == {}
+
+
+def test_a_json_rpc_refusal_keeps_the_shared_session() -> None:
+    site = FakeMcpSite({"demo_a": _echo})
+    session = _session(site)
+
+    async def unknown(caller):
+        return await caller.call("demo_missing", {})
+
+    async def fine(caller):
+        return await caller.call("demo_a", {})
+
+    try:
+        session.run_shared(fine)
+        with pytest.raises(DreachySiteError, match="demo_missing"):
+            session.run_shared(unknown)
+        session.run_shared(fine)
+    finally:
+        session.close()
+
+    assert len(set(site.session_ids())) == 1
+    assert [name for _, name, _ in site.calls].count("demo_missing") == 1  # not run again

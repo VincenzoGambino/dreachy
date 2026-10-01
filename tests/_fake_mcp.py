@@ -230,6 +230,7 @@ class FakeEntityStore:
         self.site_filled = {"ai_automator_status"}
         self.publishes_everything = False  # a misconfigured site: every save goes live
         self.refused_fields: set[str] = set()  # field_set_value refuses these
+        self.hidden_fields: set[str] = set()  # entity_field_values leaves these out (field access)
         self._handle_ids = itertools.count(1)
 
     def tools(self) -> dict[str, ToolFn]:
@@ -343,7 +344,12 @@ class FakeEntityStore:
         return Reply({"loaded_entity": self._issue(entity)}, f"Successfully loaded node entity with ID {nid}")
 
     def _values(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
-        fields = dict(self._resolve(arguments["entity"])["fields"])
+        entity = self._resolve(arguments["entity"])
+        fields = dict(entity["fields"])
+        if entity.get("id"):  # as the real server: a saved entity's ids are fields too
+            fields.setdefault("nid", str(entity["id"]))
+            fields.setdefault("uuid", self.nodes.get(entity["id"], {}).get("uuid", f"uuid-{entity['id']}"))
+        fields = {k: v for k, v in fields.items() if k not in self.hidden_fields}
         wanted = arguments.get("fields")
         if wanted:
             fields = {wanted: fields.get(wanted)} if "," not in wanted else {}

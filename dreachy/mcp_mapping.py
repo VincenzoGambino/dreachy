@@ -46,6 +46,15 @@ WRITE_OPERATIONS = ("stub", "set_value", "save")
 _DENIED_WORDS = ("publish", "set_homepage", "set_default", "delete", "discard")
 
 
+# The entity write steps: used only inside create_draft's checked chain,
+# never as extras — they could save content past the draft checks.
+_ENTITY_WRITES = ("entity_stub", "field_set_value", "entity_save", "entity_revision_add")
+
+
+def is_entity_write(name: str) -> bool:
+    return any(name == suffix or name.endswith(f"_{suffix}") for suffix in _ENTITY_WRITES)
+
+
 def is_denied(tool: mcp_types.Tool) -> bool:
     """Never exposed, never mapped: publishing, the homepage and site
     defaults, deleting, discarding."""

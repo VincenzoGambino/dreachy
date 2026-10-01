@@ -250,3 +250,42 @@ def test_site_actions_are_decided_at_start_from_the_backend(monkeypatch, backend
 
     shared._client = backend_for(_site(), ())
     assert not dreachy_main._site_actions_available()
+
+
+# -- review fixes ----------------------------------------------------------
+
+
+def test_a_null_published_is_never_sent_to_a_tool_that_defaults_to_live(backend_for) -> None:
+    site = _site()
+    backend = backend_for(site, ("tool_api__canvas_create_page", "tool_api__canvas_update_page_metadata"))
+
+    created = backend.run_site_action("tool_api__canvas_create_page", {"title": "x", "published": None}, confirmed=True)
+    updated = backend.run_site_action("tool_api__canvas_update_page_metadata", {"page_id": 3, "published": None}, confirmed=True)
+
+    assert created["result"]["echo"]["published"] is False
+    assert updated["result"]["echo"] == {"page_id": 3}
+
+
+def test_the_entity_write_tools_are_never_extras(backend_for) -> None:
+    # They'd let the model save content past create_draft's draft checks.
+    writes = (
+        "tool_api__demo_entity_stub",
+        "tool_api__demo_field_set_value",
+        "tool_api__demo_entity_save",
+        "tool_api__demo_entity_revision_add",
+    )
+    site = _site({"tool_api__demo_entity_revision_add": _echo})
+    backend = backend_for(site, (*writes, "tool_api__canvas_list_targets"))
+
+    assert list(backend.site_actions()) == ["tool_api__canvas_list_targets"]
+
+
+def test_an_unexpected_failure_finding_the_actions_is_an_error_not_a_crash(backend_for) -> None:
+    backend = backend_for(_site(), ("tool_api__canvas_list_targets",))
+
+    def broken():
+        raise RuntimeError("boom")
+
+    backend.site_actions = broken
+
+    assert "error" in _call(backend, action="tool_api__canvas_list_targets", arguments={}, confirmed=True)

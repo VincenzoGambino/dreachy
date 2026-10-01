@@ -65,13 +65,16 @@ class DrupalSiteAction(Tool):
         }
 
     async def __call__(self, deps: ToolDependencies, **kwargs: Any) -> Dict[str, Any]:
-        client = get_client()
         name, arguments = kwargs.get("action"), kwargs.get("arguments")
         try:
+            client = get_client()
             actions = await asyncio.to_thread(client.site_actions)
         except DreachySiteError as e:
             logger.warning("drupal_site_action: site unreachable: %s", e)
             return {"error": f"I can't reach the site right now: {e}"}
+        except Exception as e:
+            logger.exception("drupal_site_action: couldn't find the site actions")
+            return {"error": f"Something went wrong: {type(e).__name__}: {e}"}
         action = actions.get(name) if isinstance(name, str) else None
         if action is None:
             return dict(_NOT_AVAILABLE)
