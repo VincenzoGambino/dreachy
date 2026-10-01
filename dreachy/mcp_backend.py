@@ -20,6 +20,7 @@ every read (docs/mcp-findings.md "Verified from Dreachy"):
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 import threading
@@ -31,11 +32,11 @@ import anyio
 import httpx
 from mcp.shared.exceptions import MCPError
 
-from .backend import Backend, DreachySiteError
+from .backend import Backend, DreachySiteError, SiteAction
 from .client import _strip_html
 from .config import Config
 from .mcp_chain import Handle, field_values, load, save, set_value, stub
-from .mcp_mapping import McpMapping, discover_mapping
+from .mcp_mapping import McpMapping, discover_mapping, is_denied
 from .mcp_session import HttpClientFactory, McpSession, McpToolError, ToolCaller, _leaf
 from .schema import Schema, TypeSchema, humanize, type_schema_from_definitions
 
@@ -55,6 +56,9 @@ _HIT_ID = re.compile(r"node/(\d+)")
 # Fields every node dict needs, besides the type's text fields.
 _NODE_FIELDS = ("status", "moderation_state", "created", "changed", "path")
 _NO_INDEX = "no MCP search index is set — choose one on Dreachy's settings page"
+# A site action's answer is read by the model: a preview past this many characters.
+_ACTION_RESULT_CHARS = 4000
+_NOT_AN_ACTION = "that site action isn't available"
 
 
 def _iso(timestamp: Any) -> str | None:
@@ -144,7 +148,9 @@ class McpBackend(Backend):
             token_http_client=token_http_client,
         )
         self._mapping: McpMapping | None = None
+        self._tools: dict[str, Any] = {}
         self._mapping_lock = threading.Lock()
+        self._actions: dict[str, SiteAction] | None = None
 
     def close(self) -> None:
         self._session.close()
@@ -156,6 +162,7 @@ class McpBackend(Backend):
             tools = await caller.list_tools()
             mapping = discover_mapping(tools, self.config.mcp_mapping, search_index=self.config.mcp_search_index)
             with self._mapping_lock:
+                self._tools = self._tools or {tool.name: tool for tool in tools}
                 self._mapping = self._mapping or mapping
         return self._mapping
 
@@ -395,6 +402,66 @@ class McpBackend(Backend):
             raise DreachySiteError(f"the site wouldn't let the note be a draft, so nothing was saved ({_reason(exc)})") from exc
 
 
+    # -- site actions (Task 8) ---------------------------------------------
+
+    def site_actions(self) -> dict[str, SiteAction]:
+        """DREACHY_MCP_EXTRA_TOOLS ∩ what the server offers ∖ the deny-list.
+        Found once (a denied or missing entry is logged once) and kept."""
+        if self._actions is not None:
+            return dict(self._actions)
+        if not self.config.mcp_extra_tools:
+            self._actions = {}
+            return {}
+
+        async def chain(caller: ToolCaller, mapping: McpMapping) -> dict[str, Any]:
+            return self._tools
+
+        served = self._read(chain)
+        actions: dict[str, SiteAction] = {}
+        for name in self.config.mcp_extra_tools:
+            tool = served.get(name)
+            if tool is None:
+                logger.warning("Site action %s isn't offered by this site's MCP server; ignoring it", name)
+            elif is_denied(tool):
+                logger.warning("Site action %s is never allowed (Dreachy never publishes, deletes or discards)", name)
+            else:
+                properties = (tool.input_schema or {}).get("properties") or {}
+                actions[name] = SiteAction(
+                    name,
+                    tool.description or "",
+                    bool(tool.annotations and tool.annotations.read_only_hint is True),
+                    tuple(properties),
+                )
+        self._actions = actions
+        return dict(actions)
+
+    def known_site_actions(self) -> dict[str, SiteAction]:
+        return dict(self._actions or {})
+
+    def run_site_action(self, name: str, arguments: dict[str, Any], *, confirmed: bool) -> dict[str, Any]:
+        """Run one allowlisted extra. A write needs confirmed (the tool asks
+        first; this is the second line) and gets a session of its own."""
+        action = self.site_actions().get(name)
+        if action is None:
+            raise DreachySiteError(_NOT_AN_ACTION)
+        if not action.read_only and confirmed is not True:
+            raise DreachySiteError("a site action that changes the site needs the person's spoken yes first")
+        tool = self._tools[name]
+        args = _safe_arguments(tool, arguments)
+
+        async def run(caller: ToolCaller) -> tuple[dict[str, Any], str]:
+            return await caller.call_with_message(name, args)
+
+        if action.read_only:
+            data, message = self._read(lambda caller, mapping: run(caller))
+        else:
+            data, message = self._session.run(run)
+        text = json.dumps(data, ensure_ascii=False, default=str)
+        if len(text) > _ACTION_RESULT_CHARS:
+            return {"message": message, "result_preview": text[:_ACTION_RESULT_CHARS]}
+        return {"message": message, "result": data}
+
+
 def _reason(exc: McpToolError) -> str:
     """The server's own words, without the tool name McpToolError puts first."""
     return str(exc).split(": ", 1)[-1]
@@ -409,3 +476,20 @@ def _save_refused(exc: McpToolError, type_schema: TypeSchema) -> DreachySiteErro
             f"note — nothing was saved"
         )
     return DreachySiteError(f"the site rejected the note, so nothing was saved ({reason})")
+
+
+
+def _safe_arguments(tool: Any, arguments: dict[str, Any]) -> dict[str, Any]:
+    """check_access is always TRUE, and nothing is ever asked to go live:
+    `published` is never sent true, and is sent false where the tool says it
+    defaults to true (canvas_create_page)."""
+    properties = (tool.input_schema or {}).get("properties") or {}
+    args = {k: v for k, v in arguments.items() if k != "check_access"}
+    if "check_access" in properties:
+        args["check_access"] = True
+    published = properties.get("published")
+    if published is not None:
+        defaults_live = "defaults to true" in str(published.get("description", "")).lower()
+        if args.get("published", None) not in (None, False) or ("published" not in args and defaults_live):
+            args["published"] = False
+    return args

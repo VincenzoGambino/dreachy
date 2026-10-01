@@ -42,6 +42,10 @@ _EDITORIAL_TOOLS = ("drupal_pending_content", "drupal_create_note")
 # are registered only when the site login works (spec R3.1). Settings saves
 # re-render the profile with the same decision.
 _editorial_enabled = False
+# R4: drupal_site_action, only on the MCP backend with allowlisted extras
+# (decided at start, like the editorial tools).
+_SITE_ACTION_TOOL = "drupal_site_action"
+_site_actions_enabled = False
 
 
 def _instance_path() -> Path:
@@ -99,6 +103,13 @@ def _render_profile() -> None:
             tools.rstrip("\n")
             + "\n\n# Editorial tools: registered because the site login works (spec R3).\n"
             + "\n".join(_EDITORIAL_TOOLS)
+            + "\n"
+        )
+    if _site_actions_enabled:
+        tools = (
+            tools.rstrip("\n")
+            + "\n\n# Site actions: the MCP backend with allowlisted extras (spec R4).\n"
+            + _SITE_ACTION_TOOL
             + "\n"
         )
     (dest / "tools.txt").write_text(tools)
@@ -406,9 +417,19 @@ def _editorial_available() -> bool:
         return False
 
 
+def _site_actions_available() -> bool:
+    """Whether to register drupal_site_action: allowlisted extras exist now.
+    Also fills the backend's cache, which the tool's spec is built from."""
+    try:
+        return bool(get_client().site_actions())
+    except Exception:
+        logger.exception("Couldn't check the site actions at start; they stay off")
+        return False
+
+
 def _start_up(settings_app: FastAPI | None) -> None:
     """Everything Dreachy does before handing over to the conversation app."""
-    global _editorial_enabled
+    global _editorial_enabled, _site_actions_enabled
     _load_instance_env()
     _configure_environment()
     # Routes before discovery: a saved URL that hangs keeps discovery waiting
@@ -417,6 +438,7 @@ def _start_up(settings_app: FastAPI | None) -> None:
         _register_settings_routes(settings_app)
     _warm_schema()
     _editorial_enabled = _editorial_available()
+    _site_actions_enabled = _site_actions_available()
     # Last: tools.txt depends on the login check. The conversation app reads
     # the profile only after _start_up returns.
     _render_profile()

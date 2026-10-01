@@ -157,6 +157,7 @@ def test_no_search_index_means_none_not_a_guess() -> None:
         "tool_api__canvas_set_homepage",
         "tool_api__canvas_delete_page",
         "tool_api__canvas_discard_auto_save",
+        "tool_api__canvas_set_default_page_variant",
         "tool_api__demo_unpublish",
     ],
 )

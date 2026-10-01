@@ -9,9 +9,9 @@ Dreachy").
 
 Two rules hold whatever the configuration says:
 - search always sends check_access TRUE (findings, consequence 3);
-- a tool that publishes, sets the homepage, deletes or discards — by name, or
-  by its destructiveHint — is never used, as a mapping or as an extra
-  (Ruling 1, extended after Task 1).
+- a tool that publishes, sets the homepage or a site default, deletes or
+  discards — by name, or by its destructiveHint — is never used, as a
+  mapping or as an extra (Ruling 1, extended after Task 1).
 """
 
 from __future__ import annotations
@@ -41,11 +41,14 @@ OPERATIONS: dict[str, str] = {
 READ_OPERATIONS = ("search", "entity_list", "load", "field_values", "field_definitions")
 WRITE_OPERATIONS = ("stub", "set_value", "save")
 
-_DENIED_WORDS = ("publish", "set_homepage", "delete", "discard")
+# set_default: canvas_set_default_page_variant changes every page at once,
+# immediately — live, like the homepage.
+_DENIED_WORDS = ("publish", "set_homepage", "set_default", "delete", "discard")
 
 
 def is_denied(tool: mcp_types.Tool) -> bool:
-    """Never exposed, never mapped: publishing, the homepage, deleting, discarding."""
+    """Never exposed, never mapped: publishing, the homepage and site
+    defaults, deleting, discarding."""
     if any(word in tool.name.lower() for word in _DENIED_WORDS):
         return True
     return bool(tool.annotations and tool.annotations.destructive_hint)
