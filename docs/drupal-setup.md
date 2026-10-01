@@ -130,3 +130,58 @@ secret, paste the new one into Dreachy's settings page.
 
 To remove Dreachy's copy of the secret too, tick **Remove the saved secret**
 on its settings page and save.
+
+## 8. Letting Dreachy save drafts (optional)
+
+With the login working, Dreachy can also say what's waiting to be published
+and save a note someone dictates as an **unpublished draft**. It never
+publishes, updates or deletes anything. It turns this on at start only when
+the login works; restart Dreachy after setting it up.
+
+1. **Allow writes over JSON:API.** At **`/admin/config/services/jsonapi`**,
+   choose **Accept all JSON:API create, read, update, and delete
+   operations**. Core accepts only reads by default. This opens writes to
+   every API client, each limited by its own permissions, so review who else
+   uses the API first.
+2. **Grant the `dreachy` role, and add to the `dreachy` scope, the
+   permissions below.** For client credentials, the scope is what counts
+   (§4).
+   - **View any unpublished content** (`view any unpublished content`), so
+     "what's pending?" can see everyone's drafts. This comes with the Content
+     Moderation module. Without Content Moderation, grant **View own
+     unpublished content** (`view own unpublished content`) instead: Dreachy
+     then sees only the drafts it saved itself.
+
+     > **Never grant `bypass node access` to make up for it.** That
+     > permission lets its holder view, edit and delete *every* node,
+     > published or not, whatever the other settings say. Anyone holding
+     > Dreachy's client secret would hold that power too.
+   - **View the latest version** (`view latest version`), on sites using
+     Content Moderation.
+   - **Create new content** for the type notes are saved as
+     (`create {type} content`).
+   - On a moderated type: the transition that creates a draft, for example
+     **Editorial workflow: Use Create New Draft transition**
+     (`use editorial transition create_new_draft`).
+   - Only if the note type is **not** moderated: **Administer node published
+     status** (`administer node published status`). Drupal lets only this
+     permission set whether a new node is published, and Dreachy must set it
+     to unpublished. It's marked as a restricted permission: with it, Dreachy
+     could in principle publish what it creates, though the code never does,
+     and it grants no access to anyone else's content. A moderated note type
+     avoids it altogether, so prefer one.
+3. **Choose the note type** in Dreachy's settings page (Advanced: **Save
+   dictated notes as**). The default is the first content type Dreachy talks
+   about. Notes are saved as plain text (core's `plain_text` format), which
+   every role may use.
+4. Notes are authored by the `dreachy` user.
+
+**How "pending" is counted:** Dreachy reads each content type's 50 most
+recently changed items and counts the unpublished ones that aren't archived.
+It can't simply ask the site for "all drafts": Drupal's JSON:API narrows any
+filtered listing to published content (plus the account's own) unless the
+account may bypass node access, which Dreachy must never have. Drafts older
+than a type's last 50 changes aren't counted.
+
+**Not covered:** a new draft of content that's already published (Content
+Moderation's "Create New Draft" from Published) isn't counted as pending.

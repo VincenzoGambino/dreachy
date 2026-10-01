@@ -1,5 +1,6 @@
-"""Query-shaping logic behind the four Q&A tools (drupal_whats_new,
-drupal_find_content, drupal_site_pulse, drupal_read_article).
+"""Query-shaping logic behind the Q&A and editorial tools: drupal_whats_new,
+drupal_find_content, drupal_site_pulse, drupal_read_article, and (R3)
+drupal_pending_content and drupal_create_note.
 
 Plain functions, not Tool subclasses. Each function takes an already-
 configured Backend and raises DreachySiteError on real site failures
@@ -9,6 +10,7 @@ so the catching happens there, not here.
 
 from __future__ import annotations
 
+from collections import Counter
 from datetime import datetime, timezone
 from typing import Any
 
@@ -71,3 +73,23 @@ def drupal_read_article(client: Backend, *, title_or_path: str) -> dict[str, Any
     if article is None:
         return None
     return {"title": article["title"], "text": article["body"]}
+
+
+def drupal_pending_content(client: Backend) -> dict[str, Any]:
+    nodes = client.get_pending_nodes()
+    states = [node["moderation_state"] or "unpublished" for node in nodes]
+    return {
+        "count": len(nodes),
+        "by_state": dict(Counter(states)),
+        "latest": [
+            {"title": node["title"], "type": node["type"], "state": state, "age": _humanize_age(node["changed"])}
+            for node, state in list(zip(nodes, states))[:3]
+        ],
+    }
+
+
+def drupal_create_note(client: Backend, *, title: str, body: str) -> dict[str, Any]:
+    # The installer's note type, else the first enabled type (spec R3.3).
+    content_type = client.config.note_type or next(iter(client.schema))
+    node = client.create_draft(content_type, title, body)
+    return {"saved": "draft", "title": node["title"], "type": node["type"]}

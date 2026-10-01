@@ -208,27 +208,31 @@ behind a five-minute wait.
 
 ## How Dreachy plugs in
 
-`dreachy/main.py` is a `ReachyMiniApp` subclass that does five things before
+`dreachy/main.py` is a `ReachyMiniApp` subclass that does six things before
 handing over:
 
-1. **Loads the instance `.env`** itself. The conversation app loads the same file,
-   but only once its audio stream launches, which is after it has built the tool
-   specs, and Dreachy needs the site URL before then.
-2. **Renders the profile** into the writable instance path, appending any extra
-   instructions from the settings page to the built-in persona rather than
-   replacing it, so the guardrails survive whatever an installer types.
-3. **Sets three environment variables** the conversation app's `Config` reads at
+1. **Loads the instance `.env`** itself. The conversation app loads the same file
+   at the start of its own `run()`, but Dreachy discovers the site's content types
+   before handing over to it, so it needs the site URL first.
+2. **Sets three environment variables** the conversation app's `Config` reads at
    import time — the custom profile name, the profiles directory and the external
    tools directory. This is why the import of `run()` happens *inside* the method
    and not at module level.
-4. **Registers `GET`/`POST /api/config` and `GET /api/schema`** on the settings app
-   that the dashboard serves. This comes before discovery, so the settings page
-   answers even while a bad saved URL is timing out — it's how you fix the URL.
-5. **Discovers the site's content types**, so the search tool's type filter lists
+3. **Registers the settings routes** (`/api/config`, `/api/schema`, `/api/status`,
+   `/api/auth`, `/api/editorial`) on the settings app that the dashboard serves.
+   This comes before discovery, so the settings page answers even while a bad
+   saved URL is timing out — it's how you fix the URL.
+4. **Discovers the site's content types**, so the search tool's type filter lists
    the site's own types when its spec is built. If the site can't be reached, the
-   Umami mapping stands in and discovery is retried as the tools are used. Then it
-   calls `reachy_mini_conversation_app.main.run()` and does not
-   return until the app stops.
+   Umami mapping stands in and discovery is retried as the tools are used.
+5. **Checks the site login** (R3). Only if it works does Dreachy get its two
+   editorial tools, `drupal_pending_content` and `drupal_create_note`.
+6. **Renders the profile** into the writable instance path, last because
+   `tools.txt` depends on the login check: the editorial tools are listed only
+   when it passed. Extra instructions from the settings page are appended to the
+   built-in persona rather than replacing it, so the guardrails survive whatever
+   an installer types. Then it calls `reachy_mini_conversation_app.main.run()` and
+   does not return until the app stops.
 
 Tools are discovered by filename from the external tools directory, which is why
 shared helpers live in `tools/_shared.py`: the loader skips files starting with an
@@ -246,7 +250,7 @@ delegates to it.
 | Every request 404s | Language prefix set when the site is single-language, or missing when it's multilingual | Settings page |
 | Says it will read an article, then stops | The model acknowledged without emitting the tool call. Known, intermittent | Ask again |
 | Reaction never fires | Watcher polling the wrong site, or nothing published since the baseline | Logs: `drupal_watch_site: new content detected` |
-| Ignores a content type | The type has no formatted text field, is unticked on the settings page, or was created since start | Settings page (saving re-reads the site's types); logs: `Couldn't discover the site's content types` |
+| Ignores a content type | The type has no formatted text field, is unticked on the settings page, or was created since start | Settings page (saving re-reads the site's types); logs: `Can't sample node--X, skipping it` (the site refused that type) or `Skipping node--X: none of its content has a formatted text field` |
 | Site pulse counts look wrong | Counts are capped at `pulse_sample_limit` (50) per type — core JSON:API has no collection count | `config.py` |
 
 The daemon streams its journal over a WebSocket at `/logs/ws/daemon`, which

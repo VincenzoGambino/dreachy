@@ -4,7 +4,7 @@ import asyncio
 import logging
 from typing import Any, Dict
 
-from dreachy.client import DreachySiteError
+from dreachy.backend import DreachySiteError
 from dreachy.tool_queries import drupal_site_pulse
 from dreachy.tools._shared import get_client
 from reachy_mini_conversation_app.tools.core_tools import Tool, ToolDependencies

@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import os
 import threading
+import time
 
+import dotenv
 import pytest
 from _fake_site import NEWS_LABELS, NEWS_NODES, FakeSite
 from fastapi import FastAPI
@@ -41,9 +43,11 @@ def _isolated_paths(tmp_path, monkeypatch):
         "DREACHY_OAUTH_CLIENT_ID",
         "DREACHY_OAUTH_CLIENT_SECRET",
         "DREACHY_OAUTH_SCOPE",
+        "DREACHY_NOTE_TYPE",
     ):
         monkeypatch.setenv(key, "")
         monkeypatch.delenv(key)
+    monkeypatch.setattr(dreachy_main, "_editorial_enabled", False, raising=False)
     shared._client = None
     yield
     shared._client = None
@@ -493,3 +497,203 @@ def test_a_save_without_login_fields_leaves_the_login_alone() -> None:
         "auth": "oauth", "client_id": "dreachy", "scope": "dreachy", "client_secret_set": True, "active": True,
     }
     assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == _SECRET
+
+
+def test_concurrent_callers_after_a_reset_share_one_client(monkeypatch) -> None:
+    built = []
+    gate = threading.Event()
+
+    class _SlowBackend:
+        def __init__(self, *args, **kwargs) -> None:
+            gate.wait(2)  # both callers are inside get_client() before either finishes building
+            built.append(self)
+
+    monkeypatch.setattr(shared, "JsonApiBackend", _SlowBackend)
+    shared.reset_client()
+    results = []
+    threads = [threading.Thread(target=lambda: results.append(shared.get_client())) for _ in range(2)]
+    for thread in threads:
+        thread.start()
+    gate.set()
+    for thread in threads:
+        thread.join(5)
+
+    assert len(built) == 1
+    assert results[0] is results[1]
+
+
+# ---------------------------------------------------------------------------
+# R3 Task 1 cleanup: the login section tells the truth, never loses a secret
+# to stray whitespace, and a refused login is told apart from a down site.
+# ---------------------------------------------------------------------------
+
+
+def test_the_login_status_matches_what_dreachy_does(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_AUTH", "OAuth")  # hand-edited; Config lowercases it
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_ID", "dreachy")
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_SECRET", _SECRET)
+    body = _make_client().get("/api/auth").json()
+    assert (body["auth"], body["active"]) == ("oauth", True)
+
+    monkeypatch.setenv("DREACHY_OAUTH_CLIENT_SECRET", "   ")  # Config strips it to nothing
+    assert _make_client().get("/api/auth").json()["active"] is False
+
+
+def test_a_whitespace_only_secret_field_keeps_the_saved_secret() -> None:
+    client = _make_client()
+    _save_login(client, client_secret=_SECRET)
+
+    resp = _save_login(client, client_secret="   ")
+
+    assert resp.json()["client_secret_set"] is True
+    assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == _SECRET
+
+
+def test_a_new_secret_wins_over_remove() -> None:
+    client = _make_client()
+    _save_login(client, client_secret=_SECRET)
+
+    _save_login(client, client_secret="the-new-secret", clear_client_secret=True)
+
+    assert os.environ["DREACHY_OAUTH_CLIENT_SECRET"] == "the-new-secret"
+
+
+def test_a_secret_with_backslashes_and_quotes_survives_a_restart() -> None:
+    tricky = "ab\\\\cd'ef\\"  # two backslashes in a row are what python-dotenv collapses
+    _save_login(_make_client(), client_secret=tricky)
+
+    reloaded = dotenv.dotenv_values(dreachy_main._instance_path() / ".env")
+
+    assert reloaded["DREACHY_OAUTH_CLIENT_SECRET"] == tricky
+
+
+def test_status_tells_a_refused_login_from_an_unreachable_site(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://example.com")
+    client = _make_client()
+
+    # The login is refused: this fake site has no /oauth/token at all.
+    logged_in = Config(auth="oauth", oauth_client_id="dreachy", oauth_client_secret=_SECRET)
+    shared._client = FakeSite(NEWS_NODES, labels=NEWS_LABELS).client(logged_in, auto_discover=True)
+    client.get("/api/schema")  # the page's load: tries discovery
+    assert client.get("/api/status").json() == {"discovered": False, "problem": "login_refused"}
+
+    shared._client = FakeSite(NEWS_NODES, index_status=503).client(auto_discover=True)
+    client.get("/api/schema")
+    assert client.get("/api/status").json() == {"discovered": False, "problem": "site_unreachable"}
+
+    shared._client = FakeSite(NEWS_NODES, labels=NEWS_LABELS).client(auto_discover=True)
+    client.get("/api/schema")
+    assert client.get("/api/status").json() == {"discovered": True, "problem": None}
+
+
+def test_a_dropped_client_is_closed_once_nothing_should_still_be_using_it(monkeypatch) -> None:
+    # Not at once: an in-flight tool call or the watcher may still hold it.
+    monkeypatch.setattr(shared, "_RETIRE_AFTER_SECONDS", 0.2)
+
+    class _Old:
+        closed = False
+
+        def close(self) -> None:
+            self.closed = True
+
+    old = _Old()
+    shared._client = old
+    shared.reset_client()
+
+    assert old.closed is False
+    time.sleep(0.5)
+    assert old.closed is True
+
+
+# ---------------------------------------------------------------------------
+# Editorial tools (R3): in tools.txt only when the site login works.
+# ---------------------------------------------------------------------------
+
+
+class _Editor:
+    def __init__(self, can: bool) -> None:
+        self.can = can
+
+    def refresh_schema(self) -> bool:
+        return True
+
+    def can_edit(self) -> bool:
+        return self.can
+
+
+def _rendered_tools() -> list[str]:
+    text = (dreachy_main._instance_profile_dir() / "tools.txt").read_text()
+    return [line.strip() for line in text.splitlines() if line.strip() and not line.startswith("#")]
+
+
+def test_render_profile_adds_the_editorial_tools_only_when_enabled(monkeypatch) -> None:
+    dreachy_main._render_profile()
+    assert _rendered_tools() == ["drupal_whats_new"]
+
+    monkeypatch.setattr(dreachy_main, "_editorial_enabled", True)
+    dreachy_main._render_profile()
+    assert _rendered_tools() == ["drupal_whats_new", "drupal_pending_content", "drupal_create_note"]
+
+
+@pytest.mark.parametrize(("can_edit", "expected"), [
+    (True, ["drupal_whats_new", "drupal_pending_content", "drupal_create_note"]),
+    (False, ["drupal_whats_new"]),
+])
+def test_start_up_registers_editorial_tools_only_when_the_login_works(monkeypatch, can_edit, expected) -> None:
+    for key in ("REACHY_MINI_CUSTOM_PROFILE", "REACHY_MINI_EXTERNAL_PROFILES_DIRECTORY", "REACHY_MINI_EXTERNAL_TOOLS_DIRECTORY"):
+        monkeypatch.setenv(key, "")
+    monkeypatch.setenv("DREACHY_BASE_URL", "https://site.example")
+    monkeypatch.setattr(dreachy_main, "get_client", lambda: _Editor(can_edit))
+
+    dreachy_main._start_up(None)
+
+    assert _rendered_tools() == expected
+
+
+def test_start_up_leaves_editing_off_when_the_login_check_errors(monkeypatch) -> None:
+    class _Broken(_Editor):
+        def can_edit(self) -> bool:
+            raise KeyError("expires_in")
+
+    for key in ("REACHY_MINI_CUSTOM_PROFILE", "REACHY_MINI_EXTERNAL_PROFILES_DIRECTORY", "REACHY_MINI_EXTERNAL_TOOLS_DIRECTORY"):
+        monkeypatch.setenv(key, "")
+    monkeypatch.setattr(dreachy_main, "get_client", lambda: _Broken(True))
+
+    dreachy_main._start_up(None)  # must not raise
+
+    assert _rendered_tools() == ["drupal_whats_new"]
+
+
+def test_a_settings_save_keeps_the_editorial_tools_decided_at_start(monkeypatch) -> None:
+    monkeypatch.setattr(dreachy_main, "_editorial_enabled", True)
+
+    _make_client().post("/api/config", json={"base_url": "https://example.com", "extra_instructions": "Be brief."})
+
+    assert "drupal_create_note" in _rendered_tools()
+
+
+def test_editorial_status_reports_whether_editing_is_on(monkeypatch) -> None:
+    assert _make_client().get("/api/editorial").json() == {"available": False, "note_type": ""}
+
+    monkeypatch.setattr(dreachy_main, "_editorial_enabled", True)
+
+    assert _make_client().get("/api/editorial").json()["available"] is True
+
+
+def test_saving_the_note_type() -> None:
+    client = _make_client()
+
+    resp = client.post("/api/editorial", json={"note_type": "event"})
+
+    assert resp.json()["note_type"] == "event"
+    assert os.environ["DREACHY_NOTE_TYPE"] == "event"
+    assert shared._client is None  # the next note uses it at once
+
+
+def test_an_editorial_save_without_a_note_type_leaves_it_alone(monkeypatch) -> None:
+    monkeypatch.setenv("DREACHY_NOTE_TYPE", "event")
+
+    resp = _make_client().post("/api/editorial", json={})
+
+    assert resp.json()["note_type"] == "event"  # the save happened, and kept it
+    assert os.environ["DREACHY_NOTE_TYPE"] == "event"

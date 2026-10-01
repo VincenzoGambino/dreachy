@@ -28,13 +28,19 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
 
-from dreachy.config import AUTH_MODES, Config, parse_types
+from dreachy.config import Config, parse_types
 from dreachy.tools._shared import get_client, reset_client
 
 logger = logging.getLogger(__name__)
 
 _PACKAGE_DIR = Path(__file__).resolve().parent
 _BUNDLED_PROFILE_DIR = _PACKAGE_DIR / "profile" / "dreachy"
+
+_EDITORIAL_TOOLS = ("drupal_pending_content", "drupal_create_note")
+# Decided once at start, after discovery (_start_up): the editorial tools
+# are registered only when the site login works (spec R3.1). Settings saves
+# re-render the profile with the same decision.
+_editorial_enabled = False
 
 
 def _instance_path() -> Path:
@@ -73,7 +79,8 @@ def _write_extra_instructions(text: str) -> None:
 def _render_profile() -> None:
     """Sync the bundled profile into the writable instance path.
 
-    tools.txt/greeting.txt copy verbatim; instructions.txt gets any
+    greeting.txt copies verbatim; tools.txt too, plus the editorial tools
+    when _editorial_enabled (decided at start: the site login works); instructions.txt gets any
     installer-supplied extra instructions appended after the built-in
     persona — appending, not replacing, keeps the built-in guardrails (e.g.
     "only answer from site content") intact regardless of what gets typed
@@ -84,8 +91,16 @@ def _render_profile() -> None:
     hot-reloaded.
     """
     dest = _instance_profile_dir()
-    for name in ("tools.txt", "greeting.txt"):
-        (dest / name).write_text((_BUNDLED_PROFILE_DIR / name).read_text())
+    (dest / "greeting.txt").write_text((_BUNDLED_PROFILE_DIR / "greeting.txt").read_text())
+    tools = (_BUNDLED_PROFILE_DIR / "tools.txt").read_text()
+    if _editorial_enabled:
+        tools = (
+            tools.rstrip("\n")
+            + "\n\n# Editorial tools: registered because the site login works (spec R3).\n"
+            + "\n".join(_EDITORIAL_TOOLS)
+            + "\n"
+        )
+    (dest / "tools.txt").write_text(tools)
 
     base_instructions = (_BUNDLED_PROFILE_DIR / "instructions.txt").read_text()
     extra = _read_extra_instructions()
@@ -111,10 +126,10 @@ def _configure_environment() -> None:
 def _load_instance_env() -> None:
     """Load the instance .env into os.environ before anything reads it.
 
-    The conversation app loads this same file too, but only once its audio
-    stream launches — after it has built its tool specs. Dreachy needs the
-    site settings earlier, to discover the site's content types before
-    those specs are built (so drupal_find_content lists the site's own).
+    The conversation app loads this same file too, at the start of its own
+    run(). But Dreachy discovers the site's content types (so
+    drupal_find_content lists the site's own) before it hands over to that
+    run(), so it needs the site settings first and loads the file itself.
     """
     env_path = _instance_path() / ".env"
     if env_path.exists():
@@ -160,24 +175,44 @@ class _AuthPayload(BaseModel):
     clear_client_secret: bool = False
 
 
+class _EditorialPayload(BaseModel):
+    # None = field absent: leave the saved value alone. "" = the first enabled type.
+    note_type: str | None = None
+
+
+def _editorial_status() -> dict:
+    return {"available": _editorial_enabled, "note_type": os.environ.get("DREACHY_NOTE_TYPE", "")}
+
+
+def _set_env(key: str, value: str) -> None:
+    """Save one setting to the instance .env and the running environment.
+
+    python-dotenv collapses two backslashes in a row when it reloads the file,
+    so backslashes are escaped on the way in: every value, a secret included,
+    reads back exactly as saved after a restart.
+    """
+    dotenv.set_key(str(_instance_path() / ".env"), key, value.replace("\\", "\\\\"))
+    os.environ[key] = value
+
+
 def _auth_status() -> dict:
-    auth = os.environ.get("DREACHY_AUTH", "none") or "none"
-    client_id = os.environ.get("DREACHY_OAUTH_CLIENT_ID", "")
-    scope = os.environ.get("DREACHY_OAUTH_SCOPE", "")
-    secret_set = bool(os.environ.get("DREACHY_OAUTH_CLIENT_SECRET"))
+    # From Config, so the page reports exactly what Dreachy does (Config
+    # lowercases the mode and strips the values).
+    config = Config.from_env()
     return {
-        "auth": auth if auth in AUTH_MODES else "none",
-        "client_id": client_id,
-        "scope": scope,
-        "client_secret_set": secret_set,
-        "active": auth == "oauth" and bool(client_id) and secret_set,
+        "auth": config.auth,
+        "client_id": config.oauth_client_id,
+        "scope": config.oauth_scope,
+        "client_secret_set": bool(config.oauth_client_secret),
+        "active": config.uses_oauth,
     }
 
 
 def _register_settings_routes(settings_app: FastAPI) -> None:
     """Wire the settings page's routes onto the app's own FastAPI instance.
 
-    GET/POST /api/config, GET /api/schema and GET/POST /api/auth.
+    GET/POST /api/config, GET /api/schema, GET /api/status, GET/POST /api/auth
+    and GET/POST /api/editorial.
     """
 
     @settings_app.get("/api/config")
@@ -207,6 +242,12 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             ],
         }
 
+    @settings_app.get("/api/status")
+    def get_status() -> dict:
+        # No discovery here: the page asks after /api/schema has tried one.
+        client = get_client()
+        return {"discovered": client.schema_discovered, "problem": client.last_discovery_problem}
+
     @settings_app.get("/api/auth")
     def get_auth() -> dict:
         return _auth_status()
@@ -220,12 +261,14 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             "DREACHY_OAUTH_SCOPE": payload.scope,
         }
         updates = {key: value.strip() for key, value in fields.items() if value is not None}
-        if payload.client_secret and not payload.clear_client_secret:
-            updates["DREACHY_OAUTH_CLIENT_SECRET"] = payload.client_secret.strip()
+        # Blank, or only spaces, means "keep the saved secret". A newly typed
+        # secret wins over "Remove the saved secret".
+        new_secret = (payload.client_secret or "").strip()
+        if new_secret:
+            updates["DREACHY_OAUTH_CLIENT_SECRET"] = new_secret
         for key, value in updates.items():
-            dotenv.set_key(str(env_path), key, value)
-            os.environ[key] = value
-        if payload.clear_client_secret:
+            _set_env(key, value)
+        if payload.clear_client_secret and not new_secret:
             env_path.touch()
             dotenv.unset_key(str(env_path), "DREACHY_OAUTH_CLIENT_SECRET")
             os.environ.pop("DREACHY_OAUTH_CLIENT_SECRET", None)
@@ -235,6 +278,18 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
         reset_client()  # the next request logs in with the new settings
         return _auth_status()
 
+    @settings_app.get("/api/editorial")
+    def get_editorial() -> dict:
+        return _editorial_status()
+
+    @settings_app.post("/api/editorial")
+    def save_editorial(payload: _EditorialPayload) -> dict:
+        if payload.note_type is not None:
+            note_type = payload.note_type.strip()
+            _set_env("DREACHY_NOTE_TYPE", note_type)
+            reset_client()  # the next note is saved as this type
+        return _editorial_status()
+
     @settings_app.post("/api/config")
     def save_config(payload: _ConfigPayload) -> dict:
         env_path = _instance_path() / ".env"
@@ -243,16 +298,14 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
         previous_base_url = os.environ.get("DREACHY_BASE_URL")
         base_url_changed = False
         if base_url and base_url != previous_base_url:
-            dotenv.set_key(str(env_path), "DREACHY_BASE_URL", base_url)
-            os.environ["DREACHY_BASE_URL"] = base_url
+            _set_env("DREACHY_BASE_URL", base_url)
             base_url_changed = True
 
         locale_changed = False
         if payload.locale is not None:
             locale = payload.locale.strip()
             if locale != os.environ.get("DREACHY_LOCALE"):
-                dotenv.set_key(str(env_path), "DREACHY_LOCALE", locale)
-                os.environ["DREACHY_LOCALE"] = locale
+                _set_env("DREACHY_LOCALE", locale)
                 locale_changed = True
 
         types = None
@@ -267,16 +320,14 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             # Credentials belong to the site that issued them. Kept, the next
             # token request would POST the secret to whatever the new URL
             # points at — so moving site means entering the new site's login.
-            dotenv.set_key(str(env_path), "DREACHY_AUTH", "none")
-            os.environ["DREACHY_AUTH"] = "none"
+            _set_env("DREACHY_AUTH", "none")
             dotenv.unset_key(str(env_path), "DREACHY_OAUTH_CLIENT_SECRET")
             os.environ.pop("DREACHY_OAUTH_CLIENT_SECRET", None)
             login_cleared = True
 
         types_changed = False
         if types is not None and types != os.environ.get("DREACHY_TYPES", ""):
-            dotenv.set_key(str(env_path), "DREACHY_TYPES", types)
-            os.environ["DREACHY_TYPES"] = types
+            _set_env("DREACHY_TYPES", types)
             types_changed = True
 
         # Always, even when nothing above changed: the next tool call picks up
@@ -297,16 +348,31 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
         }
 
 
+def _editorial_available() -> bool:
+    """Whether to register the editorial tools: the site login works right now."""
+    try:
+        return get_client().can_edit()
+    except Exception:
+        # Start-up must survive a misbehaving site; editing simply stays off.
+        logger.exception("Couldn't check the site login at start; editing stays off")
+        return False
+
+
 def _start_up(settings_app: FastAPI | None) -> None:
     """Everything Dreachy does before handing over to the conversation app."""
+    global _editorial_enabled
     _load_instance_env()
-    _render_profile()
     _configure_environment()
     # Routes before discovery: a saved URL that hangs keeps discovery waiting
     # on its timeout, and the settings page is how an installer fixes it.
     if settings_app is not None:
         _register_settings_routes(settings_app)
     _warm_schema()
+    _editorial_enabled = _editorial_available()
+    # Last: tools.txt depends on the login check. The conversation app reads
+    # the profile only after _start_up returns.
+    _render_profile()
+
 
 class Dreachy(ReachyMiniApp):
     """Reachy Mini becomes the embodiment of a Drupal site."""

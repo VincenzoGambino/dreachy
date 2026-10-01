@@ -59,6 +59,10 @@ class Backend(ABC):
         self.schema_discovered = False
         self._next_discovery_at = 0.0
         self._discovery_lock = threading.Lock()
+        self._warned_stale_selection = False
+        # Why the last discovery failed, for the settings page:
+        # "login_refused", "site_unreachable", "no_readable_types", or None.
+        self.last_discovery_problem: str | None = None
 
     def __enter__(self) -> Backend:
         return self
@@ -85,6 +89,11 @@ class Backend(ABC):
     @property
     def schema(self) -> Schema:
         """The types Dreachy talks about. Never touches the network."""
+        wanted = set(self.config.enabled_types)
+        if wanted and not wanted & self._full_schema.keys() and not self._warned_stale_selection:
+            # Once per backend: this runs on every tool call and watcher poll.
+            self._warned_stale_selection = True
+            logger.warning("None of the enabled content types %s exist on the site; using all of them", sorted(wanted))
         return select_types(self._full_schema, self.config.enabled_types)
 
     @abstractmethod
@@ -107,11 +116,14 @@ class Backend(ABC):
         try:
             schema = self.get_schema()
         except DreachySiteError as exc:
+            self.last_discovery_problem = "login_refused" if isinstance(exc, DreachyAuthError) else "site_unreachable"
             return self._discovery_failed(str(exc))
         if not schema:
+            self.last_discovery_problem = "no_readable_types"
             return self._discovery_failed("no readable content type has text fields")
         self._full_schema = schema
         self.schema_discovered = True
+        self.last_discovery_problem = None
         return True
 
     def _discovery_failed(self, reason: str) -> bool:
@@ -160,6 +172,28 @@ class Backend(ABC):
         """One node, by URL path alias or exact title; None if nothing matches.
 
         Published content only unless include_unpublished.
+        """
+
+    # -- editorial (R3): only when logged in -------------------------------
+
+    def can_edit(self) -> bool:
+        """Whether this backend is logged in and the site accepts its login."""
+        return False
+
+    @abstractmethod
+    def get_pending_nodes(self, limit: int | None = None) -> list[dict[str, Any]]:
+        """Unpublished content awaiting publication, most recently changed first.
+
+        Across the enabled types; archived content (Content Moderation's
+        "archived" state) isn't pending and is left out.
+        """
+
+    @abstractmethod
+    def create_draft(self, content_type: str, title: str, body: str) -> dict[str, Any]:
+        """Save one unpublished node and return its node dict.
+
+        Never publishes. Raises DreachySiteError when the site refuses, and
+        when the result came back published — that's an error, not a success.
         """
 
     def get_site_pulse(self) -> dict[str, Any]:

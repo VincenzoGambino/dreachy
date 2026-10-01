@@ -43,6 +43,9 @@ class TypeSchema:
     text_fields: tuple[str, ...]
     # A teaser that's a field of its own (Umami's recipe), if the type has one.
     summary_field: str | None = None
+    # Content Moderation governs this type: its content carries a
+    # moderation_state, and it can't be unpublished by setting status (R3).
+    moderated: bool = False
 
 
 Schema = dict[str, TypeSchema]
@@ -72,6 +75,8 @@ def infer_type_schema(label: str, samples: Iterable[Mapping[str, Any]]) -> TypeS
     Samples are unioned, so a field left empty on the newest node is still
     found on an older one. Returns None for a type with no formatted text.
     """
+    samples = list(samples)
+    moderated = any("moderation_state" in attributes for attributes in samples)
     candidates: list[str] = []
     for attributes in samples:
         for name, value in attributes.items():
@@ -87,7 +92,7 @@ def infer_type_schema(label: str, samples: Iterable[Mapping[str, Any]]) -> TypeS
         body, summary = [summary], None
     preferred = [name for name in _BODY_PREFERENCE if name in body]
     rest = [name for name in body if name not in preferred]
-    return TypeSchema(label, LABEL_FIELD, tuple(preferred + rest), summary)
+    return TypeSchema(label, LABEL_FIELD, tuple(preferred + rest), summary, moderated=moderated)
 
 
 def guess_type_schema(bundle: str, label: str) -> TypeSchema:
@@ -120,7 +125,9 @@ def build_schema(
             type_schema = infer_type_schema(label, bundle_samples)
         else:
             type_schema = guess_type_schema(bundle, label)
-        if type_schema is not None:
+        if type_schema is None:
+            logger.info("Skipping node--%s: none of its content has a formatted text field", bundle)
+        else:
             schema[bundle] = type_schema
     return schema
 
@@ -135,13 +142,8 @@ def select_types(schema: Schema, enabled: Iterable[str]) -> Schema:
 
     Empty *enabled* means every type. So does a selection naming only types
     the site no longer has: a stale setting mustn't leave Dreachy knowing
-    nothing.
+    nothing. (Backend.schema warns about that, once.)
     """
     wanted = set(enabled)
-    if not wanted:
-        return dict(schema)
     selected = {t: s for t, s in schema.items() if t in wanted}
-    if not selected:
-        logger.warning("None of the enabled content types %s exist on the site; using all of them", sorted(wanted))
-        return dict(schema)
-    return selected
+    return selected or dict(schema)

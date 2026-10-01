@@ -32,6 +32,12 @@ _watch_task: asyncio.Task[None] | None = None
 _CLIENT_CHECK_SECONDS = 1.0
 
 
+def _watched(client: Backend) -> tuple:
+    """What the watcher's baseline belongs to: the site, and which types count."""
+    config = client.config
+    return (config.base_url, config.default_locale, tuple(config.enabled_types))
+
+
 async def _latest_created(client: Backend) -> str | None:
     nodes = await asyncio.to_thread(client.get_recent_nodes, limit=1)
     return nodes[0]["created"] if nodes else None
@@ -65,14 +71,18 @@ async def _watch_loop(deps: ToolDependencies) -> None:
 
         current = get_client()
         if current is not client:
-            # The settings page saved a new site URL. A different site's
-            # newest content isn't news, so re-baseline silently against it
-            # (the same path as recovering from a failed baseline).
-            logger.info("drupal_watch_site: site URL changed to %s, re-baselining", current.config.base_url)
+            # The settings page saved: every save swaps the client. Only a
+            # different site (URL or language prefix) or type selection means
+            # a new baseline — its newest content isn't news. On the same
+            # site, content published since the last poll still is.
+            if _watched(current) == _watched(client):
+                logger.info("drupal_watch_site: settings changed; still watching %s", current.config.base_url)
+            else:
+                logger.info("drupal_watch_site: now watching %s, re-baselining", current.config.base_url)
+                last_seen_created = None
+                baseline_established = False
             client = current
             consecutive_failures = 0
-            last_seen_created = None
-            baseline_established = False
 
         try:
             newest = await _latest_created(client)

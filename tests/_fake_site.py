@@ -8,6 +8,7 @@ objects sit alongside them and must not be mistaken for text.
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 
@@ -99,6 +100,30 @@ NEWS_NODES = {
 }
 
 
+# A small newsroom: news_item is moderated (its content carries a
+# moderation_state), event isn't. Unpublished work in several states,
+# including archived content, which isn't "pending".
+EDITORIAL_LABELS = {"news_item": "News item", "event": "Event"}
+EDITORIAL_NODES = {
+    "news_item": [
+        node("news_item", "n1", "Council approves new park", "2026-09-28T09:00:00+00:00",
+             body=formatted("<p>The council voted.</p>"), moderation_state="published"),
+        node("news_item", "d1", "Park opening hours", "2026-09-29T09:00:00+00:00",
+             status=False, body=formatted("<p>Draft.</p>"), moderation_state="draft"),
+        node("news_item", "r1", "Budget report", "2026-09-27T09:00:00+00:00",
+             status=False, body=formatted("<p>In review.</p>"), moderation_state="review"),
+        node("news_item", "a1", "Old fair", "2026-01-01T09:00:00+00:00",
+             status=False, body=formatted("<p>Gone.</p>"), moderation_state="archived"),
+    ],
+    "event": [
+        node("event", "e1", "Harvest fair", "2026-09-25T09:00:00+00:00",
+             field_description=formatted("<p>Stalls.</p>")),
+        node("event", "e2", "Winter market", "2026-09-26T09:00:00+00:00",
+             status=False, field_description=formatted("<p>Plans.</p>")),
+    ],
+}
+
+
 def _error(status: int) -> httpx.Response:
     return httpx.Response(status, json={"errors": [{"status": str(status)}]})
 
@@ -121,6 +146,10 @@ class FakeSite:
         node_types_status: int = 200,
         unreadable: tuple[str, ...] = (),
         errors: dict[str, int] | None = None,
+        write_status: int | None = None,
+        publish_on_create: bool = False,
+        write_detail: str | None = None,
+        filter_hides_drafts: bool = False,
     ) -> None:
         self.nodes = nodes
         self.labels = labels or {}
@@ -130,6 +159,16 @@ class FakeSite:
         self.unreadable = unreadable
         # Per-type status for collection requests, e.g. {"recipe": 502}.
         self.errors = errors or {}
+        # Writes (R3): a forced error status, or a site that publishes regardless.
+        self.write_status = write_status
+        self.publish_on_create = publish_on_create
+        self.created: list[dict[str, Any]] = []
+        # The JSON:API errors[].detail sent with write_status.
+        self.write_detail = write_detail
+        # Core JSON:API filter access: without `bypass node access`, a *filtered*
+        # node collection admits only published content (JsonapiHooks::
+        # jsonapiNodeFilterAccess), whatever else the account may view per item.
+        self.filter_hides_drafts = filter_hides_drafts
         self.requests: list[str] = []
         prefix = f"/{locale}" if locale else ""
         self._api = f"{prefix}/jsonapi"
@@ -150,6 +189,8 @@ class FakeSite:
             return self._node_types()
         if match := re.fullmatch(rf"{re.escape(self._api)}/node/(\w+)/([\w-]+)", path):
             return self._resource(*match.groups())
+        if request.method == "POST" and (match := re.fullmatch(rf"{re.escape(self._api)}/node/(\w+)", path)):
+            return self._create(match.group(1), request)
         if match := re.fullmatch(rf"{re.escape(self._api)}/node/(\w+)", path):
             return self._collection(match.group(1), request.url.params)
         if path == self._router:
@@ -189,8 +230,12 @@ class FakeSite:
         if bundle not in self.nodes:
             return _error(404)
         data = sorted(self.nodes[bundle], key=lambda r: r["attributes"]["created"], reverse=True)
+        if self.filter_hides_drafts and any(key.startswith("filter[") for key in params.keys()):
+            data = [r for r in data if r["attributes"].get("status", True)]
         if params.get("filter[status]") == "1":
             data = [r for r in data if r["attributes"].get("status", True)]
+        elif params.get("filter[status]") == "0":
+            data = [r for r in data if not r["attributes"].get("status", True)]
         if contains := params.get("filter[title][value]"):
             data = [r for r in data if contains.lower() in r["attributes"]["title"].lower()]
         elif equal := params.get("filter[title]"):
@@ -198,6 +243,20 @@ class FakeSite:
         if limit := params.get("page[limit]"):
             data = data[: int(limit)]
         return httpx.Response(200, json={"data": data, "links": {}})
+
+    def _create(self, bundle: str, request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        self.created.append(body)
+        if self.write_status is not None:
+            if self.write_detail is not None:
+                error = {"status": str(self.write_status), "detail": self.write_detail}
+                return httpx.Response(self.write_status, json={"errors": [error]})
+            return _error(self.write_status)
+        attributes = dict(body["data"]["attributes"])
+        title = attributes.pop("title")
+        resource = node(bundle, f"new-{len(self.created)}", title, "2026-09-30T12:00:00+00:00", **attributes)
+        resource["attributes"]["status"] = self.publish_on_create
+        return httpx.Response(201, json={"data": resource})
 
     def _resource(self, bundle: str, uuid: str) -> httpx.Response:
         for resource in self.nodes.get(bundle, []):

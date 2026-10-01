@@ -121,12 +121,18 @@ Goal: with credentials present, Dreachy gains an editor persona.
    external tools) — investigate the cleanest way to make registration
    conditional without forking; if tools.txt is static, the tools themselves
    should return a polite "not available on this site" when unauthenticated.
+   *(Amended 2026-09-30:)* both — Dreachy renders `tools.txt` itself and adds
+   the two tools only when the login check passes at start, **and** each tool
+   refuses at call time when not logged in (an installer's
+   `AUTOLOAD_EXTERNAL_TOOLS` would load them regardless).
 2. `drupal_pending_content`: unpublished/draft nodes of the enabled types
    (and, if the site runs core Content Moderation, items in review states —
    detect, don't assume). Spoken summary: counts + latest titles.
 3. `drupal_create_note`: creates an **unpublished** node (type configurable,
    default the first enabled type) with spoken-dictated title/body.
-   **Hard rules**: always unpublished; no update/delete tools; the tool
+   **Hard rules**: always unpublished — `status=false`, or the `draft`
+   moderation state on types under Content Moderation, which forbids setting
+   `status` *(amended 2026-09-30)*; no update/delete tools; the tool
    description must instruct the LLM to confirm aloud before calling (and the
    profile instructions repeat it): ask "shall I save it as a draft?" and only
    call after explicit assent. The tool itself is the last line of defence:
@@ -195,6 +201,13 @@ as them until they log out or go idle. Design decisions *(recorded
 
 ## Tracked separately
 
+- **Forward drafts in pending content.** A new draft of already-published
+  content (Content Moderation's "Create New Draft" from Published) is a
+  non-default revision that JSON:API list reads don't return, so R3's
+  `drupal_pending_content` undercounts on moderated sites. Reading latest
+  revisions needs a request per node. Out of scope for R3 (ruled
+  2026-09-30); a candidate for a later release.
+
 - **Settings-page authentication.** The settings endpoints (`/api/config`,
   `/api/schema`) are unauthenticated on the robot's network — a pre-existing
   gap. R2's OAuth covers Dreachy's requests *to Drupal* only; it doesn't
@@ -253,3 +266,10 @@ Explicit changes to this spec, made after reading the source (see
 - **2026-09-30 — R6 per-user login added; per-user auth removed from Out of
   scope.** Device authorization grant, design decisions recorded in the R6
   section. Paragraphs support keeps R5.
+- **2026-09-30 — R3.1 conditional registration.** Both mechanisms: `tools.txt`
+  rendered with the editorial tools only when the login check passes at
+  start, and a call-time refusal in each tool.
+- **2026-09-30 — R3.3 "always unpublished".** `status=false`, or the `draft`
+  moderation state on moderated types (Content Moderation forbids setting
+  `status` there). Forward drafts in pending content are out of scope
+  (Tracked separately).

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from _fake_site import NEWS_LABELS, NEWS_NODES, UMAMI_LABELS, UMAMI_NODES, formatted
 
 from dreachy.schema import (
@@ -100,3 +102,20 @@ def test_a_selection_keeps_schema_order() -> None:
 
 def test_a_selection_of_only_vanished_types_falls_back_to_every_type() -> None:
     assert select_types(FALLBACK_TYPES, ("news_item",)) == FALLBACK_TYPES
+
+
+def test_a_type_skipped_for_having_no_text_is_logged(caplog) -> None:
+    with caplog.at_level(logging.INFO, logger="dreachy.schema"):
+        build_schema(NEWS_NODES, NEWS_LABELS, _samples(NEWS_NODES))
+
+    assert "node--gallery" in caplog.text
+
+
+def test_a_type_whose_content_carries_a_moderation_state_is_moderated() -> None:
+    samples = [{"title": "t", "body": formatted("b"), "moderation_state": "published"}]
+
+    assert infer_type_schema("News", samples).moderated is True
+
+
+def test_a_type_without_moderation_state_is_not_moderated() -> None:
+    assert infer_type_schema("News", [{"title": "t", "body": formatted("b")}]).moderated is False

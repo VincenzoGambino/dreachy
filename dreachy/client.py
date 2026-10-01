@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Callable
 from typing import Any
 from urllib.parse import urljoin
 
@@ -45,6 +46,21 @@ _CREDENTIALS_REFUSED = (
     " — if this keeps happening, check the site login on Dreachy's settings page"
 )
 
+# Core's fallback format: usable by every role, so notes need no format permission.
+_NOTE_TEXT_FORMAT = "plain_text"
+_DRAFT_STATE = "draft"
+_ARCHIVED_STATE = "archived"
+
+
+def _error_detail(response: httpx.Response) -> str:
+    """The first JSON:API error's detail, shortened; "" if there isn't one."""
+    try:
+        errors = response.json().get("errors") or []
+        detail = str(errors[0].get("detail") or "") if errors else ""
+    except (ValueError, AttributeError, TypeError):
+        return ""
+    return detail[:200]
+
 
 def _strip_html(text: str) -> str:
     """Collapse Drupal's rendered HTML into plain, speakable text."""
@@ -74,6 +90,8 @@ def _node_to_dict(bundle: str, type_schema: TypeSchema, resource: dict[str, Any]
         "path": path.get("alias"),
         "body": body,
         "summary": summary,
+        "status": bool(attributes.get("status", True)),
+        "moderation_state": attributes.get("moderation_state"),
     }
 
 
@@ -156,7 +174,9 @@ class JsonApiBackend(Backend):
         try:
             response = self._client.fetch(self._index_url(), raise_for_status=True)
             links = response.json().get("links", {})
-        except (AuthenticationError, httpx.HTTPError, ValueError, AttributeError) as exc:
+        # KeyError/TypeError: e.g. a token response without expires_in, raised
+        # by the library while logging in for this request.
+        except (AuthenticationError, httpx.HTTPError, ValueError, AttributeError, KeyError, TypeError) as exc:
             error = self._site_error(exc, "the JSON:API index")
             if type(error) is DreachySiteError:  # keep R1's wording for plain site failures
                 error = DreachySiteError(f"JSON:API index unavailable: {exc}", status=error.status)
@@ -197,17 +217,107 @@ class JsonApiBackend(Backend):
             return None
         return [resource.get("attributes") or {} for resource in resources]
 
+    # -- editorial (R3) ---------------------------------------------------
+
+    def can_edit(self) -> bool:
+        """Logged in, and the site grants a token (checked now: one request)."""
+        if not self.config.uses_oauth:
+            return False
+        try:
+            self._client.add_authorization_header()
+        except (AuthenticationError, httpx.HTTPError) as exc:
+            # The type only: an exception's text is no place to risk credentials.
+            logger.warning("Editing is unavailable: the site login failed (%s)", type(exc).__name__)
+            return False
+        return True
+
+    def get_pending_nodes(self, limit: int | None = None) -> list[dict[str, Any]]:
+        limit = limit or self.config.pending_sample_limit
+
+        # No filter, on purpose: core JSON:API narrows any *filtered* node
+        # collection to published (and the account's own) content unless it
+        # has `bypass node access` (JsonapiHooks::jsonapiNodeFilterAccess), so
+        # filter[status]=0 would hide everyone else's drafts. Unfiltered, each
+        # item is checked on its own, where `view any unpublished content`
+        # counts. So: each type's most recently changed items, unpublished
+        # kept — pending *among the latest `limit` changes per type*.
+        def params(type_schema: TypeSchema) -> DrupalJsonApiParams:
+            return DrupalJsonApiParams().add_sort("changed", "DESC").add_page_limit(limit)
+
+        # Same per-type rule as the other reads: one failing type is skipped.
+        nodes = [
+            n
+            for n in self._read_each_type(self._types(), params)
+            if not n["status"] and n["moderation_state"] != _ARCHIVED_STATE
+        ]
+        nodes.sort(key=lambda n: n["changed"], reverse=True)
+        return nodes[:limit]
+
+    def create_draft(self, content_type: str, title: str, body: str) -> dict[str, Any]:
+        # Never write from the fallback table or a guess: only a discovered
+        # schema says which field holds the text and whether the type is moderated.
+        # _types() first: it retries a failed discovery when one is due (a site
+        # that was down at start), rather than refusing notes until a read does.
+        types = self._types()
+        type_schema = types.get(content_type) if self.schema_discovered else None
+        if type_schema is None:
+            raise DreachySiteError(f"notes can't be saved as {content_type!r} on this site right now")
+        attributes: dict[str, Any] = {
+            type_schema.label_field: title,
+            type_schema.text_fields[0]: {"value": body, "format": _NOTE_TEXT_FORMAT},
+        }
+        if type_schema.moderated:
+            # Content Moderation forbids setting status on moderated content;
+            # the state decides it. Explicit, in case the workflow's default isn't a draft.
+            attributes["moderation_state"] = _DRAFT_STATE
+        else:
+            attributes["status"] = False
+        document = {"data": {"type": f"node--{content_type}", "attributes": attributes}}
+        try:
+            response = self._client.create_resource(f"node--{content_type}", document)
+            node = _node_to_dict(content_type, type_schema, response["data"])
+        except (AuthenticationError, httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
+            raise self._write_error(exc, content_type) from exc
+        if node["status"]:
+            logger.error("drupal_create_note: the site published %s despite a draft request", node["id"])
+            raise DreachySiteError(
+                "the site published the note instead of keeping it as a draft — tell whoever looks after the site"
+            )
+        return node
+
+    def _write_error(self, exc: Exception, content_type: str) -> DreachySiteError:
+        """Why a write failed, in words the model can pass on — with the site's
+        own reason when it gave one (JSON:API errors[].detail: a missing
+        permission, an unknown moderation state, a required field)."""
+        if isinstance(exc, httpx.HTTPStatusError):
+            status = exc.response.status_code
+            reason = _error_detail(exc.response)
+            if reason:
+                logger.warning("drupal_create_note: the site refused the note (%s): %s", status, reason)
+            suffix = f" ({reason})" if reason else ""
+            if status == 405:
+                return DreachySiteError(
+                    "the site doesn't accept changes over JSON:API (it's in read-only mode)", status=status
+                )
+            if status == 403:
+                return DreachySiteError(
+                    f"the site doesn't let Dreachy create {content_type} drafts{suffix}", status=status
+                )
+            if status == 422:
+                return DreachySiteError(f"the site rejected the note{suffix}", status=status)
+        return self._site_error(exc, f"node--{content_type}")
+
     # -- queries --------------------------------------------------------
 
     def get_recent_nodes(self, limit: int | None = None, *, include_unpublished: bool = False) -> list[dict[str, Any]]:
         limit = limit or self.config.whats_new_limit
-        nodes: list[dict[str, Any]] = []
-        for bundle, type_schema in self._types().items():
-            params = _published(
+
+        def params(type_schema: TypeSchema) -> DrupalJsonApiParams:
+            return _published(
                 DrupalJsonApiParams().add_sort("created", "DESC").add_page_limit(limit), include_unpublished
             )
-            for resource in self._get_collection(f"node--{bundle}", params):
-                nodes.append(_node_to_dict(bundle, type_schema, resource))
+
+        nodes = self._read_each_type(self._types(), params)
         nodes.sort(key=lambda n: n["created"], reverse=True)
         return nodes[:limit]
 
@@ -221,19 +331,47 @@ class JsonApiBackend(Backend):
         # nothing.
         if content_type in types:
             types = {content_type: types[content_type]}
-        matches: list[dict[str, Any]] = []
-        for bundle, type_schema in types.items():
-            params = _published(
+
+        def params(type_schema: TypeSchema) -> DrupalJsonApiParams:
+            return _published(
                 DrupalJsonApiParams()
                 .add_filter(type_schema.label_field, keyword, operator=FilterOperator.CONTAINS)
                 .add_sort("created", "DESC")
                 .add_page_limit(limit),
                 include_unpublished,
             )
-            for resource in self._get_collection(f"node--{bundle}", params):
-                matches.append(_node_to_dict(bundle, type_schema, resource))
+
+        matches = self._read_each_type(types, params)
         matches.sort(key=lambda n: n["created"], reverse=True)
         return matches[:limit]
+
+    def _read_each_type(
+        self, types: Schema, params_for: Callable[[TypeSchema], DrupalJsonApiParams]
+    ) -> list[dict[str, Any]]:
+        """Node dicts from one collection read per type.
+
+        A type that fails on its own (deleted or locked mid-session: a 403,
+        404, or an anonymous 401) is skipped with a warning, so it can't sink
+        every query until a restart. A bad login, a site-wide failure, or
+        every type failing at once (a wrong language prefix 404s them all)
+        still raises: that's the site, not one type.
+        """
+        nodes: list[dict[str, Any]] = []
+        skipped: list[tuple[str, DreachySiteError]] = []
+        for bundle, type_schema in types.items():
+            try:
+                resources = self._get_collection(f"node--{bundle}", params_for(type_schema))
+            except DreachySiteError as exc:
+                if isinstance(exc, DreachyAuthError) or exc.status not in _UNREADABLE_STATUSES:
+                    raise
+                skipped.append((bundle, exc))
+                continue
+            nodes.extend(_node_to_dict(bundle, type_schema, resource) for resource in resources)
+        if skipped and len(skipped) == len(types):
+            raise skipped[0][1]
+        for bundle, exc in skipped:
+            logger.warning("Skipping node--%s this time: %s", bundle, exc)
+        return nodes
 
     def get_article(self, title_or_path: str, *, include_unpublished: bool = False) -> dict[str, Any] | None:
         types = self._types()
@@ -243,12 +381,16 @@ class JsonApiBackend(Backend):
             resource = self._client.get_resource_by_path(path, raise_for_status=True, disable_cache=True)
         except ResourceNotFoundError:
             pass
-        except (AuthenticationError, httpx.HTTPError) as exc:
+        # ValueError and friends: a router answer that isn't JSON (a captive portal).
+        except (AuthenticationError, httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
             raise self._site_error(exc, title_or_path) from exc
 
         if resource is not None:
             bundle = resource["data"]["type"].split("--")[1]
-            published = resource["data"]["attributes"].get("status", True)
+            # A site that hides `status` (e.g. JSON:API Extras): anonymous
+            # access only ever sees published content, but a logged-in
+            # Dreachy may see drafts, so there a missing status fails closed.
+            published = resource["data"]["attributes"].get("status", not self.config.uses_oauth)
             if bundle in types and (published or include_unpublished):
                 return _node_to_dict(bundle, types[bundle], resource["data"])
             # A path to something Dreachy doesn't talk about (a disabled

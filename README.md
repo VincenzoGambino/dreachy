@@ -75,6 +75,8 @@ the Reachy Mini dashboard (the gear/settings icon next to the app) and set:
   isn't public; see [`docs/drupal-setup.md`](docs/drupal-setup.md). The secret is write-only:
   once saved it's never shown again, and a blank field keeps it. Takes effect immediately.
   Changing the site URL removes the saved login, so it's never sent to a different site.
+  With the login working, Dreachy can also list pending content and save dictated notes as
+  unpublished drafts; choose the note type there too (see `docs/drupal-setup.md` §8).
 - **Extra instructions** (optional) — free text appended to Dreachy's built-in persona (tone,
   language, anything else). Built-in guardrails (e.g. "only answer from site content") stay in
   force either way, since this is appended, not a replacement. Takes effect the next time the
@@ -103,6 +105,11 @@ by a `.env` file at `~/.local/share/dreachy/.env` on the robot — see
   formatted text falls back to the Umami `article`/`page`/`recipe` mapping. Paragraphs support
   is planned as its own future release (R5 in
   [`specs/backend-and-auth.md`](specs/backend-and-auth.md)).
+- **"Pending" undercounts.** `drupal_pending_content` looks at each content type's 50 most
+  recently changed items, so older drafts aren't counted (see `docs/drupal-setup.md` §8 for
+  why). On sites using Content Moderation, a new draft of content that's already published is
+  a separate revision that JSON:API lists don't return, so it isn't counted either. Tracked in
+  [`specs/backend-and-auth.md`](specs/backend-and-auth.md) ("Tracked separately").
 - **If the site can't be read at start**, Dreachy falls back to the Umami
   `article`/`page`/`recipe` mapping and retries discovery, at most once a minute, as it's used.
 - **`drupal_read_article` occasionally acknowledges without reading.** The model says it will
@@ -136,7 +143,9 @@ Everything else lives under `dreachy/`:
 - `schema.py` — the content-model heuristics (which types, which fields hold text). `client.py`
   fetches; `schema.py` decides.
 - `tool_queries.py` — the plain-function query logic behind each tool.
-- `tools/` — the five `Tool` subclasses the conversation app loads.
+- `tools/` — the five Q&A/watcher `Tool` subclasses the conversation app loads, plus two
+  editorial tools (`drupal_pending_content`, `drupal_create_note`) registered only when the
+  site login works.
 - `common_reactions.py` / `reaction_player.py` — Dreachy's one physical reaction (`perk_up`) and
   the code that plays it on the robot.
 - `profile/dreachy/` — the persona: `instructions.txt`, `tools.txt`, `greeting.txt`. This is the
