@@ -113,7 +113,8 @@ class FakeMcpSite:
             }
             return _result(request_id, result, headers={"mcp-session-id": session_id})
         if session_id not in self.sessions:
-            return _error(request_id, -32600, "unknown session")
+            # MCP: a server that no longer knows a session answers 404.
+            return httpx2.Response(404, json={"jsonrpc": "2.0", "id": request_id, "error": {"code": -32600, "message": "Session not found"}})
         if method == "tools/list":
             return _result(request_id, {"tools": [self._describe(name) for name in self.tools]})
         if method == "tools/call":
@@ -147,20 +148,27 @@ class FakeMcpSite:
     def session_ids(self) -> list[str]:
         return [session_id for session_id, _, _ in self.calls]
 
+    def forget_sessions(self) -> None:
+        """As a server restart or session expiry would."""
+        self.sessions.clear()
+
 
 class FakeTokenEndpoint:
     """POST /oauth/token for drupal-api-client (sync httpx): grants `token`, or refuses."""
 
-    def __init__(self, token: str = "good-token", *, accept: bool = True) -> None:
+    def __init__(self, token: str = "good-token", *, accept: bool = True, expires_in: int = 300, rotate: bool = False) -> None:
         self.token = token
         self.accept = accept
+        self.expires_in = expires_in  # under the 60 s refresh margin, every request refreshes
+        self.rotate = rotate  # a new token per grant: token-1, token-2, …
         self.grants = 0
 
     def handle(self, request: httpx.Request) -> httpx.Response:
         if request.url.path != "/oauth/token" or not self.accept:
             return httpx.Response(401, json={"error": "invalid_client"})
         self.grants += 1
-        return httpx.Response(200, json={"access_token": self.token, "expires_in": 300, "token_type": "Bearer"})
+        token = f"{self.token}-{self.grants}" if self.rotate else self.token
+        return httpx.Response(200, json={"access_token": token, "expires_in": self.expires_in, "token_type": "Bearer"})
 
     def client(self) -> httpx.Client:
         return httpx.Client(transport=httpx.MockTransport(self.handle))

@@ -253,3 +253,146 @@ def test_list_tools_returns_the_servers_tools() -> None:
 
     assert [t.name for t in tools] == ["demo_a", "demo_b"]
     assert tools[0].annotations.read_only_hint is True
+
+
+# -- the shared read session (R4 latency ruling) ---------------------------
+
+
+def test_shared_runs_reuse_one_session() -> None:
+    site = FakeMcpSite({"demo_a": _echo})
+    session = _session(site)
+
+    async def chain(caller):
+        return await caller.call("demo_a", {})
+
+    try:
+        session.run_shared(chain)
+        session.run_shared(chain)
+    finally:
+        session.close()
+
+    assert len(site.calls) == 2
+    assert len(set(site.session_ids())) == 1
+
+
+def test_a_dropped_shared_session_reconnects_and_retries() -> None:
+    site = FakeMcpSite({"demo_a": _echo})
+    session = _session(site)
+
+    async def chain(caller):
+        return await caller.call("demo_a", {"n": 1})
+
+    try:
+        session.run_shared(chain)
+        site.forget_sessions()
+        assert session.run_shared(chain) == {"echo": {"n": 1}}
+    finally:
+        session.close()
+
+    assert len(set(site.session_ids())) == 2
+
+
+def test_the_shared_session_follows_a_refreshed_token() -> None:
+    site = FakeMcpSite({"demo_a": _echo}, token="first")
+    tokens = FakeTokenEndpoint("first")
+    session = _session(site, tokens)
+
+    async def chain(caller):
+        return await caller.call("demo_a", {})
+
+    try:
+        session.run_shared(chain)
+        site.token = tokens.token = "second"  # the old token is refused from now on
+        assert session.run_shared(chain) == {"echo": {}}
+    finally:
+        session.close()
+
+    assert site.seen_auth[-1] == "Bearer second"
+    assert tokens.grants == 2
+
+
+def test_a_refused_login_on_the_shared_session_is_a_dreachy_auth_error() -> None:
+    site = FakeMcpSite({"demo_a": _echo}, token="the-server-wants-another")
+    session = _session(site)
+
+    async def chain(caller):
+        return await caller.call("demo_a", {})
+
+    try:
+        with pytest.raises(DreachyAuthError):
+            session.run_shared(chain)
+    finally:
+        session.close()
+
+
+def test_a_tool_failure_keeps_the_shared_session() -> None:
+    def refused(arguments, state):
+        raise FakeToolError("Tool plugin access denied.")
+
+    site = FakeMcpSite({"demo_a": _echo, "demo_refused": refused})
+    session = _session(site)
+
+    async def failing(caller):
+        return await caller.call("demo_refused", {})
+
+    async def fine(caller):
+        return await caller.call("demo_a", {})
+
+    try:
+        with pytest.raises(McpToolError):
+            session.run_shared(failing)
+        session.run_shared(fine)
+    finally:
+        session.close()
+
+    assert len(set(site.session_ids())) == 1
+    assert [name for _, name, _ in site.calls] == ["demo_refused", "demo_a"]  # no retry of a tool's own refusal
+
+
+def test_close_ends_the_shared_session() -> None:
+    site = FakeMcpSite({"demo_a": _echo})
+    session = _session(site)
+
+    async def chain(caller):
+        return await caller.call("demo_a", {})
+
+    session.run_shared(chain)
+    assert len(site.sessions) == 1
+
+    session.close()
+
+    assert site.sessions == {}  # the SDK's DELETE on close reached the server
+
+
+def test_a_server_that_isnt_there_is_a_site_error_on_the_shared_session_too() -> None:
+    site = FakeMcpSite({"demo_a": _echo}, down=True)
+    session = _session(site)
+
+    async def chain(caller):
+        return await caller.call("demo_a", {})
+
+    try:
+        with pytest.raises(DreachySiteError) as excinfo:
+            session.run_shared(chain)
+    finally:
+        session.close()
+
+    assert not isinstance(excinfo.value, DreachyAuthError)
+
+
+def test_a_token_renewed_early_reaches_the_open_shared_session() -> None:
+    site = FakeMcpSite({"demo_a": _echo}, token=None)
+    tokens = FakeTokenEndpoint("token", expires_in=30, rotate=True)  # inside the refresh margin: renewed every time
+    session = _session(site, tokens)
+
+    async def chain(caller):
+        return await caller.call("demo_a", {})
+
+    try:
+        session.run_shared(chain)
+        session.run_shared(chain)
+    finally:
+        session.close()
+
+    assert len(set(site.session_ids())) == 1
+    assert site.seen_auth[-1] == f"Bearer token-{tokens.grants}"
