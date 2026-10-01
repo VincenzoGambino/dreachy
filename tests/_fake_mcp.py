@@ -64,6 +64,8 @@ class FakeMcpSite:
         self.token = token  # None: no auth required
         self.annotations = annotations or {}
         self.down = down
+        # The next N tools/call requests get HTTP 503, as the sandbox answers under load.
+        self.fail_next = 0
         self.sessions: dict[str, dict[str, Any]] = {}
         self.calls: list[tuple[str, str, dict[str, Any]]] = []  # (session id, tool, arguments)
         self.seen_auth: list[str | None] = []
@@ -99,6 +101,9 @@ class FakeMcpSite:
         message = json.loads(request.content)
         if "id" not in message:  # a notification
             return httpx2.Response(202)
+        if message.get("method") == "tools/call" and self.fail_next > 0:
+            self.fail_next -= 1
+            return httpx2.Response(503, text="The website encountered an unexpected error. Try again later.")
         return self._answer(message, request.headers.get("mcp-session-id"))
 
     def _answer(self, message: dict[str, Any], session_id: str | None) -> httpx2.Response:
@@ -201,22 +206,105 @@ class FakeEntityStore:
     using an old handle silently loses its earlier changes.
     """
 
-    def __init__(self, nodes: dict[int, dict[str, Any]] | None = None, *, prefix: str = "tool_api__demo_") -> None:
-        self.nodes: dict[int, dict[str, Any]] = dict(nodes or {})  # nid -> {"bundle", "fields": {...}}
+    def __init__(
+        self,
+        nodes: dict[int, dict[str, Any]] | None = None,
+        *,
+        prefix: str = "tool_api__demo_",
+        definitions: dict[str, dict[str, Any]] | None = None,
+        index: str = "content_vector",
+    ) -> None:
+        self.nodes: dict[int, dict[str, Any]] = dict(nodes or {})  # nid -> {"bundle", "uuid"?, "fields": {...}}
         self.saves: list[dict[str, Any]] = []
         self.handles: dict[str, dict[str, Any]] = {}
         self.prefix = prefix
+        # bundle -> {"base_field_definitions": {...}, "field_definitions": {...}}
+        self.definitions = definitions or {}
+        self.index = index
+        self.searches: list[dict[str, Any]] = []
         self._handle_ids = itertools.count(1)
 
     def tools(self) -> dict[str, ToolFn]:
         p = self.prefix
         return {
+            f"{p}search_index": self._search,
+            f"{p}entity_list": self._list,
             f"{p}entity_load_by_id": self._load,
             f"{p}entity_field_values": self._values,
+            f"{p}entity_field_value_definitions": self._definitions,
             f"{p}entity_stub": self._stub,
             f"{p}field_set_value": self._set,
             f"{p}entity_save": self._save,
         }
+
+    def write_tools(self) -> set[str]:
+        return {f"{self.prefix}{suffix}" for suffix in ("entity_stub", "field_set_value", "entity_save")}
+
+    def _meta(self, nid: int) -> dict[str, Any]:
+        node = self.nodes[nid]
+        return {
+            "id": str(nid),
+            "type": "node",
+            "bundle": node["bundle"],
+            "label": node["fields"].get("title"),
+            "uuid": node.get("uuid", f"uuid-{nid}"),
+        }
+
+    def _list(self, arguments: dict[str, Any], state: dict[str, Any]) -> Reply:
+        nids = [n for n in self.nodes if arguments.get("bundle") in (None, self.nodes[n]["bundle"])]
+        sort = arguments.get("sort_field") or "nid"
+
+        def key(nid: int) -> Any:
+            value = nid if sort == "nid" else self.nodes[nid]["fields"].get(sort)
+            return int(value) if isinstance(value, str) and value.isdigit() else value
+
+        nids.sort(key=key, reverse=arguments.get("sort_order", "ASC").upper() == "DESC")
+        amount = arguments.get("amount") or len(nids)
+        page = nids[arguments.get("offset", 0) :][:amount]
+        wanted = arguments.get("fields")
+        results = []
+        for nid in page:
+            item: dict[str, Any] = {"_metadata": self._meta(nid)}
+            # ONE field name, as the real server; a list returns nothing.
+            if wanted and "," not in wanted and " " not in wanted and wanted in self.nodes[nid]["fields"]:
+                item[wanted] = self.nodes[nid]["fields"][wanted]
+            results.append(item)
+        return Reply({"results": results}, f"Returned {len(page)} Content(node) entities out of a total {len(nids)}.")
+
+    def _search(self, arguments: dict[str, Any], state: dict[str, Any]) -> Reply:
+        self.searches.append(dict(arguments))
+        if arguments.get("index") != self.index:
+            raise FakeToolError("Tool plugin access denied.")
+        words = arguments["search_words"].lower().split()
+        results = []
+        for nid, node in self.nodes.items():
+            fields = node["fields"]
+            text = " ".join(str(v) for v in fields.values() if isinstance(v, str)).lower()
+            if not any(word in text for word in words):
+                continue
+            for chunk in (1, 2):  # the real index repeats a node per matching passage
+                results.append(
+                    {
+                        "id": f"entity:node/{nid}:en:{nid * 10 + chunk}",
+                        "index": self.index,
+                        "label": fields.get("title"),
+                        "score": 0.9 - chunk / 100,
+                        "snippet": "",
+                        "url": (fields.get("path") or {}).get("alias") or f"/node/{nid}",
+                        "fields": {
+                            "title": {"label": "Title", "values": [fields.get("title")]},
+                            "type": {"label": "Content type", "values": [node["bundle"]]},
+                        },
+                    }
+                )
+        amount = arguments.get("amount") or 10
+        return Reply({"results": results[:amount]}, f"Showing {min(amount, len(results))} result(s)")
+
+    def _definitions(self, arguments: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+        found = self.definitions.get(arguments["bundle"])
+        if found is None:
+            raise FakeToolError("Tool plugin access denied.")
+        return found
 
     def _issue(self, entity: dict[str, Any]) -> str:
         token = f"{{{{entity:{next(self._handle_ids):06x}}}}}"

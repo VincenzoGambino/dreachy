@@ -16,6 +16,10 @@ Discovery route (chosen 2026-09-30 against Drupal core 11.4.4):
   anonymous never has, so the shape of real attribute values is the only
   anonymous signal: formatted text is an object with ``value`` plus
   ``format`` or ``processed``.
+
+Over MCP (R4) the site's field definitions ARE readable, so
+type_schema_from_definitions() picks text fields by type instead, and notes
+which fields a new node must have filled in.
 """
 
 from __future__ import annotations
@@ -46,6 +50,11 @@ class TypeSchema:
     # Content Moderation governs this type: its content carries a
     # moderation_state, and it can't be unpublished by setting status (R3).
     moderated: bool = False
+    # Known only from field definitions (MCP, R4): required text fields a
+    # note fills with its text, and required fields of any other kind,
+    # which Dreachy never invents a value for (Ruling C).
+    required_text: tuple[str, ...] = ()
+    required_other: tuple[str, ...] = ()
 
 
 Schema = dict[str, TypeSchema]
@@ -93,6 +102,40 @@ def infer_type_schema(label: str, samples: Iterable[Mapping[str, Any]]) -> TypeS
     preferred = [name for name in _BODY_PREFERENCE if name in body]
     rest = [name for name in body if name not in preferred]
     return TypeSchema(label, LABEL_FIELD, tuple(preferred + rest), summary, moderated=moderated)
+
+
+# Formatted text (what R1 reads aloud), and plain text a note may also fill.
+FORMATTED_TEXT_TYPES = ("text", "text_long", "text_with_summary")
+PLAIN_TEXT_TYPES = ("string", "string_long")
+
+
+def type_schema_from_definitions(
+    label: str, definitions: Mapping[str, Mapping[str, Any]], *, moderated: bool = False
+) -> TypeSchema | None:
+    """A type's schema from its configured fields' definitions (name ->
+    {type, required, ...}). Same choices as infer_type_schema(), by type
+    rather than by value shape. None for a type with no formatted text."""
+    candidates = [name for name, d in definitions.items() if d.get("type") in FORMATTED_TEXT_TYPES]
+    summary = next((name for name in candidates if any(hint in name for hint in _SUMMARY_HINTS)), None)
+    body = [name for name in candidates if name != summary]
+    if not body:
+        if summary is None:
+            return None
+        body, summary = [summary], None
+    preferred = [name for name in _BODY_PREFERENCE if name in body]
+    rest = [name for name in body if name not in preferred]
+    text_fields = tuple(preferred + rest)
+    required = [name for name, d in definitions.items() if d.get("required") and name != LABEL_FIELD]
+    text_types = FORMATTED_TEXT_TYPES + PLAIN_TEXT_TYPES
+    return TypeSchema(
+        label,
+        LABEL_FIELD,
+        text_fields,
+        summary,
+        moderated=moderated,
+        required_text=tuple(n for n in required if definitions[n].get("type") in text_types and n != text_fields[0]),
+        required_other=tuple(n for n in required if definitions[n].get("type") not in text_types),
+    )
 
 
 def guess_type_schema(bundle: str, label: str) -> TypeSchema:

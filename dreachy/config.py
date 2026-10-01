@@ -73,12 +73,39 @@ class Config:
     pulse_sample_limit: int = 50
 
     # ---------------------------------------------------------------------------
+    # Backend (R4): JSON:API (the default) or the site's MCP server
+    # ---------------------------------------------------------------------------
+    backend: str = "jsonapi"
+    # Empty = {base_url}/mcp.
+    mcp_endpoint: str = ""
+    # The Search API index content searches use; empty = the search tool's
+    # schema enum, if it has one (mcp_mapping.py).
+    mcp_search_index: str = ""
+    # Operation -> tool name overrides, plus "search_params" (DREACHY_MCP_MAPPING).
+    mcp_mapping: dict = field(default_factory=dict)
+    # The node types to use, instead of discovering them from a listing of
+    # all content (which can't see a type with no content yet).
+    mcp_bundles: tuple[str, ...] = ()
+    # Allowlisted extra tools for drupal_site_action (Task 8).
+    mcp_extra_tools: tuple[str, ...] = ()
+    # Calls run at once in one session: the sandbox answered 503 at 6.
+    mcp_concurrency: int = 3
+    # Items a read lists to find the newest content of the enabled types,
+    # and pending items (Ruling 4: about 20).
+    mcp_window: int = 50
+    mcp_pending_window: int = 20
+
+    # ---------------------------------------------------------------------------
     # Watcher (drupal_watch_site)
     # ---------------------------------------------------------------------------
     poll_interval_seconds: float = 30.0
     # On a failed poll, the interval doubles each consecutive failure (backing
     # off a down site rather than hammering it), capped at this many seconds.
     watch_max_backoff_seconds: float = 300.0
+
+    @property
+    def effective_mcp_endpoint(self) -> str:
+        return self.mcp_endpoint or f"{self.base_url.rstrip('/')}/mcp"
 
     @property
     def uses_oauth(self) -> bool:
