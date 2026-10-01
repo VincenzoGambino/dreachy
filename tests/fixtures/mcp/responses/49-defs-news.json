@@ -1,0 +1,1696 @@
+{
+  "call": {
+    "arguments": {
+      "bundle": "news",
+      "entity_type_id": "node"
+    },
+    "name": "tool_api__demo_entity_field_value_definitions"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Found 29 base field definitions and 19 field definitions for node:news\",\n    \"data\": {\n        \"base_field_definitions\": {\n            \"nid\": {\n                \"name\": \"nid\",\n                \"label\": \"ID\",\n                \"description\": null,\n                \"type\": \"integer\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"unsigned\": true,\n                    \"size\": \"normal\",\n                    \"min\": \"\",\n                    \"max\": \"\",\n                    \"prefix\": \"\",\n                    \"suffix\": \"\"\n                },\n                \"translatable\": false\n            },\n            \"uuid\": {\n                \"name\": \"uuid\",\n                \"label\": \"UUID\",\n                \"description\": null,\n                \"type\": \"uuid\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"max_length\": 128,\n                    \"is_ascii\": true,\n                    \"case_sensitive\": false\n                },\n                \"translatable\": false\n            },\n            \"vid\": {\n                \"name\": \"vid\",\n                \"label\": \"Revision ID\",\n                \"description\": null,\n                \"type\": \"integer\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"unsigned\": true,\n                    \"size\": \"normal\",\n                    \"min\": \"\",\n                    \"max\": \"\",\n                    \"prefix\": \"\",\n                    \"suffix\": \"\"\n                },\n                \"translatable\": false\n            },\n            \"langcode\": {\n                \"name\": \"langcode\",\n                \"label\": \"Language\",\n                \"description\": null,\n                \"type\": \"language\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": [],\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"object\",\n                        \"null\"\n                    ],\n                    \"properties\": {\n                        \"value\": {\n                            \"type\": \"string\",\n                            \"default\": \"en\",\n                            \"description\": \"Language code: The value property of the field \\\"langcode\\\".\",\n                            \"title\": \"Language code\"\n                        }\n                    },\n                    \"required\": [\n                        \"value\"\n                    ],\n                    \"description\": \"Language item: A single \\\"langcode\\\" item.\",\n                    \"title\": \"Language item\"\n                }\n            },\n            \"type\": {\n                \"name\": \"type\",\n                \"label\": \"Content type\",\n                \"description\": null,\n                \"type\": \"entity_reference\",\n                \"required\": true,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"target_type\": \"node_type\",\n                    \"handler\": \"default\",\n                    \"handler_settings\": []\n                },\n                \"translatable\": false\n            },\n            \"revision_timestamp\": {\n                \"name\": \"revision_timestamp\",\n                \"label\": \"Revision create time\",\n                \"description\": \"The time that the current revision was created.\",\n                \"type\": \"created\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": [],\n                \"translatable\": false\n            },\n            \"revision_uid\": {\n                \"name\": \"revision_uid\",\n                \"label\": \"Revision user\",\n                \"description\": \"The user ID of the author of the current revision.\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"target_type\": \"user\",\n                    \"handler\": \"default\",\n                    \"handler_settings\": []\n                },\n                \"translatable\": false\n            },\n            \"revision_log\": {\n                \"name\": \"revision_log\",\n                \"label\": \"Revision log message\",\n                \"description\": \"Briefly describe the changes you have made.\",\n                \"type\": \"string_long\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"case_sensitive\": false\n                },\n                \"translatable\": false\n            },\n            \"status\": {\n                \"name\": \"status\",\n                \"label\": \"Published\",\n                \"description\": null,\n                \"type\": \"boolean\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"on_label\": \"On\",\n                    \"off_label\": \"Off\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"object\",\n                        \"null\"\n                    ],\n                    \"properties\": {\n                        \"value\": {\n                            \"type\": \"boolean\",\n                            \"default\": true,\n                            \"description\": \"Boolean value: The value property of the field \\\"status\\\".\",\n                            \"title\": \"Boolean value\"\n                        }\n                    },\n                    \"required\": [\n                        \"value\"\n                    ],\n                    \"description\": \"Published item: A single \\\"status\\\" item.\",\n                    \"title\": \"Published item\"\n                }\n            },\n            \"uid\": {\n                \"name\": \"uid\",\n                \"label\": \"Authored by\",\n                \"description\": \"The username of the content author.\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"target_type\": \"user\",\n                    \"handler\": \"default\",\n                    \"handler_settings\": []\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"object\",\n                        \"null\"\n                    ],\n                    \"properties\": {\n                        \"target_id\": {\n                            \"type\": \"integer\",\n                            \"default\": \"1\",\n                            \"description\": \"User ID: The target_id property of the field \\\"uid\\\".\",\n                            \"title\": \"User ID\"\n                        },\n                        \"target_uuid\": {\n                            \"oneOf\": [\n                                {\n                                    \"type\": \"string\"\n                                },\n                                {\n                                    \"type\": \"null\"\n                                }\n                            ],\n                            \"format\": \"uuid\",\n                            \"description\": \"Target UUID: The target_uuid property of the field \\\"uid\\\".\",\n                            \"title\": \"Target UUID\"\n                        }\n                    },\n                    \"required\": [\n                        \"target_id\"\n                    ],\n                    \"description\": \"Authored by item: A single \\\"uid\\\" item.\",\n                    \"title\": \"Authored by item\"\n                }\n            },\n            \"title\": {\n                \"name\": \"title\",\n                \"label\": \"Title\",\n                \"description\": null,\n                \"type\": \"string\",\n                \"required\": true,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"max_length\": 255,\n                    \"is_ascii\": false,\n                    \"case_sensitive\": false\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"object\",\n                        \"null\"\n                    ],\n                    \"properties\": {\n                        \"value\": {\n                            \"type\": \"string\",\n                            \"description\": \"Text value: The value property of the field \\\"title\\\".\",\n                            \"title\": \"Text value\"\n                        }\n                    },\n                    \"required\": [\n                        \"value\"\n                    ],\n                    \"description\": \"Title item: A single \\\"title\\\" item.\",\n                    \"title\": \"Title item\"\n                }\n            },\n            \"created\": {\n                \"name\": \"created\",\n                \"label\": \"Authored on\",\n                \"description\": \"The date and time that the content was created.\",\n                \"type\": \"created\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": [],\n                \"translatable\": true\n            },\n            \"changed\": {\n                \"name\": \"changed\",\n                \"label\": \"Changed\",\n                \"description\": \"The time that the node was last edited.\",\n                \"type\": \"changed\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": [],\n                \"translatable\": true\n            },\n            \"promote\": {\n                \"name\": \"promote\",\n                \"label\": \"Promoted to front page\",\n                \"description\": null,\n                \"type\": \"boolean\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"on_label\": \"On\",\n                    \"off_label\": \"Off\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"object\",\n                        \"null\"\n                    ],\n                    \"properties\": {\n                        \"value\": {\n                            \"type\": \"boolean\",\n                            \"description\": \"Boolean value: The value property of the field \\\"promote\\\".\",\n                            \"title\": \"Boolean value\"\n                        }\n                    },\n                    \"required\": [\n                        \"value\"\n                    ],\n                    \"description\": \"Promoted to front page item: A single \\\"promote\\\" item.\",\n                    \"title\": \"Promoted to front page item\"\n                }\n            },\n            \"sticky\": {\n                \"name\": \"sticky\",\n                \"label\": \"Sticky at top of lists\",\n                \"description\": null,\n                \"type\": \"boolean\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"on_label\": \"On\",\n                    \"off_label\": \"Off\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"object\",\n                        \"null\"\n                    ],\n                    \"properties\": {\n                        \"value\": {\n                            \"type\": \"boolean\",\n                            \"description\": \"Boolean value: The value property of the field \\\"sticky\\\".\",\n                            \"title\": \"Boolean value\"\n                        }\n                    },\n                    \"required\": [\n                        \"value\"\n                    ],\n                    \"description\": \"Sticky at top of lists item: A single \\\"sticky\\\" item.\",\n                    \"title\": \"Sticky at top of lists item\"\n                }\n            },\n            \"default_langcode\": {\n                \"name\": \"default_langcode\",\n                \"label\": \"Default translation\",\n                \"description\": \"A flag indicating whether this is the default translation.\",\n                \"type\": \"boolean\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"on_label\": \"On\",\n                    \"off_label\": \"Off\"\n                },\n                \"translatable\": true\n            },\n            \"revision_default\": {\n                \"name\": \"revision_default\",\n                \"label\": \"Default revision\",\n                \"description\": \"A flag indicating whether this was a default revision when it was saved.\",\n                \"type\": \"boolean\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"on_label\": \"On\",\n                    \"off_label\": \"Off\"\n                },\n                \"translatable\": false\n            },\n            \"revision_translation_affected\": {\n                \"name\": \"revision_translation_affected\",\n                \"label\": \"Revision translation affected\",\n                \"description\": \"Indicates if the last edit of a translation belongs to current revision.\",\n                \"type\": \"boolean\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"on_label\": \"On\",\n                    \"off_label\": \"Off\"\n                },\n                \"translatable\": true\n            },\n            \"moderation_state\": {\n                \"name\": \"moderation_state\",\n                \"label\": \"Moderation state\",\n                \"description\": \"The moderation state of this piece of content.\",\n                \"type\": \"string\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"max_length\": 255,\n                    \"is_ascii\": false,\n                    \"case_sensitive\": false\n                },\n                \"translatable\": true\n            },\n            \"metatag\": {\n                \"name\": \"metatag\",\n                \"label\": \"Metatags (Hidden field for JSON support)\",\n                \"description\": \"The computed meta tags for the entity.\",\n                \"type\": \"metatag_computed\",\n                \"required\": false,\n                \"cardinality\": -1,\n                \"settings\": [],\n                \"translatable\": true\n            },\n            \"path\": {\n                \"name\": \"path\",\n                \"label\": \"URL alias\",\n                \"description\": null,\n                \"type\": \"path\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": [],\n                \"translatable\": true\n            },\n            \"publish_on\": {\n                \"name\": \"publish_on\",\n                \"label\": \"Publish on\",\n                \"description\": null,\n                \"type\": \"timestamp\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": [],\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"object\",\n                        \"null\"\n                    ],\n                    \"properties\": {\n                        \"value\": {\n                            \"type\": \"string\",\n                            \"format\": \"date-time\",\n                            \"description\": \"Timestamp value: The value property of the field \\\"publish_on\\\".\",\n                            \"title\": \"Timestamp value\"\n                        }\n                    },\n                    \"required\": [\n                        \"value\"\n                    ],\n                    \"description\": \"Publish on item: A single \\\"publish_on\\\" item.\",\n                    \"title\": \"Publish on item\"\n                }\n            },\n            \"unpublish_on\": {\n                \"name\": \"unpublish_on\",\n                \"label\": \"Unpublish on\",\n                \"description\": null,\n                \"type\": \"timestamp\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": [],\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"object\",\n                        \"null\"\n                    ],\n                    \"properties\": {\n                        \"value\": {\n                            \"type\": \"string\",\n                            \"format\": \"date-time\",\n                            \"description\": \"Timestamp value: The value property of the field \\\"unpublish_on\\\".\",\n                            \"title\": \"Timestamp value\"\n                        }\n                    },\n                    \"required\": [\n                        \"value\"\n                    ],\n                    \"description\": \"Unpublish on item: A single \\\"unpublish_on\\\" item.\",\n                    \"title\": \"Unpublish on item\"\n                }\n            },\n            \"publish_state\": {\n                \"name\": \"publish_state\",\n                \"label\": \"Publish state\",\n                \"description\": null,\n                \"type\": \"list_string\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"allowed_values\": [],\n                    \"allowed_values_function\": \"_scheduler_content_moderation_integration_states_values\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"object\",\n                        \"null\"\n                    ],\n                    \"properties\": {\n                        \"value\": {\n                            \"type\": \"string\",\n                            \"maxLength\": 255,\n                            \"description\": \"Text value: The value property of the field \\\"publish_state\\\".\",\n                            \"title\": \"Text value\"\n                        }\n                    },\n                    \"required\": [\n                        \"value\"\n                    ],\n                    \"description\": \"Publish state item: A single \\\"publish_state\\\" item.\",\n                    \"title\": \"Publish state item\"\n                }\n            },\n            \"unpublish_state\": {\n                \"name\": \"unpublish_state\",\n                \"label\": \"Unpublish state\",\n                \"description\": null,\n                \"type\": \"list_string\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"allowed_values\": [],\n                    \"allowed_values_function\": \"_scheduler_content_moderation_integration_states_values\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"object\",\n                        \"null\"\n                    ],\n                    \"properties\": {\n                        \"value\": {\n                            \"type\": \"string\",\n                            \"maxLength\": 255,\n                            \"description\": \"Text value: The value property of the field \\\"unpublish_state\\\".\",\n                            \"title\": \"Text value\"\n                        }\n                    },\n                    \"required\": [\n                        \"value\"\n                    ],\n                    \"description\": \"Unpublish state item: A single \\\"unpublish_state\\\" item.\",\n                    \"title\": \"Unpublish state item\"\n                }\n            },\n            \"menu_link\": {\n                \"name\": \"menu_link\",\n                \"label\": \"Menu link\",\n                \"description\": \"Computed menu link for the node (only available during node saving).\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"target_type\": \"menu_link_content\",\n                    \"handler\": \"default\",\n                    \"handler_settings\": []\n                },\n                \"translatable\": true\n            },\n            \"deleted\": {\n                \"name\": \"deleted\",\n                \"label\": \"Deleted\",\n                \"description\": \"Time when the item got deleted.\",\n                \"type\": \"timestamp\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": [],\n                \"translatable\": true\n            },\n            \"content_translation_source\": {\n                \"name\": \"content_translation_source\",\n                \"label\": \"Translation source\",\n                \"description\": \"The source language from which this translation was created.\",\n                \"type\": \"language\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": [],\n                \"translatable\": true\n            },\n            \"content_translation_outdated\": {\n                \"name\": \"content_translation_outdated\",\n                \"label\": \"Translation outdated\",\n                \"description\": \"A boolean indicating whether this translation needs to be updated.\",\n                \"type\": \"boolean\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"on_label\": \"On\",\n                    \"off_label\": \"Off\"\n                },\n                \"translatable\": true\n            }\n        },\n        \"field_definitions\": {\n            \"ai_automator_status\": {\n                \"name\": \"ai_automator_status\",\n                \"label\": \"AI Automator Status\",\n                \"description\": \"\",\n                \"type\": \"list_string\",\n                \"required\": true,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"allowed_values\": {\n                        \"pending\": \"Pending\",\n                        \"processing\": \"Processing\",\n                        \"failed\": \"Failed\",\n                        \"finished\": \"Finished\"\n                    },\n                    \"allowed_values_function\": \"\"\n                },\n                \"translatable\": false,\n                \"value_schema\": {\n                    \"type\": \"array\",\n                    \"description\": \"Value (AI Automator Status): The values to set for the field \\\"ai_automator_status\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"value\": {\n                                \"type\": \"string\",\n                                \"maxLength\": 255,\n                                \"description\": \"Text value: The value property of the field \\\"ai_automator_status\\\".\",\n                                \"title\": \"Text value\"\n                            }\n                        },\n                        \"required\": [\n                            \"value\"\n                        ],\n                        \"description\": \"AI Automator Status item: A single \\\"ai_automator_status\\\" item.\",\n                        \"title\": \"AI Automator Status item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (AI Automator Status)\"\n                }\n            },\n            \"ai_disclosure\": {\n                \"name\": \"ai_disclosure\",\n                \"label\": \"AI disclosure\",\n                \"description\": \"\",\n                \"type\": \"ai_disclosure\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"default_profile\": \"\"\n                },\n                \"translatable\": false,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (AI disclosure): The values to set for the field \\\"ai_disclosure\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"mode\": {\n                                \"type\": \"string\",\n                                \"enum\": [\n                                    \"inherit\",\n                                    \"none\",\n                                    \"profile\",\n                                    \"custom\"\n                                ],\n                                \"description\": \"Mode: The mode property of the field \\\"ai_disclosure\\\".\",\n                                \"title\": \"Mode\"\n                            },\n                            \"profile\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Profile: The profile property of the field \\\"ai_disclosure\\\".\",\n                                \"title\": \"Profile\"\n                            },\n                            \"grade\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Grade: The grade property of the field \\\"ai_disclosure\\\".\",\n                                \"title\": \"Grade\"\n                            },\n                            \"human_review\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"boolean\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Human review: The human_review property of the field \\\"ai_disclosure\\\".\",\n                                \"title\": \"Human review\"\n                            },\n                            \"editorial_responsibility\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Editorial responsibility: The editorial_responsibility property of the field \\\"ai_disclosure\\\".\",\n                                \"title\": \"Editorial responsibility\"\n                            },\n                            \"description\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Description: The description property of the field \\\"ai_disclosure\\\".\",\n                                \"title\": \"Description\"\n                            },\n                            \"scope_medium\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"enum\": [\n                                    \"deepfake_av\",\n                                    \"text\"\n                                ],\n                                \"description\": \"Scope: medium: The scope_medium property of the field \\\"ai_disclosure\\\".\",\n                                \"title\": \"Scope: medium\"\n                            },\n                            \"scope_artistic_work\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"integer\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Scope: artistic work: The scope_artistic_work property of the field \\\"ai_disclosure\\\".\",\n                                \"title\": \"Scope: artistic work\"\n                            },\n                            \"scope_informing_public\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"integer\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Scope: informing public: The scope_informing_public property of the field \\\"ai_disclosure\\\".\",\n                                \"title\": \"Scope: informing public\"\n                            },\n                            \"scope_public_interest\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"integer\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Scope: public interest: The scope_public_interest property of the field \\\"ai_disclosure\\\".\",\n                                \"title\": \"Scope: public interest\"\n                            }\n                        },\n                        \"required\": [\n                            \"mode\"\n                        ],\n                        \"description\": \"AI disclosure item: A single \\\"ai_disclosure\\\" item.\",\n                        \"title\": \"AI disclosure item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (AI disclosure)\"\n                }\n            },\n            \"departments\": {\n                \"name\": \"departments\",\n                \"label\": \"Departments\",\n                \"description\": \"\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": -1,\n                \"settings\": {\n                    \"handler\": \"default:node\",\n                    \"handler_settings\": {\n                        \"target_bundles\": {\n                            \"department\": \"department\"\n                        },\n                        \"sort\": {\n                            \"field\": \"_none\"\n                        },\n                        \"auto_create\": false,\n                        \"auto_create_bundle\": \"\"\n                    },\n                    \"target_type\": \"node\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (Departments): The values to set for the field \\\"departments\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"target_id\": {\n                                \"type\": \"integer\",\n                                \"description\": \"Content ID: The target_id property of the field \\\"departments\\\".\",\n                                \"title\": \"Content ID\"\n                            },\n                            \"target_uuid\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"format\": \"uuid\",\n                                \"description\": \"Target UUID: The target_uuid property of the field \\\"departments\\\".\",\n                                \"title\": \"Target UUID\"\n                            }\n                        },\n                        \"required\": [\n                            \"target_id\"\n                        ],\n                        \"description\": \"Departments item: A single \\\"departments\\\" item.\",\n                        \"title\": \"Departments item\"\n                    },\n                    \"title\": \"Value (Departments)\"\n                }\n            },\n            \"description\": {\n                \"name\": \"description\",\n                \"label\": \"Description\",\n                \"description\": \"\",\n                \"type\": \"text_long\",\n                \"required\": true,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"allowed_formats\": []\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": \"array\",\n                    \"description\": \"Value (Description): The values to set for the field \\\"description\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"value\": {\n                                \"type\": \"string\",\n                                \"description\": \"Text: The value property of the field \\\"description\\\".\",\n                                \"title\": \"Text\"\n                            },\n                            \"format\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Text format: The format property of the field \\\"description\\\".\",\n                                \"title\": \"Text format\"\n                            }\n                        },\n                        \"required\": [\n                            \"value\"\n                        ],\n                        \"description\": \"Description item: A single \\\"description\\\" item.\",\n                        \"title\": \"Description item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (Description)\"\n                }\n            },\n            \"field_ai_seo_analysis\": {\n                \"name\": \"field_ai_seo_analysis\",\n                \"label\": \"AI SEO Analysis\",\n                \"description\": \"Contains the analysis detailed report and score.\",\n                \"type\": \"custom\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"add_more_label\": \"\",\n                    \"field_settings\": [],\n                    \"columns\": {\n                        \"report\": {\n                            \"name\": \"report\",\n                            \"type\": \"string_long\"\n                        },\n                        \"score\": {\n                            \"name\": \"score\",\n                            \"type\": \"integer\",\n                            \"unsigned\": true,\n                            \"size\": \"tiny\"\n                        }\n                    }\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (AI SEO Analysis): The values to set for the field \\\"field_ai_seo_analysis\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"report\": {\n                                \"$comment\": \"Unable to provide schema, no type specified.\",\n                                \"description\": \"report: The report property of the field \\\"field_ai_seo_analysis\\\".\",\n                                \"title\": \"report\"\n                            },\n                            \"score\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"integer\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"score: The score property of the field \\\"field_ai_seo_analysis\\\".\",\n                                \"title\": \"score\"\n                            }\n                        },\n                        \"description\": \"AI SEO Analysis item: A single \\\"field_ai_seo_analysis\\\" item.\",\n                        \"title\": \"AI SEO Analysis item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (AI SEO Analysis)\"\n                }\n            },\n            \"field_content_tags\": {\n                \"name\": \"field_content_tags\",\n                \"label\": \"Content Tags\",\n                \"description\": \"Tags used to classify content. Leave empty to generate automatically when saved or by clicking 'Generate tags'.\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": -1,\n                \"settings\": {\n                    \"handler\": \"default:taxonomy_term\",\n                    \"handler_settings\": {\n                        \"target_bundles\": {\n                            \"content_classification\": \"content_classification\"\n                        },\n                        \"sort\": {\n                            \"field\": \"name\",\n                            \"direction\": \"asc\"\n                        },\n                        \"auto_create\": true,\n                        \"auto_create_bundle\": \"\"\n                    },\n                    \"target_type\": \"taxonomy_term\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (Content Tags): The values to set for the field \\\"field_content_tags\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"target_id\": {\n                                \"type\": \"integer\",\n                                \"description\": \"Taxonomy term ID: The target_id property of the field \\\"field_content_tags\\\".\",\n                                \"title\": \"Taxonomy term ID\"\n                            },\n                            \"target_uuid\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"format\": \"uuid\",\n                                \"description\": \"Target UUID: The target_uuid property of the field \\\"field_content_tags\\\".\",\n                                \"title\": \"Target UUID\"\n                            }\n                        },\n                        \"required\": [\n                            \"target_id\"\n                        ],\n                        \"description\": \"Content Tags item: A single \\\"field_content_tags\\\" item.\",\n                        \"title\": \"Content Tags item\"\n                    },\n                    \"title\": \"Value (Content Tags)\"\n                }\n            },\n            \"field_llms_txt_content_section\": {\n                \"name\": \"field_llms_txt_content_section\",\n                \"label\": \"LLMs.txt content section\",\n                \"description\": \"Select a section to include this content in the site's /llms.txt file and make it discoverable by AI systems. Choose the section that best categorizes this content.<br>\\r\\n<strong>Note:</strong> Only tagged content appears in llms.txt. Untagged content will not be available to language models.<br>\\r\\n<a href=\\\"/admin/structure/taxonomy/manage/llms_txt_content_sections/add\\\" target=\\\"_blank\\\">+ Add new section</a>\\r\\n\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"handler\": \"default:taxonomy_term\",\n                    \"handler_settings\": {\n                        \"target_bundles\": {\n                            \"llms_txt_content_sections\": \"llms_txt_content_sections\"\n                        },\n                        \"sort\": {\n                            \"field\": \"name\",\n                            \"direction\": \"asc\"\n                        },\n                        \"auto_create\": false,\n                        \"auto_create_bundle\": \"\"\n                    },\n                    \"target_type\": \"taxonomy_term\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (LLMs.txt content section): The values to set for the field \\\"field_llms_txt_content_section\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"target_id\": {\n                                \"type\": \"integer\",\n                                \"description\": \"Taxonomy term ID: The target_id property of the field \\\"field_llms_txt_content_section\\\".\",\n                                \"title\": \"Taxonomy term ID\"\n                            },\n                            \"target_uuid\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"format\": \"uuid\",\n                                \"description\": \"Target UUID: The target_uuid property of the field \\\"field_llms_txt_content_section\\\".\",\n                                \"title\": \"Target UUID\"\n                            }\n                        },\n                        \"required\": [\n                            \"target_id\"\n                        ],\n                        \"description\": \"LLMs.txt content section item: A single \\\"field_llms_txt_content_section\\\" item.\",\n                        \"title\": \"LLMs.txt content section item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (LLMs.txt content section)\"\n                }\n            },\n            \"field_seo_analysis\": {\n                \"name\": \"field_seo_analysis\",\n                \"label\": \"SEO analysis\",\n                \"description\": \"Pick the main keyword this page is about.\",\n                \"type\": \"yoast_seo\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": [],\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (SEO analysis): The values to set for the field \\\"field_seo_analysis\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"status\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Status: The status property of the field \\\"field_seo_analysis\\\".\",\n                                \"title\": \"Status\"\n                            },\n                            \"focus_keyword\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Focus Keyword: The focus_keyword property of the field \\\"field_seo_analysis\\\".\",\n                                \"title\": \"Focus Keyword\"\n                            },\n                            \"title\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Edited title: The title property of the field \\\"field_seo_analysis\\\".\",\n                                \"title\": \"Edited title\"\n                            },\n                            \"description\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Edited description: The description property of the field \\\"field_seo_analysis\\\".\",\n                                \"title\": \"Edited description\"\n                            }\n                        },\n                        \"description\": \"SEO analysis item: A single \\\"field_seo_analysis\\\" item.\",\n                        \"title\": \"SEO analysis item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (SEO analysis)\"\n                }\n            },\n            \"field_seo_description\": {\n                \"name\": \"field_seo_description\",\n                \"label\": \"SEO description\",\n                \"description\": \"Write a description for search engines and social media sites.\",\n                \"type\": \"string_long\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"case_sensitive\": false\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (SEO description): The values to set for the field \\\"field_seo_description\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"value\": {\n                                \"type\": \"string\",\n                                \"pattern\": \"(.|\\\\r?\\\\n)*\",\n                                \"description\": \"Text value: The value property of the field \\\"field_seo_description\\\".\",\n                                \"title\": \"Text value\"\n                            }\n                        },\n                        \"required\": [\n                            \"value\"\n                        ],\n                        \"description\": \"SEO description item: A single \\\"field_seo_description\\\" item.\",\n                        \"title\": \"SEO description item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (SEO description)\"\n                }\n            },\n            \"field_seo_image\": {\n                \"name\": \"field_seo_image\",\n                \"label\": \"SEO image\",\n                \"description\": \"Upload an image to be used when the page is shared on social media sites.\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"handler\": \"default:media\",\n                    \"handler_settings\": {\n                        \"target_bundles\": {\n                            \"image\": \"image\"\n                        }\n                    },\n                    \"target_type\": \"media\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (SEO image): The values to set for the field \\\"field_seo_image\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"target_id\": {\n                                \"type\": \"integer\",\n                                \"description\": \"Media ID: The target_id property of the field \\\"field_seo_image\\\".\",\n                                \"title\": \"Media ID\"\n                            },\n                            \"target_uuid\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"format\": \"uuid\",\n                                \"description\": \"Target UUID: The target_uuid property of the field \\\"field_seo_image\\\".\",\n                                \"title\": \"Target UUID\"\n                            }\n                        },\n                        \"required\": [\n                            \"target_id\"\n                        ],\n                        \"description\": \"SEO image item: A single \\\"field_seo_image\\\" item.\",\n                        \"title\": \"SEO image item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (SEO image)\"\n                }\n            },\n            \"field_seo_title\": {\n                \"name\": \"field_seo_title\",\n                \"label\": \"SEO title\",\n                \"description\": \"Use this field to overwrite the default HTML page title for SEO.\",\n                \"type\": \"string\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"max_length\": 255,\n                    \"case_sensitive\": false,\n                    \"is_ascii\": false\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (SEO title): The values to set for the field \\\"field_seo_title\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"value\": {\n                                \"type\": \"string\",\n                                \"description\": \"Text value: The value property of the field \\\"field_seo_title\\\".\",\n                                \"title\": \"Text value\"\n                            }\n                        },\n                        \"required\": [\n                            \"value\"\n                        ],\n                        \"description\": \"SEO title item: A single \\\"field_seo_title\\\" item.\",\n                        \"title\": \"SEO title item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (SEO title)\"\n                }\n            },\n            \"main_image\": {\n                \"name\": \"main_image\",\n                \"label\": \"Main image\",\n                \"description\": \"\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"handler\": \"default:media\",\n                    \"handler_settings\": {\n                        \"target_bundles\": {\n                            \"image\": \"image\"\n                        },\n                        \"sort\": {\n                            \"field\": \"_none\"\n                        },\n                        \"auto_create\": false,\n                        \"auto_create_bundle\": \"\"\n                    },\n                    \"target_type\": \"media\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (Main image): The values to set for the field \\\"main_image\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"target_id\": {\n                                \"type\": \"integer\",\n                                \"description\": \"Media ID: The target_id property of the field \\\"main_image\\\".\",\n                                \"title\": \"Media ID\"\n                            },\n                            \"target_uuid\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"format\": \"uuid\",\n                                \"description\": \"Target UUID: The target_uuid property of the field \\\"main_image\\\".\",\n                                \"title\": \"Target UUID\"\n                            }\n                        },\n                        \"required\": [\n                            \"target_id\"\n                        ],\n                        \"description\": \"Main image item: A single \\\"main_image\\\" item.\",\n                        \"title\": \"Main image item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (Main image)\"\n                }\n            },\n            \"news_author\": {\n                \"name\": \"news_author\",\n                \"label\": \"Author\",\n                \"description\": \"\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"handler\": \"default:node\",\n                    \"handler_settings\": {\n                        \"target_bundles\": {\n                            \"person\": \"person\"\n                        },\n                        \"sort\": {\n                            \"field\": \"_none\"\n                        },\n                        \"auto_create\": false,\n                        \"auto_create_bundle\": \"\"\n                    },\n                    \"target_type\": \"node\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (Author): The values to set for the field \\\"news_author\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"target_id\": {\n                                \"type\": \"integer\",\n                                \"description\": \"Content ID: The target_id property of the field \\\"news_author\\\".\",\n                                \"title\": \"Content ID\"\n                            },\n                            \"target_uuid\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"format\": \"uuid\",\n                                \"description\": \"Target UUID: The target_uuid property of the field \\\"news_author\\\".\",\n                                \"title\": \"Target UUID\"\n                            }\n                        },\n                        \"required\": [\n                            \"target_id\"\n                        ],\n                        \"description\": \"Author item: A single \\\"news_author\\\" item.\",\n                        \"title\": \"Author item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (Author)\"\n                }\n            },\n            \"news_publish_date\": {\n                \"name\": \"news_publish_date\",\n                \"label\": \"Publish date\",\n                \"description\": \"\",\n                \"type\": \"datetime\",\n                \"required\": true,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"datetime_type\": \"datetime\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": \"array\",\n                    \"description\": \"Value (Publish date): The values to set for the field \\\"news_publish_date\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"value\": {\n                                \"type\": \"string\",\n                                \"format\": \"date-time\",\n                                \"description\": \"Date value: The value property of the field \\\"news_publish_date\\\".\",\n                                \"title\": \"Date value\"\n                            }\n                        },\n                        \"required\": [\n                            \"value\"\n                        ],\n                        \"description\": \"Publish date item: A single \\\"news_publish_date\\\" item.\",\n                        \"title\": \"Publish date item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (Publish date)\"\n                }\n            },\n            \"news_related\": {\n                \"name\": \"news_related\",\n                \"label\": \"Related articles\",\n                \"description\": \"\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": -1,\n                \"settings\": {\n                    \"handler\": \"default:node\",\n                    \"handler_settings\": {\n                        \"target_bundles\": {\n                            \"news\": \"news\"\n                        },\n                        \"sort\": {\n                            \"field\": \"_none\"\n                        },\n                        \"auto_create\": false,\n                        \"auto_create_bundle\": \"\"\n                    },\n                    \"target_type\": \"node\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (Related articles): The values to set for the field \\\"news_related\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"target_id\": {\n                                \"type\": \"integer\",\n                                \"description\": \"Content ID: The target_id property of the field \\\"news_related\\\".\",\n                                \"title\": \"Content ID\"\n                            },\n                            \"target_uuid\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"format\": \"uuid\",\n                                \"description\": \"Target UUID: The target_uuid property of the field \\\"news_related\\\".\",\n                                \"title\": \"Target UUID\"\n                            }\n                        },\n                        \"required\": [\n                            \"target_id\"\n                        ],\n                        \"description\": \"Related articles item: A single \\\"news_related\\\" item.\",\n                        \"title\": \"Related articles item\"\n                    },\n                    \"title\": \"Value (Related articles)\"\n                }\n            },\n            \"news_subhead\": {\n                \"name\": \"news_subhead\",\n                \"label\": \"Subhead\",\n                \"description\": \"\",\n                \"type\": \"text_long\",\n                \"required\": false,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"allowed_formats\": []\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (Subhead): The values to set for the field \\\"news_subhead\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"value\": {\n                                \"type\": \"string\",\n                                \"description\": \"Text: The value property of the field \\\"news_subhead\\\".\",\n                                \"title\": \"Text\"\n                            },\n                            \"format\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Text format: The format property of the field \\\"news_subhead\\\".\",\n                                \"title\": \"Text format\"\n                            }\n                        },\n                        \"required\": [\n                            \"value\"\n                        ],\n                        \"description\": \"Subhead item: A single \\\"news_subhead\\\" item.\",\n                        \"title\": \"Subhead item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (Subhead)\"\n                }\n            },\n            \"people\": {\n                \"name\": \"people\",\n                \"label\": \"People\",\n                \"description\": \"\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": -1,\n                \"settings\": {\n                    \"handler\": \"default:node\",\n                    \"handler_settings\": {\n                        \"target_bundles\": {\n                            \"person\": \"person\"\n                        },\n                        \"sort\": {\n                            \"field\": \"_none\"\n                        },\n                        \"auto_create\": false,\n                        \"auto_create_bundle\": \"\"\n                    },\n                    \"target_type\": \"node\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (People): The values to set for the field \\\"people\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"target_id\": {\n                                \"type\": \"integer\",\n                                \"description\": \"Content ID: The target_id property of the field \\\"people\\\".\",\n                                \"title\": \"Content ID\"\n                            },\n                            \"target_uuid\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"format\": \"uuid\",\n                                \"description\": \"Target UUID: The target_uuid property of the field \\\"people\\\".\",\n                                \"title\": \"Target UUID\"\n                            }\n                        },\n                        \"required\": [\n                            \"target_id\"\n                        ],\n                        \"description\": \"People item: A single \\\"people\\\" item.\",\n                        \"title\": \"People item\"\n                    },\n                    \"title\": \"Value (People)\"\n                }\n            },\n            \"preview_text\": {\n                \"name\": \"preview_text\",\n                \"label\": \"Preview\",\n                \"description\": \"\",\n                \"type\": \"text_long\",\n                \"required\": true,\n                \"cardinality\": 1,\n                \"settings\": {\n                    \"allowed_formats\": []\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": \"array\",\n                    \"description\": \"Value (Preview): The values to set for the field \\\"preview_text\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"value\": {\n                                \"type\": \"string\",\n                                \"description\": \"Text: The value property of the field \\\"preview_text\\\".\",\n                                \"title\": \"Text\"\n                            },\n                            \"format\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"description\": \"Text format: The format property of the field \\\"preview_text\\\".\",\n                                \"title\": \"Text format\"\n                            }\n                        },\n                        \"required\": [\n                            \"value\"\n                        ],\n                        \"description\": \"Preview item: A single \\\"preview_text\\\" item.\",\n                        \"title\": \"Preview item\"\n                    },\n                    \"maxItems\": 1,\n                    \"title\": \"Value (Preview)\"\n                }\n            },\n            \"programs\": {\n                \"name\": \"programs\",\n                \"label\": \"Programs\",\n                \"description\": \"\",\n                \"type\": \"entity_reference\",\n                \"required\": false,\n                \"cardinality\": -1,\n                \"settings\": {\n                    \"handler\": \"default:node\",\n                    \"handler_settings\": {\n                        \"target_bundles\": {\n                            \"program\": \"program\"\n                        },\n                        \"sort\": {\n                            \"field\": \"_none\"\n                        },\n                        \"auto_create\": false,\n                        \"auto_create_bundle\": \"\"\n                    },\n                    \"target_type\": \"node\"\n                },\n                \"translatable\": true,\n                \"value_schema\": {\n                    \"type\": [\n                        \"array\",\n                        \"null\"\n                    ],\n                    \"description\": \"Value (Programs): The values to set for the field \\\"programs\\\", one object per field item.\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"target_id\": {\n                                \"type\": \"integer\",\n                                \"description\": \"Content ID: The target_id property of the field \\\"programs\\\".\",\n                                \"title\": \"Content ID\"\n                            },\n                            \"target_uuid\": {\n                                \"oneOf\": [\n                                    {\n                                        \"type\": \"string\"\n                                    },\n                                    {\n                                        \"type\": \"null\"\n                                    }\n                                ],\n                                \"format\": \"uuid\",\n                                \"description\": \"Target UUID: The target_uuid property of the field \\\"programs\\\".\",\n                                \"title\": \"Target UUID\"\n                            }\n                        },\n                        \"required\": [\n                            \"target_id\"\n                        ],\n                        \"description\": \"Programs item: A single \\\"programs\\\" item.\",\n                        \"title\": \"Programs item\"\n                    },\n                    \"title\": \"Value (Programs)\"\n                }\n            }\n        }\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "base_field_definitions": {
+          "changed": {
+            "cardinality": 1,
+            "description": "The time that the node was last edited.",
+            "label": "Changed",
+            "name": "changed",
+            "required": false,
+            "settings": [],
+            "translatable": true,
+            "type": "changed"
+          },
+          "content_translation_outdated": {
+            "cardinality": 1,
+            "description": "A boolean indicating whether this translation needs to be updated.",
+            "label": "Translation outdated",
+            "name": "content_translation_outdated",
+            "required": false,
+            "settings": {
+              "off_label": "Off",
+              "on_label": "On"
+            },
+            "translatable": true,
+            "type": "boolean"
+          },
+          "content_translation_source": {
+            "cardinality": 1,
+            "description": "The source language from which this translation was created.",
+            "label": "Translation source",
+            "name": "content_translation_source",
+            "required": false,
+            "settings": [],
+            "translatable": true,
+            "type": "language"
+          },
+          "created": {
+            "cardinality": 1,
+            "description": "The date and time that the content was created.",
+            "label": "Authored on",
+            "name": "created",
+            "required": false,
+            "settings": [],
+            "translatable": true,
+            "type": "created"
+          },
+          "default_langcode": {
+            "cardinality": 1,
+            "description": "A flag indicating whether this is the default translation.",
+            "label": "Default translation",
+            "name": "default_langcode",
+            "required": false,
+            "settings": {
+              "off_label": "Off",
+              "on_label": "On"
+            },
+            "translatable": true,
+            "type": "boolean"
+          },
+          "deleted": {
+            "cardinality": 1,
+            "description": "Time when the item got deleted.",
+            "label": "Deleted",
+            "name": "deleted",
+            "required": false,
+            "settings": [],
+            "translatable": true,
+            "type": "timestamp"
+          },
+          "langcode": {
+            "cardinality": 1,
+            "description": null,
+            "label": "Language",
+            "name": "langcode",
+            "required": false,
+            "settings": [],
+            "translatable": true,
+            "type": "language",
+            "value_schema": {
+              "description": "Language item: A single \"langcode\" item.",
+              "properties": {
+                "value": {
+                  "default": "en",
+                  "description": "Language code: The value property of the field \"langcode\".",
+                  "title": "Language code",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "title": "Language item",
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          },
+          "menu_link": {
+            "cardinality": 1,
+            "description": "Computed menu link for the node (only available during node saving).",
+            "label": "Menu link",
+            "name": "menu_link",
+            "required": false,
+            "settings": {
+              "handler": "default",
+              "handler_settings": [],
+              "target_type": "menu_link_content"
+            },
+            "translatable": true,
+            "type": "entity_reference"
+          },
+          "metatag": {
+            "cardinality": -1,
+            "description": "The computed meta tags for the entity.",
+            "label": "Metatags (Hidden field for JSON support)",
+            "name": "metatag",
+            "required": false,
+            "settings": [],
+            "translatable": true,
+            "type": "metatag_computed"
+          },
+          "moderation_state": {
+            "cardinality": 1,
+            "description": "The moderation state of this piece of content.",
+            "label": "Moderation state",
+            "name": "moderation_state",
+            "required": false,
+            "settings": {
+              "case_sensitive": false,
+              "is_ascii": false,
+              "max_length": 255
+            },
+            "translatable": true,
+            "type": "string"
+          },
+          "nid": {
+            "cardinality": 1,
+            "description": null,
+            "label": "ID",
+            "name": "nid",
+            "required": false,
+            "settings": {
+              "max": "",
+              "min": "",
+              "prefix": "",
+              "size": "normal",
+              "suffix": "",
+              "unsigned": true
+            },
+            "translatable": false,
+            "type": "integer"
+          },
+          "path": {
+            "cardinality": 1,
+            "description": null,
+            "label": "URL alias",
+            "name": "path",
+            "required": false,
+            "settings": [],
+            "translatable": true,
+            "type": "path"
+          },
+          "promote": {
+            "cardinality": 1,
+            "description": null,
+            "label": "Promoted to front page",
+            "name": "promote",
+            "required": false,
+            "settings": {
+              "off_label": "Off",
+              "on_label": "On"
+            },
+            "translatable": true,
+            "type": "boolean",
+            "value_schema": {
+              "description": "Promoted to front page item: A single \"promote\" item.",
+              "properties": {
+                "value": {
+                  "description": "Boolean value: The value property of the field \"promote\".",
+                  "title": "Boolean value",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "title": "Promoted to front page item",
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          },
+          "publish_on": {
+            "cardinality": 1,
+            "description": null,
+            "label": "Publish on",
+            "name": "publish_on",
+            "required": false,
+            "settings": [],
+            "translatable": true,
+            "type": "timestamp",
+            "value_schema": {
+              "description": "Publish on item: A single \"publish_on\" item.",
+              "properties": {
+                "value": {
+                  "description": "Timestamp value: The value property of the field \"publish_on\".",
+                  "format": "date-time",
+                  "title": "Timestamp value",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "title": "Publish on item",
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          },
+          "publish_state": {
+            "cardinality": 1,
+            "description": null,
+            "label": "Publish state",
+            "name": "publish_state",
+            "required": false,
+            "settings": {
+              "allowed_values": [],
+              "allowed_values_function": "_scheduler_content_moderation_integration_states_values"
+            },
+            "translatable": true,
+            "type": "list_string",
+            "value_schema": {
+              "description": "Publish state item: A single \"publish_state\" item.",
+              "properties": {
+                "value": {
+                  "description": "Text value: The value property of the field \"publish_state\".",
+                  "maxLength": 255,
+                  "title": "Text value",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "title": "Publish state item",
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          },
+          "revision_default": {
+            "cardinality": 1,
+            "description": "A flag indicating whether this was a default revision when it was saved.",
+            "label": "Default revision",
+            "name": "revision_default",
+            "required": false,
+            "settings": {
+              "off_label": "Off",
+              "on_label": "On"
+            },
+            "translatable": false,
+            "type": "boolean"
+          },
+          "revision_log": {
+            "cardinality": 1,
+            "description": "Briefly describe the changes you have made.",
+            "label": "Revision log message",
+            "name": "revision_log",
+            "required": false,
+            "settings": {
+              "case_sensitive": false
+            },
+            "translatable": false,
+            "type": "string_long"
+          },
+          "revision_timestamp": {
+            "cardinality": 1,
+            "description": "The time that the current revision was created.",
+            "label": "Revision create time",
+            "name": "revision_timestamp",
+            "required": false,
+            "settings": [],
+            "translatable": false,
+            "type": "created"
+          },
+          "revision_translation_affected": {
+            "cardinality": 1,
+            "description": "Indicates if the last edit of a translation belongs to current revision.",
+            "label": "Revision translation affected",
+            "name": "revision_translation_affected",
+            "required": false,
+            "settings": {
+              "off_label": "Off",
+              "on_label": "On"
+            },
+            "translatable": true,
+            "type": "boolean"
+          },
+          "revision_uid": {
+            "cardinality": 1,
+            "description": "The user ID of the author of the current revision.",
+            "label": "Revision user",
+            "name": "revision_uid",
+            "required": false,
+            "settings": {
+              "handler": "default",
+              "handler_settings": [],
+              "target_type": "user"
+            },
+            "translatable": false,
+            "type": "entity_reference"
+          },
+          "status": {
+            "cardinality": 1,
+            "description": null,
+            "label": "Published",
+            "name": "status",
+            "required": false,
+            "settings": {
+              "off_label": "Off",
+              "on_label": "On"
+            },
+            "translatable": true,
+            "type": "boolean",
+            "value_schema": {
+              "description": "Published item: A single \"status\" item.",
+              "properties": {
+                "value": {
+                  "default": true,
+                  "description": "Boolean value: The value property of the field \"status\".",
+                  "title": "Boolean value",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "title": "Published item",
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          },
+          "sticky": {
+            "cardinality": 1,
+            "description": null,
+            "label": "Sticky at top of lists",
+            "name": "sticky",
+            "required": false,
+            "settings": {
+              "off_label": "Off",
+              "on_label": "On"
+            },
+            "translatable": true,
+            "type": "boolean",
+            "value_schema": {
+              "description": "Sticky at top of lists item: A single \"sticky\" item.",
+              "properties": {
+                "value": {
+                  "description": "Boolean value: The value property of the field \"sticky\".",
+                  "title": "Boolean value",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "title": "Sticky at top of lists item",
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          },
+          "title": {
+            "cardinality": 1,
+            "description": null,
+            "label": "Title",
+            "name": "title",
+            "required": true,
+            "settings": {
+              "case_sensitive": false,
+              "is_ascii": false,
+              "max_length": 255
+            },
+            "translatable": true,
+            "type": "string",
+            "value_schema": {
+              "description": "Title item: A single \"title\" item.",
+              "properties": {
+                "value": {
+                  "description": "Text value: The value property of the field \"title\".",
+                  "title": "Text value",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "title": "Title item",
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          },
+          "type": {
+            "cardinality": 1,
+            "description": null,
+            "label": "Content type",
+            "name": "type",
+            "required": true,
+            "settings": {
+              "handler": "default",
+              "handler_settings": [],
+              "target_type": "node_type"
+            },
+            "translatable": false,
+            "type": "entity_reference"
+          },
+          "uid": {
+            "cardinality": 1,
+            "description": "The username of the content author.",
+            "label": "Authored by",
+            "name": "uid",
+            "required": false,
+            "settings": {
+              "handler": "default",
+              "handler_settings": [],
+              "target_type": "user"
+            },
+            "translatable": true,
+            "type": "entity_reference",
+            "value_schema": {
+              "description": "Authored by item: A single \"uid\" item.",
+              "properties": {
+                "target_id": {
+                  "default": "1",
+                  "description": "User ID: The target_id property of the field \"uid\".",
+                  "title": "User ID",
+                  "type": "integer"
+                },
+                "target_uuid": {
+                  "description": "Target UUID: The target_uuid property of the field \"uid\".",
+                  "format": "uuid",
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Target UUID"
+                }
+              },
+              "required": [
+                "target_id"
+              ],
+              "title": "Authored by item",
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          },
+          "unpublish_on": {
+            "cardinality": 1,
+            "description": null,
+            "label": "Unpublish on",
+            "name": "unpublish_on",
+            "required": false,
+            "settings": [],
+            "translatable": true,
+            "type": "timestamp",
+            "value_schema": {
+              "description": "Unpublish on item: A single \"unpublish_on\" item.",
+              "properties": {
+                "value": {
+                  "description": "Timestamp value: The value property of the field \"unpublish_on\".",
+                  "format": "date-time",
+                  "title": "Timestamp value",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "title": "Unpublish on item",
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          },
+          "unpublish_state": {
+            "cardinality": 1,
+            "description": null,
+            "label": "Unpublish state",
+            "name": "unpublish_state",
+            "required": false,
+            "settings": {
+              "allowed_values": [],
+              "allowed_values_function": "_scheduler_content_moderation_integration_states_values"
+            },
+            "translatable": true,
+            "type": "list_string",
+            "value_schema": {
+              "description": "Unpublish state item: A single \"unpublish_state\" item.",
+              "properties": {
+                "value": {
+                  "description": "Text value: The value property of the field \"unpublish_state\".",
+                  "maxLength": 255,
+                  "title": "Text value",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "title": "Unpublish state item",
+              "type": [
+                "object",
+                "null"
+              ]
+            }
+          },
+          "uuid": {
+            "cardinality": 1,
+            "description": null,
+            "label": "UUID",
+            "name": "uuid",
+            "required": false,
+            "settings": {
+              "case_sensitive": false,
+              "is_ascii": true,
+              "max_length": 128
+            },
+            "translatable": false,
+            "type": "uuid"
+          },
+          "vid": {
+            "cardinality": 1,
+            "description": null,
+            "label": "Revision ID",
+            "name": "vid",
+            "required": false,
+            "settings": {
+              "max": "",
+              "min": "",
+              "prefix": "",
+              "size": "normal",
+              "suffix": "",
+              "unsigned": true
+            },
+            "translatable": false,
+            "type": "integer"
+          }
+        },
+        "field_definitions": {
+          "ai_automator_status": {
+            "cardinality": 1,
+            "description": "",
+            "label": "AI Automator Status",
+            "name": "ai_automator_status",
+            "required": true,
+            "settings": {
+              "allowed_values": {
+                "failed": "Failed",
+                "finished": "Finished",
+                "pending": "Pending",
+                "processing": "Processing"
+              },
+              "allowed_values_function": ""
+            },
+            "translatable": false,
+            "type": "list_string",
+            "value_schema": {
+              "description": "Value (AI Automator Status): The values to set for the field \"ai_automator_status\", one object per field item.",
+              "items": {
+                "description": "AI Automator Status item: A single \"ai_automator_status\" item.",
+                "properties": {
+                  "value": {
+                    "description": "Text value: The value property of the field \"ai_automator_status\".",
+                    "maxLength": 255,
+                    "title": "Text value",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "title": "AI Automator Status item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (AI Automator Status)",
+              "type": "array"
+            }
+          },
+          "ai_disclosure": {
+            "cardinality": 1,
+            "description": "",
+            "label": "AI disclosure",
+            "name": "ai_disclosure",
+            "required": false,
+            "settings": {
+              "default_profile": ""
+            },
+            "translatable": false,
+            "type": "ai_disclosure",
+            "value_schema": {
+              "description": "Value (AI disclosure): The values to set for the field \"ai_disclosure\", one object per field item.",
+              "items": {
+                "description": "AI disclosure item: A single \"ai_disclosure\" item.",
+                "properties": {
+                  "description": {
+                    "description": "Description: The description property of the field \"ai_disclosure\".",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Description"
+                  },
+                  "editorial_responsibility": {
+                    "description": "Editorial responsibility: The editorial_responsibility property of the field \"ai_disclosure\".",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Editorial responsibility"
+                  },
+                  "grade": {
+                    "description": "Grade: The grade property of the field \"ai_disclosure\".",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Grade"
+                  },
+                  "human_review": {
+                    "description": "Human review: The human_review property of the field \"ai_disclosure\".",
+                    "oneOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Human review"
+                  },
+                  "mode": {
+                    "description": "Mode: The mode property of the field \"ai_disclosure\".",
+                    "enum": [
+                      "inherit",
+                      "none",
+                      "profile",
+                      "custom"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "profile": {
+                    "description": "Profile: The profile property of the field \"ai_disclosure\".",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Profile"
+                  },
+                  "scope_artistic_work": {
+                    "description": "Scope: artistic work: The scope_artistic_work property of the field \"ai_disclosure\".",
+                    "oneOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Scope: artistic work"
+                  },
+                  "scope_informing_public": {
+                    "description": "Scope: informing public: The scope_informing_public property of the field \"ai_disclosure\".",
+                    "oneOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Scope: informing public"
+                  },
+                  "scope_medium": {
+                    "description": "Scope: medium: The scope_medium property of the field \"ai_disclosure\".",
+                    "enum": [
+                      "deepfake_av",
+                      "text"
+                    ],
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Scope: medium"
+                  },
+                  "scope_public_interest": {
+                    "description": "Scope: public interest: The scope_public_interest property of the field \"ai_disclosure\".",
+                    "oneOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Scope: public interest"
+                  }
+                },
+                "required": [
+                  "mode"
+                ],
+                "title": "AI disclosure item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (AI disclosure)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "departments": {
+            "cardinality": -1,
+            "description": "",
+            "label": "Departments",
+            "name": "departments",
+            "required": false,
+            "settings": {
+              "handler": "default:node",
+              "handler_settings": {
+                "auto_create": false,
+                "auto_create_bundle": "",
+                "sort": {
+                  "field": "_none"
+                },
+                "target_bundles": {
+                  "department": "department"
+                }
+              },
+              "target_type": "node"
+            },
+            "translatable": true,
+            "type": "entity_reference",
+            "value_schema": {
+              "description": "Value (Departments): The values to set for the field \"departments\", one object per field item.",
+              "items": {
+                "description": "Departments item: A single \"departments\" item.",
+                "properties": {
+                  "target_id": {
+                    "description": "Content ID: The target_id property of the field \"departments\".",
+                    "title": "Content ID",
+                    "type": "integer"
+                  },
+                  "target_uuid": {
+                    "description": "Target UUID: The target_uuid property of the field \"departments\".",
+                    "format": "uuid",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Target UUID"
+                  }
+                },
+                "required": [
+                  "target_id"
+                ],
+                "title": "Departments item",
+                "type": "object"
+              },
+              "title": "Value (Departments)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "description": {
+            "cardinality": 1,
+            "description": "",
+            "label": "Description",
+            "name": "description",
+            "required": true,
+            "settings": {
+              "allowed_formats": []
+            },
+            "translatable": true,
+            "type": "text_long",
+            "value_schema": {
+              "description": "Value (Description): The values to set for the field \"description\", one object per field item.",
+              "items": {
+                "description": "Description item: A single \"description\" item.",
+                "properties": {
+                  "format": {
+                    "description": "Text format: The format property of the field \"description\".",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Text format"
+                  },
+                  "value": {
+                    "description": "Text: The value property of the field \"description\".",
+                    "title": "Text",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "title": "Description item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (Description)",
+              "type": "array"
+            }
+          },
+          "field_ai_seo_analysis": {
+            "cardinality": 1,
+            "description": "Contains the analysis detailed report and score.",
+            "label": "AI SEO Analysis",
+            "name": "field_ai_seo_analysis",
+            "required": false,
+            "settings": {
+              "add_more_label": "",
+              "columns": {
+                "report": {
+                  "name": "report",
+                  "type": "string_long"
+                },
+                "score": {
+                  "name": "score",
+                  "size": "tiny",
+                  "type": "integer",
+                  "unsigned": true
+                }
+              },
+              "field_settings": []
+            },
+            "translatable": true,
+            "type": "custom",
+            "value_schema": {
+              "description": "Value (AI SEO Analysis): The values to set for the field \"field_ai_seo_analysis\", one object per field item.",
+              "items": {
+                "description": "AI SEO Analysis item: A single \"field_ai_seo_analysis\" item.",
+                "properties": {
+                  "report": {
+                    "$comment": "Unable to provide schema, no type specified.",
+                    "description": "report: The report property of the field \"field_ai_seo_analysis\".",
+                    "title": "report"
+                  },
+                  "score": {
+                    "description": "score: The score property of the field \"field_ai_seo_analysis\".",
+                    "oneOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "score"
+                  }
+                },
+                "title": "AI SEO Analysis item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (AI SEO Analysis)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "field_content_tags": {
+            "cardinality": -1,
+            "description": "Tags used to classify content. Leave empty to generate automatically when saved or by clicking 'Generate tags'.",
+            "label": "Content Tags",
+            "name": "field_content_tags",
+            "required": false,
+            "settings": {
+              "handler": "default:taxonomy_term",
+              "handler_settings": {
+                "auto_create": true,
+                "auto_create_bundle": "",
+                "sort": {
+                  "direction": "asc",
+                  "field": "name"
+                },
+                "target_bundles": {
+                  "content_classification": "content_classification"
+                }
+              },
+              "target_type": "taxonomy_term"
+            },
+            "translatable": true,
+            "type": "entity_reference",
+            "value_schema": {
+              "description": "Value (Content Tags): The values to set for the field \"field_content_tags\", one object per field item.",
+              "items": {
+                "description": "Content Tags item: A single \"field_content_tags\" item.",
+                "properties": {
+                  "target_id": {
+                    "description": "Taxonomy term ID: The target_id property of the field \"field_content_tags\".",
+                    "title": "Taxonomy term ID",
+                    "type": "integer"
+                  },
+                  "target_uuid": {
+                    "description": "Target UUID: The target_uuid property of the field \"field_content_tags\".",
+                    "format": "uuid",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Target UUID"
+                  }
+                },
+                "required": [
+                  "target_id"
+                ],
+                "title": "Content Tags item",
+                "type": "object"
+              },
+              "title": "Value (Content Tags)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "field_llms_txt_content_section": {
+            "cardinality": 1,
+            "description": "Select a section to include this content in the site's /llms.txt file and make it discoverable by AI systems. Choose the section that best categorizes this content.<br>\r\n<strong>Note:</strong> Only tagged content appears in llms.txt. Untagged content will not be available to language models.<br>\r\n<a href=\"/admin/structure/taxonomy/manage/llms_txt_content_sections/add\" target=\"_blank\">+ Add new section</a>\r\n",
+            "label": "LLMs.txt content section",
+            "name": "field_llms_txt_content_section",
+            "required": false,
+            "settings": {
+              "handler": "default:taxonomy_term",
+              "handler_settings": {
+                "auto_create": false,
+                "auto_create_bundle": "",
+                "sort": {
+                  "direction": "asc",
+                  "field": "name"
+                },
+                "target_bundles": {
+                  "llms_txt_content_sections": "llms_txt_content_sections"
+                }
+              },
+              "target_type": "taxonomy_term"
+            },
+            "translatable": true,
+            "type": "entity_reference",
+            "value_schema": {
+              "description": "Value (LLMs.txt content section): The values to set for the field \"field_llms_txt_content_section\", one object per field item.",
+              "items": {
+                "description": "LLMs.txt content section item: A single \"field_llms_txt_content_section\" item.",
+                "properties": {
+                  "target_id": {
+                    "description": "Taxonomy term ID: The target_id property of the field \"field_llms_txt_content_section\".",
+                    "title": "Taxonomy term ID",
+                    "type": "integer"
+                  },
+                  "target_uuid": {
+                    "description": "Target UUID: The target_uuid property of the field \"field_llms_txt_content_section\".",
+                    "format": "uuid",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Target UUID"
+                  }
+                },
+                "required": [
+                  "target_id"
+                ],
+                "title": "LLMs.txt content section item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (LLMs.txt content section)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "field_seo_analysis": {
+            "cardinality": 1,
+            "description": "Pick the main keyword this page is about.",
+            "label": "SEO analysis",
+            "name": "field_seo_analysis",
+            "required": false,
+            "settings": [],
+            "translatable": true,
+            "type": "yoast_seo",
+            "value_schema": {
+              "description": "Value (SEO analysis): The values to set for the field \"field_seo_analysis\", one object per field item.",
+              "items": {
+                "description": "SEO analysis item: A single \"field_seo_analysis\" item.",
+                "properties": {
+                  "description": {
+                    "description": "Edited description: The description property of the field \"field_seo_analysis\".",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Edited description"
+                  },
+                  "focus_keyword": {
+                    "description": "Focus Keyword: The focus_keyword property of the field \"field_seo_analysis\".",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Focus Keyword"
+                  },
+                  "status": {
+                    "description": "Status: The status property of the field \"field_seo_analysis\".",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Status"
+                  },
+                  "title": {
+                    "description": "Edited title: The title property of the field \"field_seo_analysis\".",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Edited title"
+                  }
+                },
+                "title": "SEO analysis item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (SEO analysis)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "field_seo_description": {
+            "cardinality": 1,
+            "description": "Write a description for search engines and social media sites.",
+            "label": "SEO description",
+            "name": "field_seo_description",
+            "required": false,
+            "settings": {
+              "case_sensitive": false
+            },
+            "translatable": true,
+            "type": "string_long",
+            "value_schema": {
+              "description": "Value (SEO description): The values to set for the field \"field_seo_description\", one object per field item.",
+              "items": {
+                "description": "SEO description item: A single \"field_seo_description\" item.",
+                "properties": {
+                  "value": {
+                    "description": "Text value: The value property of the field \"field_seo_description\".",
+                    "pattern": "(.|\\r?\\n)*",
+                    "title": "Text value",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "title": "SEO description item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (SEO description)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "field_seo_image": {
+            "cardinality": 1,
+            "description": "Upload an image to be used when the page is shared on social media sites.",
+            "label": "SEO image",
+            "name": "field_seo_image",
+            "required": false,
+            "settings": {
+              "handler": "default:media",
+              "handler_settings": {
+                "target_bundles": {
+                  "image": "image"
+                }
+              },
+              "target_type": "media"
+            },
+            "translatable": true,
+            "type": "entity_reference",
+            "value_schema": {
+              "description": "Value (SEO image): The values to set for the field \"field_seo_image\", one object per field item.",
+              "items": {
+                "description": "SEO image item: A single \"field_seo_image\" item.",
+                "properties": {
+                  "target_id": {
+                    "description": "Media ID: The target_id property of the field \"field_seo_image\".",
+                    "title": "Media ID",
+                    "type": "integer"
+                  },
+                  "target_uuid": {
+                    "description": "Target UUID: The target_uuid property of the field \"field_seo_image\".",
+                    "format": "uuid",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Target UUID"
+                  }
+                },
+                "required": [
+                  "target_id"
+                ],
+                "title": "SEO image item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (SEO image)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "field_seo_title": {
+            "cardinality": 1,
+            "description": "Use this field to overwrite the default HTML page title for SEO.",
+            "label": "SEO title",
+            "name": "field_seo_title",
+            "required": false,
+            "settings": {
+              "case_sensitive": false,
+              "is_ascii": false,
+              "max_length": 255
+            },
+            "translatable": true,
+            "type": "string",
+            "value_schema": {
+              "description": "Value (SEO title): The values to set for the field \"field_seo_title\", one object per field item.",
+              "items": {
+                "description": "SEO title item: A single \"field_seo_title\" item.",
+                "properties": {
+                  "value": {
+                    "description": "Text value: The value property of the field \"field_seo_title\".",
+                    "title": "Text value",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "title": "SEO title item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (SEO title)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "main_image": {
+            "cardinality": 1,
+            "description": "",
+            "label": "Main image",
+            "name": "main_image",
+            "required": false,
+            "settings": {
+              "handler": "default:media",
+              "handler_settings": {
+                "auto_create": false,
+                "auto_create_bundle": "",
+                "sort": {
+                  "field": "_none"
+                },
+                "target_bundles": {
+                  "image": "image"
+                }
+              },
+              "target_type": "media"
+            },
+            "translatable": true,
+            "type": "entity_reference",
+            "value_schema": {
+              "description": "Value (Main image): The values to set for the field \"main_image\", one object per field item.",
+              "items": {
+                "description": "Main image item: A single \"main_image\" item.",
+                "properties": {
+                  "target_id": {
+                    "description": "Media ID: The target_id property of the field \"main_image\".",
+                    "title": "Media ID",
+                    "type": "integer"
+                  },
+                  "target_uuid": {
+                    "description": "Target UUID: The target_uuid property of the field \"main_image\".",
+                    "format": "uuid",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Target UUID"
+                  }
+                },
+                "required": [
+                  "target_id"
+                ],
+                "title": "Main image item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (Main image)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "news_author": {
+            "cardinality": 1,
+            "description": "",
+            "label": "Author",
+            "name": "news_author",
+            "required": false,
+            "settings": {
+              "handler": "default:node",
+              "handler_settings": {
+                "auto_create": false,
+                "auto_create_bundle": "",
+                "sort": {
+                  "field": "_none"
+                },
+                "target_bundles": {
+                  "person": "person"
+                }
+              },
+              "target_type": "node"
+            },
+            "translatable": true,
+            "type": "entity_reference",
+            "value_schema": {
+              "description": "Value (Author): The values to set for the field \"news_author\", one object per field item.",
+              "items": {
+                "description": "Author item: A single \"news_author\" item.",
+                "properties": {
+                  "target_id": {
+                    "description": "Content ID: The target_id property of the field \"news_author\".",
+                    "title": "Content ID",
+                    "type": "integer"
+                  },
+                  "target_uuid": {
+                    "description": "Target UUID: The target_uuid property of the field \"news_author\".",
+                    "format": "uuid",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Target UUID"
+                  }
+                },
+                "required": [
+                  "target_id"
+                ],
+                "title": "Author item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (Author)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "news_publish_date": {
+            "cardinality": 1,
+            "description": "",
+            "label": "Publish date",
+            "name": "news_publish_date",
+            "required": true,
+            "settings": {
+              "datetime_type": "datetime"
+            },
+            "translatable": true,
+            "type": "datetime",
+            "value_schema": {
+              "description": "Value (Publish date): The values to set for the field \"news_publish_date\", one object per field item.",
+              "items": {
+                "description": "Publish date item: A single \"news_publish_date\" item.",
+                "properties": {
+                  "value": {
+                    "description": "Date value: The value property of the field \"news_publish_date\".",
+                    "format": "date-time",
+                    "title": "Date value",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "title": "Publish date item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (Publish date)",
+              "type": "array"
+            }
+          },
+          "news_related": {
+            "cardinality": -1,
+            "description": "",
+            "label": "Related articles",
+            "name": "news_related",
+            "required": false,
+            "settings": {
+              "handler": "default:node",
+              "handler_settings": {
+                "auto_create": false,
+                "auto_create_bundle": "",
+                "sort": {
+                  "field": "_none"
+                },
+                "target_bundles": {
+                  "news": "news"
+                }
+              },
+              "target_type": "node"
+            },
+            "translatable": true,
+            "type": "entity_reference",
+            "value_schema": {
+              "description": "Value (Related articles): The values to set for the field \"news_related\", one object per field item.",
+              "items": {
+                "description": "Related articles item: A single \"news_related\" item.",
+                "properties": {
+                  "target_id": {
+                    "description": "Content ID: The target_id property of the field \"news_related\".",
+                    "title": "Content ID",
+                    "type": "integer"
+                  },
+                  "target_uuid": {
+                    "description": "Target UUID: The target_uuid property of the field \"news_related\".",
+                    "format": "uuid",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Target UUID"
+                  }
+                },
+                "required": [
+                  "target_id"
+                ],
+                "title": "Related articles item",
+                "type": "object"
+              },
+              "title": "Value (Related articles)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "news_subhead": {
+            "cardinality": 1,
+            "description": "",
+            "label": "Subhead",
+            "name": "news_subhead",
+            "required": false,
+            "settings": {
+              "allowed_formats": []
+            },
+            "translatable": true,
+            "type": "text_long",
+            "value_schema": {
+              "description": "Value (Subhead): The values to set for the field \"news_subhead\", one object per field item.",
+              "items": {
+                "description": "Subhead item: A single \"news_subhead\" item.",
+                "properties": {
+                  "format": {
+                    "description": "Text format: The format property of the field \"news_subhead\".",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Text format"
+                  },
+                  "value": {
+                    "description": "Text: The value property of the field \"news_subhead\".",
+                    "title": "Text",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "title": "Subhead item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (Subhead)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "people": {
+            "cardinality": -1,
+            "description": "",
+            "label": "People",
+            "name": "people",
+            "required": false,
+            "settings": {
+              "handler": "default:node",
+              "handler_settings": {
+                "auto_create": false,
+                "auto_create_bundle": "",
+                "sort": {
+                  "field": "_none"
+                },
+                "target_bundles": {
+                  "person": "person"
+                }
+              },
+              "target_type": "node"
+            },
+            "translatable": true,
+            "type": "entity_reference",
+            "value_schema": {
+              "description": "Value (People): The values to set for the field \"people\", one object per field item.",
+              "items": {
+                "description": "People item: A single \"people\" item.",
+                "properties": {
+                  "target_id": {
+                    "description": "Content ID: The target_id property of the field \"people\".",
+                    "title": "Content ID",
+                    "type": "integer"
+                  },
+                  "target_uuid": {
+                    "description": "Target UUID: The target_uuid property of the field \"people\".",
+                    "format": "uuid",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Target UUID"
+                  }
+                },
+                "required": [
+                  "target_id"
+                ],
+                "title": "People item",
+                "type": "object"
+              },
+              "title": "Value (People)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          "preview_text": {
+            "cardinality": 1,
+            "description": "",
+            "label": "Preview",
+            "name": "preview_text",
+            "required": true,
+            "settings": {
+              "allowed_formats": []
+            },
+            "translatable": true,
+            "type": "text_long",
+            "value_schema": {
+              "description": "Value (Preview): The values to set for the field \"preview_text\", one object per field item.",
+              "items": {
+                "description": "Preview item: A single \"preview_text\" item.",
+                "properties": {
+                  "format": {
+                    "description": "Text format: The format property of the field \"preview_text\".",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Text format"
+                  },
+                  "value": {
+                    "description": "Text: The value property of the field \"preview_text\".",
+                    "title": "Text",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "title": "Preview item",
+                "type": "object"
+              },
+              "maxItems": 1,
+              "title": "Value (Preview)",
+              "type": "array"
+            }
+          },
+          "programs": {
+            "cardinality": -1,
+            "description": "",
+            "label": "Programs",
+            "name": "programs",
+            "required": false,
+            "settings": {
+              "handler": "default:node",
+              "handler_settings": {
+                "auto_create": false,
+                "auto_create_bundle": "",
+                "sort": {
+                  "field": "_none"
+                },
+                "target_bundles": {
+                  "program": "program"
+                }
+              },
+              "target_type": "node"
+            },
+            "translatable": true,
+            "type": "entity_reference",
+            "value_schema": {
+              "description": "Value (Programs): The values to set for the field \"programs\", one object per field item.",
+              "items": {
+                "description": "Programs item: A single \"programs\" item.",
+                "properties": {
+                  "target_id": {
+                    "description": "Content ID: The target_id property of the field \"programs\".",
+                    "title": "Content ID",
+                    "type": "integer"
+                  },
+                  "target_uuid": {
+                    "description": "Target UUID: The target_uuid property of the field \"programs\".",
+                    "format": "uuid",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Target UUID"
+                  }
+                },
+                "required": [
+                  "target_id"
+                ],
+                "title": "Programs item",
+                "type": "object"
+              },
+              "title": "Value (Programs)",
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          }
+        }
+      },
+      "message": "Found 29 base field definitions and 19 field definitions for node:news",
+      "success": true
+    }
+  },
+  "seconds": 1.385
+}

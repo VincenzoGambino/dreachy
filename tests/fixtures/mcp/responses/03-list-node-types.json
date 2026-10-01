@@ -1,0 +1,25 @@
+{
+  "call": {
+    "arguments": {
+      "amount": 0,
+      "entity_type_id": "node_type"
+    },
+    "name": "tool_api__demo_entity_list"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": false,\n    \"message\": \"Tool plugin access denied.\",\n    \"data\": []\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": [],
+      "message": "Tool plugin access denied.",
+      "success": false
+    }
+  },
+  "seconds": 0.453
+}

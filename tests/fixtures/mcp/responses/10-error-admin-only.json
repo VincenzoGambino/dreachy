@@ -1,0 +1,492 @@
+{
+  "call": {
+    "arguments": {},
+    "name": "tool_api__demo_system_status"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Successfully retrieved system status with 43 items. Warnings: No, Errors: No\",\n    \"data\": {\n        \"status_report\": {\n            \"drupal\": {\n                \"title\": \"Drupal\",\n                \"value\": \"11.4.8\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": -1,\n                    \"status\": \"checked\",\n                    \"label\": \"Checked\"\n                }\n            },\n            \"update access\": {\n                \"title\": \"Access to update.php\",\n                \"value\": \"Protected\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"ai_module\": {\n                \"title\": \"AI\",\n                \"value\": \"Providers installed\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"ai_built_assets\": {\n                \"title\": \"AI built assets\",\n                \"value\": \"Built JavaScript assets for the AI module are present.\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"ai_ckeditor_assets\": {\n                \"title\": \"AI CKEditor assets\",\n                \"value\": \"Built assets are present.\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"charts_chartjs_js\": {\n                \"title\": \"Chart.js Library\",\n                \"value\": \"Available through a CDN\",\n                \"description\": \"You are using the Chart.js library via a content delivery network. It is generally considered better practice to install the library files locally. Please see the README file inside charts_chartjs for instructions to install the library.\",\n                \"severity\": {\n                    \"value\": 1,\n                    \"status\": \"warning\",\n                    \"label\": \"Warnings found\"\n                }\n            },\n            \"configuration_files\": {\n                \"title\": \"Configuration files\",\n                \"value\": \"Protected\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"cron\": {\n                \"title\": \"Cron maintenance tasks\",\n                \"value\": \"Last run 2 hours 30 minutes ago\",\n                \"description\": [\n                    [\n                        {\n                            \"#type\": \"link\",\n                            \"#prefix\": \"(\",\n                            \"#title\": \"more information\",\n                            \"#suffix\": \")\",\n                            \"#url\": {}\n                        },\n                        {\n                            \"#prefix\": \"<span class=\\\"cron-description__run-cron\\\">\",\n                            \"#suffix\": \"</span>\",\n                            \"#type\": \"link\",\n                            \"#title\": \"Run cron\",\n                            \"#url\": {}\n                        }\n                    ]\n                ],\n                \"severity\": {\n                    \"value\": -1,\n                    \"status\": \"checked\",\n                    \"label\": \"Checked\"\n                }\n            },\n            \"database_support_json\": {\n                \"title\": \"Database support for JSON\",\n                \"value\": \"Available\",\n                \"description\": \"Drupal requires databases that support JSON storage.\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"database_system\": {\n                \"title\": \"Database system\",\n                \"value\": \"MySQL or equivalent\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"database_system_version\": {\n                \"title\": \"Database system version\",\n                \"value\": \"8.0.45\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"update\": {\n                \"title\": \"Database updates\",\n                \"value\": \"Up to date\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"canvas\": {\n                \"title\": \"Drupal Canvas\",\n                \"value\": \"\",\n                \"description\": \"Drupal Canvas requires the <code>justinrainbow/json-schema</code> library which may impact site performance when the JSON:API module is installed and PHP assertions are enabled. See <a href='https://www.drupal.org/project/drupal/issues/3472008'>https://www.drupal.org/project/drupal/issues/3472008</a> for more information.\",\n                \"severity\": {\n                    \"value\": 2,\n                    \"status\": \"error\",\n                    \"label\": \"Errors found\"\n                }\n            },\n            \"canvas_data_health\": {\n                \"title\": \"Drupal Canvas data health\",\n                \"value\": \"Not yet checked\",\n                \"description\": \"Canvas has not checked any data yet. It is checked incrementally on cron, or run <code>vendor/bin/dr canvas:doctor --all-checks</code> to check everything immediately.\",\n                \"severity\": {\n                    \"value\": -1,\n                    \"status\": \"checked\",\n                    \"label\": \"Checked\"\n                }\n            },\n            \"coverage_core\": {\n                \"title\": \"Drupal core security coverage\",\n                \"value\": \"Covered until 11.6.0\",\n                \"description\": {\n                    \"release_cycle_link\": {\n                        \"#markup\": \"Visit the <a href=\\\"https://www.drupal.org/core/release-cycle-overview\\\">release cycle overview</a> for more information on supported releases.\"\n                    }\n                },\n                \"severity\": {\n                    \"value\": -1,\n                    \"status\": \"checked\",\n                    \"label\": \"Checked\"\n                }\n            },\n            \"update_core\": {\n                \"title\": \"Drupal core update status\",\n                \"value\": \"<a href=\\\"/admin/reports/updates\\\">Up to date</a>\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"entity_update\": {\n                \"title\": \"Entity/field definitions\",\n                \"value\": \"Up to date\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"experimental_modules\": {\n                \"title\": \"Experimental modules installed\",\n                \"value\": \"Experimental modules found: <em class=\\\"placeholder\\\">AI Search, Postgres VDB Provider</em>. <a href=\\\"https://www.drupal.org/core/experimental\\\">Experimental modules</a> are provided for testing purposes only. Use at your own risk.\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 1,\n                    \"status\": \"warning\",\n                    \"label\": \"Warnings found\"\n                }\n            },\n            \"file system\": {\n                \"title\": \"File system\",\n                \"value\": \"Writable (<em>public</em> download method)\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"image.toolkit.gd.version\": {\n                \"title\": \"GD library\",\n                \"value\": \"bundled (2.1.0 compatible)\",\n                \"description\": \"Supported image file formats: <em class=\\\"placeholder\\\">GIF, JPEG, PNG, WEBP, AVIF</em>.\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"image.toolkit\": {\n                \"title\": \"Image toolkit\",\n                \"value\": \"gd\",\n                \"description\": \"GD2 image manipulation toolkit\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"jsonapi_read_only_mode\": {\n                \"title\": \"JSON:API allowed operations\",\n                \"value\": \"Read-only\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": -1,\n                    \"status\": \"checked\",\n                    \"label\": \"Checked\"\n                }\n            },\n            \"jsonapi_multilingual_support\": {\n                \"title\": \"JSON:API multilingual support\",\n                \"value\": \"Limited\",\n                \"description\": \"Some multilingual features currently do not work well with JSON:API. See the <a href=\\\"https://www.drupal.org/docs/core-modules-and-themes/core-modules/jsonapi-module/translations\\\">JSON:API multilingual support documentation</a> for more information on the current status of multilingual support.\",\n                \"severity\": {\n                    \"value\": -1,\n                    \"status\": \"checked\",\n                    \"label\": \"Checked\"\n                }\n            },\n            \"jsonapi_revision_support\": {\n                \"title\": \"JSON:API revision support\",\n                \"value\": \"Limited\",\n                \"description\": \"Revision support is currently read-only and only for the \\\"Content\\\" and \\\"Media\\\" entity types in JSON:API. See the <a href=\\\"https://www.drupal.org/docs/core-modules-and-themes/core-modules/jsonapi-module/revisions\\\">JSON:API revision support documentation</a> for more information on the current status of revision support.\",\n                \"severity\": {\n                    \"value\": -1,\n                    \"status\": \"checked\",\n                    \"label\": \"Checked\"\n                }\n            },\n            \"metatag_schema\": {\n                \"title\": \"Metatag\",\n                \"value\": \"Schema.org Metatag is recommended\",\n                \"description\": \"The <a href=\\\"https://www.drupal.org/project/schema_metatag\\\">Schema.org Metatag</a> module is highly recommended to add <a href=\\\"https://json-ld.org\\\">JSON-LD</a> -formatted <a href=\\\"https://schema.org\\\">schema.org</a> compatible data structures to the site.\",\n                \"severity\": {\n                    \"value\": -1,\n                    \"status\": \"checked\",\n                    \"label\": \"Checked\"\n                }\n            },\n            \"update_contrib\": {\n                \"title\": \"Module and theme update status\",\n                \"value\": \"<a href=\\\"/admin/reports/updates\\\">Out of date</a>\",\n                \"description\": [\n                    {\n                        \"#markup\": \"There are updates available for one or more of your modules or themes. To ensure the proper functioning of your site, you should update as soon as possible.\"\n                    },\n                    {\n                        \"#prefix\": \" \",\n                        \"#markup\": \"See the <a href=\\\"/admin/reports/updates\\\">available updates</a> page for more information.\"\n                    }\n                ],\n                \"severity\": {\n                    \"value\": 1,\n                    \"status\": \"warning\",\n                    \"label\": \"Warnings found\"\n                }\n            },\n            \"node_access\": {\n                \"title\": \"Node Access Permissions\",\n                \"value\": \"Disabled\",\n                \"description\": \"If the site is experiencing problems with permissions to content, you may have to rebuild the permissions cache. Rebuilding will remove all privileges to content and replace them with permissions based on the current modules and settings. Rebuilding may take some time if there is a lot of content or complex permission settings. After rebuilding has completed, content will automatically use the new permissions. <a href=\\\"/admin/reports/status/rebuild\\\">Rebuild permissions</a>\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"password_hashing\": {\n                \"title\": \"Password hashing\",\n                \"value\": \"Passwords are hashed with the bcrypt algorithm. Drupal 12 will use argon2id by default. It is recommended to <a href=\\\"https://www.drupal.org/node/3581980\\\">switch</a> to argon2id.\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": -1,\n                    \"status\": \"checked\",\n                    \"label\": \"Checked\"\n                }\n            },\n            \"php\": {\n                \"title\": \"PHP\",\n                \"value\": \"8.5.7 (<a href=\\\"/admin/reports/status/php\\\">more information</a>)\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"php_apcu_available\": {\n                \"title\": \"PHP APCu available caching\",\n                \"value\": \"Memory available: 14.22 MB.\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"php_apcu_enabled\": {\n                \"title\": \"PHP APCu caching\",\n                \"value\": \"Enabled (32 MB)\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"php_extensions\": {\n                \"title\": \"PHP extensions\",\n                \"value\": \"Enabled\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"php_memory_limit\": {\n                \"title\": \"PHP memory limit\",\n                \"value\": \"4096M\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"php_opcache\": {\n                \"title\": \"PHP OPcode caching\",\n                \"value\": \"Enabled\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"php_random_bytes\": {\n                \"title\": \"Random number generation\",\n                \"value\": \"Successful\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"php_session_samesite\": {\n                \"title\": \"SameSite cookie attribute\",\n                \"value\": \"Lax\",\n                \"description\": \"This attribute should be explicitly set to Lax, Strict or None. If set to None then the request must be made via HTTPS. See <a href=\\\"https://www.php.net/manual/en/session.configuration.php#ini.session.cookie-samesite\\\" target=\\\"_blank\\\">PHP documentation</a>\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"scheduler_timecheck\": {\n                \"title\": \"Scheduler Time Check\",\n                \"value\": \"Server time: <em class=\\\"placeholder\\\">1st October 2026, 12:10:56 +00:00</em>\",\n                \"description\": {\n                    \"#type\": \"inline_template\",\n                    \"#template\": \"{{ description|raw }}\",\n                    \"#context\": {\n                        \"description\": \"In most cases the server time should match Coordinated Universal Time (UTC) / Greenwich Mean Time (GMT).<br />Site timezone: <em class=\\\"placeholder\\\">UTC</em> (<em class=\\\"placeholder\\\">UTC</em>), offset from UTC/GMT by <em class=\\\"placeholder\\\">+00:00</em> hours. This can be <a href=\\\"/admin/config/regional/settings\\\">changed by admin users</a> who have the appropriate access.<br />Your local time: <em class=\\\"placeholder\\\">1st October 2026</em>, <em class=\\\"placeholder\\\">12:10:56</em> <em class=\\\"placeholder\\\">UTC (UTC) +00:00</em> (<em class=\\\"placeholder\\\">not in daylight saving mode</em>). You can change this via your <a href=\\\"/user/1/edit\\\">user account</a>.\"\n                    }\n                },\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"mysql_transaction_level\": {\n                \"title\": \"Transaction isolation level\",\n                \"value\": \"READ-COMMITTED\",\n                \"description\": \"See the <a href=\\\"https://www.drupal.org/docs/system-requirements/setting-the-mysql-transaction-isolation-level\\\">setting MySQL transaction isolation level</a> page for more information.\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"trusted_host_patterns\": {\n                \"title\": \"Trusted Host Settings\",\n                \"value\": \"Enabled\",\n                \"description\": \"The trusted_host_patterns setting is set to allow <em class=\\\"placeholder\\\">^.+\\\\.drupalforge\\\\.app$, ^prod\\\\-cd9108\\\\-f20348\\\\-j4f8nqnixxkb\\\\.drupalforge\\\\.app$</em>\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"unicode\": {\n                \"title\": \"Unicode library\",\n                \"value\": \"PHP Mbstring Extension\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"update status\": {\n                \"title\": \"Update notifications\",\n                \"value\": \"Enabled\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"file_progress\": {\n                \"title\": \"Upload progress\",\n                \"value\": \"Enabled (<a href=\\\"https://github.com/php/pecl-php-uploadprogress#uploadprogress\\\">PECL uploadprogress</a>)\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            },\n            \"webserver\": {\n                \"title\": \"Web server\",\n                \"value\": \"Apache/2.4.67 (Debian)\",\n                \"description\": \"\",\n                \"severity\": {\n                    \"value\": 0,\n                    \"status\": \"ok\",\n                    \"label\": \"OK\"\n                }\n            }\n        },\n        \"has_warnings\": false,\n        \"has_errors\": false\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "has_errors": false,
+        "has_warnings": false,
+        "status_report": {
+          "ai_built_assets": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "AI built assets",
+            "value": "Built JavaScript assets for the AI module are present."
+          },
+          "ai_ckeditor_assets": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "AI CKEditor assets",
+            "value": "Built assets are present."
+          },
+          "ai_module": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "AI",
+            "value": "Providers installed"
+          },
+          "canvas": {
+            "description": "Drupal Canvas requires the <code>justinrainbow/json-schema</code> library which may impact site performance when the JSON:API module is installed and PHP assertions are enabled. See <a href='https://www.drupal.org/project/drupal/issues/3472008'>https://www.drupal.org/project/drupal/issues/3472008</a> for more information.",
+            "severity": {
+              "label": "Errors found",
+              "status": "error",
+              "value": 2
+            },
+            "title": "Drupal Canvas",
+            "value": ""
+          },
+          "canvas_data_health": {
+            "description": "Canvas has not checked any data yet. It is checked incrementally on cron, or run <code>vendor/bin/dr canvas:doctor --all-checks</code> to check everything immediately.",
+            "severity": {
+              "label": "Checked",
+              "status": "checked",
+              "value": -1
+            },
+            "title": "Drupal Canvas data health",
+            "value": "Not yet checked"
+          },
+          "charts_chartjs_js": {
+            "description": "You are using the Chart.js library via a content delivery network. It is generally considered better practice to install the library files locally. Please see the README file inside charts_chartjs for instructions to install the library.",
+            "severity": {
+              "label": "Warnings found",
+              "status": "warning",
+              "value": 1
+            },
+            "title": "Chart.js Library",
+            "value": "Available through a CDN"
+          },
+          "configuration_files": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Configuration files",
+            "value": "Protected"
+          },
+          "coverage_core": {
+            "description": {
+              "release_cycle_link": {
+                "#markup": "Visit the <a href=\"https://www.drupal.org/core/release-cycle-overview\">release cycle overview</a> for more information on supported releases."
+              }
+            },
+            "severity": {
+              "label": "Checked",
+              "status": "checked",
+              "value": -1
+            },
+            "title": "Drupal core security coverage",
+            "value": "Covered until 11.6.0"
+          },
+          "cron": {
+            "description": [
+              [
+                {
+                  "#prefix": "(",
+                  "#suffix": ")",
+                  "#title": "more information",
+                  "#type": "link",
+                  "#url": {}
+                },
+                {
+                  "#prefix": "<span class=\"cron-description__run-cron\">",
+                  "#suffix": "</span>",
+                  "#title": "Run cron",
+                  "#type": "link",
+                  "#url": {}
+                }
+              ]
+            ],
+            "severity": {
+              "label": "Checked",
+              "status": "checked",
+              "value": -1
+            },
+            "title": "Cron maintenance tasks",
+            "value": "Last run 2 hours 30 minutes ago"
+          },
+          "database_support_json": {
+            "description": "Drupal requires databases that support JSON storage.",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Database support for JSON",
+            "value": "Available"
+          },
+          "database_system": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Database system",
+            "value": "MySQL or equivalent"
+          },
+          "database_system_version": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Database system version",
+            "value": "8.0.45"
+          },
+          "drupal": {
+            "description": "",
+            "severity": {
+              "label": "Checked",
+              "status": "checked",
+              "value": -1
+            },
+            "title": "Drupal",
+            "value": "11.4.8"
+          },
+          "entity_update": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Entity/field definitions",
+            "value": "Up to date"
+          },
+          "experimental_modules": {
+            "description": "",
+            "severity": {
+              "label": "Warnings found",
+              "status": "warning",
+              "value": 1
+            },
+            "title": "Experimental modules installed",
+            "value": "Experimental modules found: <em class=\"placeholder\">AI Search, Postgres VDB Provider</em>. <a href=\"https://www.drupal.org/core/experimental\">Experimental modules</a> are provided for testing purposes only. Use at your own risk."
+          },
+          "file system": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "File system",
+            "value": "Writable (<em>public</em> download method)"
+          },
+          "file_progress": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Upload progress",
+            "value": "Enabled (<a href=\"https://github.com/php/pecl-php-uploadprogress#uploadprogress\">PECL uploadprogress</a>)"
+          },
+          "image.toolkit": {
+            "description": "GD2 image manipulation toolkit",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Image toolkit",
+            "value": "gd"
+          },
+          "image.toolkit.gd.version": {
+            "description": "Supported image file formats: <em class=\"placeholder\">GIF, JPEG, PNG, WEBP, AVIF</em>.",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "GD library",
+            "value": "bundled (2.1.0 compatible)"
+          },
+          "jsonapi_multilingual_support": {
+            "description": "Some multilingual features currently do not work well with JSON:API. See the <a href=\"https://www.drupal.org/docs/core-modules-and-themes/core-modules/jsonapi-module/translations\">JSON:API multilingual support documentation</a> for more information on the current status of multilingual support.",
+            "severity": {
+              "label": "Checked",
+              "status": "checked",
+              "value": -1
+            },
+            "title": "JSON:API multilingual support",
+            "value": "Limited"
+          },
+          "jsonapi_read_only_mode": {
+            "description": "",
+            "severity": {
+              "label": "Checked",
+              "status": "checked",
+              "value": -1
+            },
+            "title": "JSON:API allowed operations",
+            "value": "Read-only"
+          },
+          "jsonapi_revision_support": {
+            "description": "Revision support is currently read-only and only for the \"Content\" and \"Media\" entity types in JSON:API. See the <a href=\"https://www.drupal.org/docs/core-modules-and-themes/core-modules/jsonapi-module/revisions\">JSON:API revision support documentation</a> for more information on the current status of revision support.",
+            "severity": {
+              "label": "Checked",
+              "status": "checked",
+              "value": -1
+            },
+            "title": "JSON:API revision support",
+            "value": "Limited"
+          },
+          "metatag_schema": {
+            "description": "The <a href=\"https://www.drupal.org/project/schema_metatag\">Schema.org Metatag</a> module is highly recommended to add <a href=\"https://json-ld.org\">JSON-LD</a> -formatted <a href=\"https://schema.org\">schema.org</a> compatible data structures to the site.",
+            "severity": {
+              "label": "Checked",
+              "status": "checked",
+              "value": -1
+            },
+            "title": "Metatag",
+            "value": "Schema.org Metatag is recommended"
+          },
+          "mysql_transaction_level": {
+            "description": "See the <a href=\"https://www.drupal.org/docs/system-requirements/setting-the-mysql-transaction-isolation-level\">setting MySQL transaction isolation level</a> page for more information.",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Transaction isolation level",
+            "value": "READ-COMMITTED"
+          },
+          "node_access": {
+            "description": "If the site is experiencing problems with permissions to content, you may have to rebuild the permissions cache. Rebuilding will remove all privileges to content and replace them with permissions based on the current modules and settings. Rebuilding may take some time if there is a lot of content or complex permission settings. After rebuilding has completed, content will automatically use the new permissions. <a href=\"/admin/reports/status/rebuild\">Rebuild permissions</a>",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Node Access Permissions",
+            "value": "Disabled"
+          },
+          "password_hashing": {
+            "description": "",
+            "severity": {
+              "label": "Checked",
+              "status": "checked",
+              "value": -1
+            },
+            "title": "Password hashing",
+            "value": "Passwords are hashed with the bcrypt algorithm. Drupal 12 will use argon2id by default. It is recommended to <a href=\"https://www.drupal.org/node/3581980\">switch</a> to argon2id."
+          },
+          "php": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "PHP",
+            "value": "8.5.7 (<a href=\"/admin/reports/status/php\">more information</a>)"
+          },
+          "php_apcu_available": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "PHP APCu available caching",
+            "value": "Memory available: 14.22 MB."
+          },
+          "php_apcu_enabled": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "PHP APCu caching",
+            "value": "Enabled (32 MB)"
+          },
+          "php_extensions": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "PHP extensions",
+            "value": "Enabled"
+          },
+          "php_memory_limit": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "PHP memory limit",
+            "value": "4096M"
+          },
+          "php_opcache": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "PHP OPcode caching",
+            "value": "Enabled"
+          },
+          "php_random_bytes": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Random number generation",
+            "value": "Successful"
+          },
+          "php_session_samesite": {
+            "description": "This attribute should be explicitly set to Lax, Strict or None. If set to None then the request must be made via HTTPS. See <a href=\"https://www.php.net/manual/en/session.configuration.php#ini.session.cookie-samesite\" target=\"_blank\">PHP documentation</a>",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "SameSite cookie attribute",
+            "value": "Lax"
+          },
+          "scheduler_timecheck": {
+            "description": {
+              "#context": {
+                "description": "In most cases the server time should match Coordinated Universal Time (UTC) / Greenwich Mean Time (GMT).<br />Site timezone: <em class=\"placeholder\">UTC</em> (<em class=\"placeholder\">UTC</em>), offset from UTC/GMT by <em class=\"placeholder\">+00:00</em> hours. This can be <a href=\"/admin/config/regional/settings\">changed by admin users</a> who have the appropriate access.<br />Your local time: <em class=\"placeholder\">1st October 2026</em>, <em class=\"placeholder\">12:10:56</em> <em class=\"placeholder\">UTC (UTC) +00:00</em> (<em class=\"placeholder\">not in daylight saving mode</em>). You can change this via your <a href=\"/user/1/edit\">user account</a>."
+              },
+              "#template": "{{ description|raw }}",
+              "#type": "inline_template"
+            },
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Scheduler Time Check",
+            "value": "Server time: <em class=\"placeholder\">1st October 2026, 12:10:56 +00:00</em>"
+          },
+          "trusted_host_patterns": {
+            "description": "The trusted_host_patterns setting is set to allow <em class=\"placeholder\">^.+\\.drupalforge\\.app$, ^prod\\-cd9108\\-f20348\\-j4f8nqnixxkb\\.drupalforge\\.app$</em>",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Trusted Host Settings",
+            "value": "Enabled"
+          },
+          "unicode": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Unicode library",
+            "value": "PHP Mbstring Extension"
+          },
+          "update": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Database updates",
+            "value": "Up to date"
+          },
+          "update access": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Access to update.php",
+            "value": "Protected"
+          },
+          "update status": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Update notifications",
+            "value": "Enabled"
+          },
+          "update_contrib": {
+            "description": [
+              {
+                "#markup": "There are updates available for one or more of your modules or themes. To ensure the proper functioning of your site, you should update as soon as possible."
+              },
+              {
+                "#markup": "See the <a href=\"/admin/reports/updates\">available updates</a> page for more information.",
+                "#prefix": " "
+              }
+            ],
+            "severity": {
+              "label": "Warnings found",
+              "status": "warning",
+              "value": 1
+            },
+            "title": "Module and theme update status",
+            "value": "<a href=\"/admin/reports/updates\">Out of date</a>"
+          },
+          "update_core": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Drupal core update status",
+            "value": "<a href=\"/admin/reports/updates\">Up to date</a>"
+          },
+          "webserver": {
+            "description": "",
+            "severity": {
+              "label": "OK",
+              "status": "ok",
+              "value": 0
+            },
+            "title": "Web server",
+            "value": "Apache/2.4.67 (Debian)"
+          }
+        }
+      },
+      "message": "Successfully retrieved system status with 43 items. Warnings: No, Errors: No",
+      "success": true
+    }
+  },
+  "seconds": 4.314
+}

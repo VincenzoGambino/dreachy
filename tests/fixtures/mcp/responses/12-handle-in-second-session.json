@@ -1,0 +1,29 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:47c0cb}}",
+      "fields": "title"
+    },
+    "name": "tool_api__demo_entity_field_values"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Retrieved 1 field values from node entity 5.\",\n    \"data\": {\n        \"field_values\": {\n            \"title\": \"Admissions\"\n        }\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "field_values": {
+          "title": "Admissions"
+        }
+      },
+      "message": "Retrieved 1 field values from node entity 5.",
+      "success": true
+    }
+  },
+  "seconds": 2.493
+}

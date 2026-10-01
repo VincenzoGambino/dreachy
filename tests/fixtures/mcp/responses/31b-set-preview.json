@@ -1,0 +1,30 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:99aaf6}}",
+      "field_name": "preview_text",
+      "value": {
+        "value": "Written through MCP by Dreachy's R4 probe. Safe to delete."
+      }
+    },
+    "name": "tool_api__demo_field_set_value"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Successfully set field \\\"preview_text\\\" on node entity.\",\n    \"data\": {\n        \"updated_entity\": \"Entity object handle token: {{entity:e1a044}}. Entity metadata: {\\\"entity_type\\\":\\\"node\\\",\\\"bundle\\\":\\\"standard_page\\\",\\\"id\\\":\\\"new\\\",\\\"langcode\\\":\\\"en\\\",\\\"revision_id\\\":null}\"\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "updated_entity": "Entity object handle token: {{entity:e1a044}}. Entity metadata: {\"entity_type\":\"node\",\"bundle\":\"standard_page\",\"id\":\"new\",\"langcode\":\"en\",\"revision_id\":null}"
+      },
+      "message": "Successfully set field \"preview_text\" on node entity.",
+      "success": true
+    }
+  },
+  "seconds": 0.429
+}

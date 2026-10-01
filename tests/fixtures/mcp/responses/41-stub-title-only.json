@@ -1,0 +1,30 @@
+{
+  "call": {
+    "arguments": {
+      "base_fields": {
+        "title": "Dreachy probe (unsaved)"
+      },
+      "bundle": "article",
+      "entity_type_id": "node"
+    },
+    "name": "tool_api__demo_entity_stub"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Successfully created unsaved node entity\",\n    \"data\": {\n        \"created_entity\": \"Entity object handle token: {{entity:c18567}}. Entity metadata: {\\\"entity_type\\\":\\\"node\\\",\\\"bundle\\\":\\\"article\\\",\\\"id\\\":\\\"new\\\",\\\"langcode\\\":\\\"en\\\",\\\"revision_id\\\":null}\"\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "created_entity": "Entity object handle token: {{entity:c18567}}. Entity metadata: {\"entity_type\":\"node\",\"bundle\":\"article\",\"id\":\"new\",\"langcode\":\"en\",\"revision_id\":null}"
+      },
+      "message": "Successfully created unsaved node entity",
+      "success": true
+    }
+  },
+  "seconds": 0.48
+}

@@ -1,0 +1,28 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:b4f0b5}}",
+      "field_name": "moderation_state",
+      "value": {
+        "value": "review"
+      }
+    },
+    "name": "tool_api__demo_field_set_value"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": false,\n    \"message\": \"Field validation failed: State &lt;em class=&quot;placeholder&quot;&gt;review&lt;/em&gt; does not exist on &lt;em class=&quot;placeholder&quot;&gt;AI Pre-Moderation&lt;/em&gt; workflow\",\n    \"data\": []\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": [],
+      "message": "Field validation failed: State &lt;em class=&quot;placeholder&quot;&gt;review&lt;/em&gt; does not exist on &lt;em class=&quot;placeholder&quot;&gt;AI Pre-Moderation&lt;/em&gt; workflow",
+      "success": false
+    }
+  },
+  "seconds": 0.587
+}

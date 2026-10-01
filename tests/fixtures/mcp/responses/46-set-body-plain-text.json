@@ -1,0 +1,31 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:c18567}}",
+      "field_name": "body",
+      "value": {
+        "format": "plain_text",
+        "value": "x"
+      }
+    },
+    "name": "tool_api__demo_field_set_value"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Successfully set field \\\"body\\\" on node entity.\",\n    \"data\": {\n        \"updated_entity\": \"Entity object handle token: {{entity:67f51a}}. Entity metadata: {\\\"entity_type\\\":\\\"node\\\",\\\"bundle\\\":\\\"article\\\",\\\"id\\\":\\\"new\\\",\\\"langcode\\\":\\\"en\\\",\\\"revision_id\\\":null}\"\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "updated_entity": "Entity object handle token: {{entity:67f51a}}. Entity metadata: {\"entity_type\":\"node\",\"bundle\":\"article\",\"id\":\"new\",\"langcode\":\"en\",\"revision_id\":null}"
+      },
+      "message": "Successfully set field \"body\" on node entity.",
+      "success": true
+    }
+  },
+  "seconds": 0.445
+}

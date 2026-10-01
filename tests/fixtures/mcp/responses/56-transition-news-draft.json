@@ -1,0 +1,30 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:c63650}}",
+      "field_name": "moderation_state",
+      "value": {
+        "value": "draft"
+      }
+    },
+    "name": "tool_api__demo_field_set_value"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Successfully set field \\\"moderation_state\\\" on node entity.\",\n    \"data\": {\n        \"updated_entity\": \"Entity object handle token: {{entity:344733}}. Entity metadata: {\\\"entity_type\\\":\\\"node\\\",\\\"bundle\\\":\\\"news\\\",\\\"id\\\":\\\"new\\\",\\\"langcode\\\":\\\"en\\\",\\\"revision_id\\\":null}\"\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "updated_entity": "Entity object handle token: {{entity:344733}}. Entity metadata: {\"entity_type\":\"node\",\"bundle\":\"news\",\"id\":\"new\",\"langcode\":\"en\",\"revision_id\":null}"
+      },
+      "message": "Successfully set field \"moderation_state\" on node entity.",
+      "success": true
+    }
+  },
+  "seconds": 0.463
+}

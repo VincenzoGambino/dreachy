@@ -1,0 +1,231 @@
+{
+  "call": {
+    "arguments": {
+      "amount": 20,
+      "entity_type_id": "node",
+      "fields": "status",
+      "sort_field": "status",
+      "sort_order": "ASC"
+    },
+    "name": "tool_api__demo_entity_list"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Returned 20 Content(node) entities out of a total 141. This means that if you want to list the rest you should offset 20 and set amount to 121.\",\n    \"data\": {\n        \"results\": [\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"11\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Visit Campus\",\n                    \"uuid\": \"7062f624-4786-5293-95c0-30f740678637\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"141\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Reset Your Password in 3 Steps\",\n                    \"uuid\": \"9f4a6d15-3c82-4e07-b5d9-6a13e8f2c744\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"20\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Autonomous Marine Systems\",\n                    \"uuid\": \"9e6379dc-f67e-57f3-bf3f-fc876d1fb6ef\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"19\",\n                    \"type\": \"node\",\n                    \"bundle\": \"course\",\n                    \"label\": \"Fluid Mechanics\",\n                    \"uuid\": \"a5a64709-80d2-5e9d-b733-cb198276ab28\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"18\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Dr. Priya Iyer\",\n                    \"uuid\": \"66e4865a-9d84-5f0b-91e7-702eb985fe22\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"17\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Contact Us\",\n                    \"uuid\": \"93c41c4c-fdb5-5a93-838d-0f7f79fc8ce6\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"16\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Tom Whitfield\",\n                    \"uuid\": \"1edc11c4-5f22-5c47-af87-06f2c7ec64d3\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"15\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Oliver Brandt\",\n                    \"uuid\": \"0d8be11d-579c-5d8c-b656-113ee6a8409f\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"14\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"James McAllister\",\n                    \"uuid\": \"61d74bb2-f8a5-553e-a785-9893d0250a7f\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"13\",\n                    \"type\": \"node\",\n                    \"bundle\": \"person\",\n                    \"label\": \"Rosa Delgado\",\n                    \"uuid\": \"79b499c5-37ea-5419-ba49-6aad1bea14f5\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"12\",\n                    \"type\": \"node\",\n                    \"bundle\": \"ai_feature\",\n                    \"label\": \"Try the AI Features\",\n                    \"uuid\": \"8726d52a-af7d-5bd5-b852-36bcb1bb100d\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"1\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Research at Northmoor\",\n                    \"uuid\": \"c4686683-b42c-593e-b5b3-2cccfeeee7eb\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"10\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"About Northmoor\",\n                    \"uuid\": \"25586080-3fb5-5a15-8f6a-edf581c946d5\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"9\",\n                    \"type\": \"node\",\n                    \"bundle\": \"facility\",\n                    \"label\": \"Marine Robotics and Test Basin\",\n                    \"uuid\": \"f8a41f62-c993-501b-87a3-d92ba6c99d9b\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"8\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Accessibility\",\n                    \"uuid\": \"7073f436-f58a-501b-ae5a-c4fd0627c1d7\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"7\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Tuition and Financial Aid\",\n                    \"uuid\": \"d716cf80-ecef-58c6-bd7f-3b3a7fdb3f50\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"6\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Privacy Notice\",\n                    \"uuid\": \"b4fa430a-b312-5f83-87d9-7acf6b0b07e0\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"5\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"Admissions\",\n                    \"uuid\": \"7be38a68-9c76-5c6a-9f39-8441eb795f39\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"4\",\n                    \"type\": \"node\",\n                    \"bundle\": \"facility\",\n                    \"label\": \"Prentice Coastal Field Station\",\n                    \"uuid\": \"54022199-f235-51e0-85ab-22a31682758a\"\n                }\n            },\n            {\n                \"status\": \"1\",\n                \"_metadata\": {\n                    \"id\": \"3\",\n                    \"type\": \"node\",\n                    \"bundle\": \"standard_page\",\n                    \"label\": \"How to Apply\",\n                    \"uuid\": \"34701446-8969-5c35-a1c3-4c88ad120b20\"\n                }\n            }\n        ]\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "results": [
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "11",
+              "label": "Visit Campus",
+              "type": "node",
+              "uuid": "7062f624-4786-5293-95c0-30f740678637"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "141",
+              "label": "Reset Your Password in 3 Steps",
+              "type": "node",
+              "uuid": "9f4a6d15-3c82-4e07-b5d9-6a13e8f2c744"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "20",
+              "label": "Autonomous Marine Systems",
+              "type": "node",
+              "uuid": "9e6379dc-f67e-57f3-bf3f-fc876d1fb6ef"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "course",
+              "id": "19",
+              "label": "Fluid Mechanics",
+              "type": "node",
+              "uuid": "a5a64709-80d2-5e9d-b733-cb198276ab28"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "18",
+              "label": "Dr. Priya Iyer",
+              "type": "node",
+              "uuid": "66e4865a-9d84-5f0b-91e7-702eb985fe22"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "17",
+              "label": "Contact Us",
+              "type": "node",
+              "uuid": "93c41c4c-fdb5-5a93-838d-0f7f79fc8ce6"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "16",
+              "label": "Tom Whitfield",
+              "type": "node",
+              "uuid": "1edc11c4-5f22-5c47-af87-06f2c7ec64d3"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "15",
+              "label": "Oliver Brandt",
+              "type": "node",
+              "uuid": "0d8be11d-579c-5d8c-b656-113ee6a8409f"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "14",
+              "label": "James McAllister",
+              "type": "node",
+              "uuid": "61d74bb2-f8a5-553e-a785-9893d0250a7f"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "person",
+              "id": "13",
+              "label": "Rosa Delgado",
+              "type": "node",
+              "uuid": "79b499c5-37ea-5419-ba49-6aad1bea14f5"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "ai_feature",
+              "id": "12",
+              "label": "Try the AI Features",
+              "type": "node",
+              "uuid": "8726d52a-af7d-5bd5-b852-36bcb1bb100d"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "1",
+              "label": "Research at Northmoor",
+              "type": "node",
+              "uuid": "c4686683-b42c-593e-b5b3-2cccfeeee7eb"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "10",
+              "label": "About Northmoor",
+              "type": "node",
+              "uuid": "25586080-3fb5-5a15-8f6a-edf581c946d5"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "facility",
+              "id": "9",
+              "label": "Marine Robotics and Test Basin",
+              "type": "node",
+              "uuid": "f8a41f62-c993-501b-87a3-d92ba6c99d9b"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "8",
+              "label": "Accessibility",
+              "type": "node",
+              "uuid": "7073f436-f58a-501b-ae5a-c4fd0627c1d7"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "7",
+              "label": "Tuition and Financial Aid",
+              "type": "node",
+              "uuid": "d716cf80-ecef-58c6-bd7f-3b3a7fdb3f50"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "6",
+              "label": "Privacy Notice",
+              "type": "node",
+              "uuid": "b4fa430a-b312-5f83-87d9-7acf6b0b07e0"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "5",
+              "label": "Admissions",
+              "type": "node",
+              "uuid": "7be38a68-9c76-5c6a-9f39-8441eb795f39"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "facility",
+              "id": "4",
+              "label": "Prentice Coastal Field Station",
+              "type": "node",
+              "uuid": "54022199-f235-51e0-85ab-22a31682758a"
+            },
+            "status": "1"
+          },
+          {
+            "_metadata": {
+              "bundle": "standard_page",
+              "id": "3",
+              "label": "How to Apply",
+              "type": "node",
+              "uuid": "34701446-8969-5c35-a1c3-4c88ad120b20"
+            },
+            "status": "1"
+          }
+        ]
+      },
+      "message": "Returned 20 Content(node) entities out of a total 141. This means that if you want to list the rest you should offset 20 and set amount to 121.",
+      "success": true
+    }
+  },
+  "seconds": 0.484
+}

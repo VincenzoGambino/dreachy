@@ -1,0 +1,30 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:a0c61b}}",
+      "field_name": "moderation_state",
+      "value": {
+        "value": "review"
+      }
+    },
+    "name": "tool_api__demo_field_set_value"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": true,\n    \"message\": \"Successfully set field \\\"moderation_state\\\" on node entity.\",\n    \"data\": {\n        \"updated_entity\": \"Entity object handle token: {{entity:c56f59}}. Entity metadata: {\\\"entity_type\\\":\\\"node\\\",\\\"bundle\\\":\\\"student_announcement\\\",\\\"id\\\":\\\"new\\\",\\\"langcode\\\":\\\"en\\\",\\\"revision_id\\\":null}\"\n    }\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": {
+        "updated_entity": "Entity object handle token: {{entity:c56f59}}. Entity metadata: {\"entity_type\":\"node\",\"bundle\":\"student_announcement\",\"id\":\"new\",\"langcode\":\"en\",\"revision_id\":null}"
+      },
+      "message": "Successfully set field \"moderation_state\" on node entity.",
+      "success": true
+    }
+  },
+  "seconds": 0.424
+}

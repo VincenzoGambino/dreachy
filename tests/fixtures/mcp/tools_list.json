@@ -1,0 +1,1032 @@
+[
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Add a component instance to the layout of a Drupal Canvas target: a page, a page template (page_variant), a theme region (page_region), or a content template. Place it at the root, or inside a slot of another component by giving parent_uuid and slot. The component is added with default props; set props separately. Changes go to the auto-save store and are live only after publishing.",
+    "inputSchema": {
+      "properties": {
+        "component_id": {
+          "description": "The component config entity ID, e.g. \"sdc.byte_theme.card\".",
+          "type": "string"
+        },
+        "label": {
+          "description": "Optional author-facing label for this component instance.",
+          "type": "string"
+        },
+        "parent_uuid": {
+          "description": "UUID of the parent component instance to nest inside. Omit to place at the root.",
+          "type": "string"
+        },
+        "position": {
+          "description": "Zero-based position among sibling components in the same slot. Omit to append at the end.",
+          "type": "integer"
+        },
+        "slot": {
+          "description": "Name of the slot in the parent component to place this component in. Required when parent_uuid is given.",
+          "type": "string"
+        },
+        "target_id": {
+          "description": "ID of the target: a numeric page ID, a page variant machine name, a region ID (\"{theme}.{region}\"), or a content template ID (\"{entity_type}.{bundle}.{view_mode}\").",
+          "type": "string"
+        },
+        "target_type": {
+          "description": "Which target to edit: \"page\", \"page_variant\" (a page template), \"page_region\" (a theme region; drupal/canvas 1.10 and earlier only), or \"content_template\".",
+          "enum": [
+            "page",
+            "page_variant",
+            "page_region",
+            "content_template"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_type",
+        "target_id",
+        "component_id"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_add_component",
+    "title": "Add component to Canvas page"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Bind props of a component instance in a content template to the host entity&#039;s fields, so the component renders live entity data instead of a static value. Provide bindings as a map of prop name to a binding spec: {&quot;body&quot;: {&quot;field&quot;: &quot;field_ingredients&quot;}, &quot;title&quot;: {&quot;field&quot;: &quot;title&quot;}}. Each spec names a &quot;field&quot; and optionally a &quot;property&quot; and &quot;delta&quot;. Only fields whose type shape-matches the prop are accepted (the same set the Canvas editor offers); a mismatch is rejected with the list of valid fields. Changes go to the auto-save store and are live only after publishing.",
+    "inputSchema": {
+      "properties": {
+        "bindings": {
+          "description": "Map of prop name to a binding spec naming a shape-compatible host field, e.g. {\"body\": {\"field\": \"field_ingredients\", \"property\": \"value\"}}.",
+          "type": "object"
+        },
+        "target_id": {
+          "description": "ID of the content template (\"{entity_type}.{bundle}.{view_mode}\", e.g. \"node.recipe.full\").",
+          "type": "string"
+        },
+        "uuid": {
+          "description": "The UUID of the component instance whose props to bind.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_id",
+        "uuid",
+        "bindings"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_bind_component_props",
+    "title": "Bind Canvas component props to fields"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Create a Drupal Canvas content template that lays out a content entity type, bundle, and view mode (e.g. node / article / full) with a component tree. The template is created disabled; add components to it (target_type=content_template, target_id={entity_type}.{bundle}.{view_mode}) and publish to activate it.",
+    "inputSchema": {
+      "properties": {
+        "bundle": {
+          "description": "Bundle, e.g. \"article\".",
+          "type": "string"
+        },
+        "entity_type": {
+          "description": "Content entity type ID, e.g. \"node\".",
+          "type": "string"
+        },
+        "view_mode": {
+          "description": "View mode, e.g. \"full\".",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity_type",
+        "bundle",
+        "view_mode"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_create_content_template",
+    "title": "Create Canvas content template"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Create a new Drupal Canvas page: a standalone page assembled from components, not a node. This site also has a node content type called Page, so check what the user means: an ordinary content page with a body field is a node, and demo_entity_stub with entity_type_id node and bundle page creates it. Use this tool only for a landing page built out of components. The page entity is always created as an unpublished draft, so it never appears live with an empty layout. The numeric id it returns is the target_id for every later canvas_ call, with target_type page.",
+    "inputSchema": {
+      "properties": {
+        "description": {
+          "description": "Optional meta description for the page.",
+          "type": "string"
+        },
+        "path": {
+          "description": "Optional URL path alias, e.g. \"/about\". A leading slash is added if missing.",
+          "type": "string"
+        },
+        "published": {
+          "description": "Whether the page should go live when its auto-saves are next published. Defaults to TRUE. Pass FALSE to keep it an unpublished draft after publishing.",
+          "type": "boolean"
+        },
+        "title": {
+          "description": "The page title.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_create_page",
+    "title": "Create Canvas page"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Create a Drupal Canvas page template (page_variant): a theme-independent full-page layout. It starts with just the required &quot;Page content&quot; marker at the root, where each page&#039;s own content is injected. Build the chrome around the marker with the tree tools (target_type &quot;page_variant&quot;, target_id = the returned id) and publish. The template is created enabled; nothing renders through it until a page selects it or it becomes the site default (canvas_set_default_page_variant). Requires drupal/canvas 1.11.0 or later.",
+    "inputSchema": {
+      "properties": {
+        "description": {
+          "description": "Optional description shown in the page template list.",
+          "type": "string"
+        },
+        "id": {
+          "description": "Optional machine name (lowercase letters, digits, underscores). Derived from the label when omitted, e.g. \"landing_page\".",
+          "type": "string"
+        },
+        "label": {
+          "description": "Human-readable name, e.g. \"Landing page\".",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_create_page_variant",
+    "title": "Create Canvas page template"
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Remove a component instance, and everything nested inside it, from the layout of a Drupal Canvas target: a page, a page template (page_variant), a theme region (page_region), or a content template. Changes go to the auto-save store and are live only after publishing.",
+    "inputSchema": {
+      "properties": {
+        "target_id": {
+          "description": "ID of the target: a numeric page ID, a page variant machine name, a region ID (\"{theme}.{region}\"), or a content template ID (\"{entity_type}.{bundle}.{view_mode}\").",
+          "type": "string"
+        },
+        "target_type": {
+          "description": "Which target to edit: \"page\", \"page_variant\" (a page template), \"page_region\" (a theme region; drupal/canvas 1.10 and earlier only), or \"content_template\".",
+          "enum": [
+            "page",
+            "page_variant",
+            "page_region",
+            "content_template"
+          ],
+          "type": "string"
+        },
+        "uuid": {
+          "description": "The UUID of the component instance to delete.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_type",
+        "target_id",
+        "uuid"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_delete_component",
+    "title": "Delete component from Canvas page"
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Permanently delete a Drupal Canvas page by ID. This is a hard delete that bypasses auto-save: any pending draft is discarded and the page is removed immediately. It cannot be undone.",
+    "inputSchema": {
+      "properties": {
+        "page_id": {
+          "description": "The numeric ID of the Canvas page to delete.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "page_id"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_delete_page",
+    "title": "Delete Canvas page"
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Discard the pending auto-save (unpublished draft changes) for a Drupal Canvas target \u2014 a page, a page template (page_variant), a theme region (page_region), or a content template \u2014 reverting it to the last published state.",
+    "inputSchema": {
+      "properties": {
+        "target_id": {
+          "description": "ID of the target: a numeric page ID, a page variant machine name, a region ID (\"{theme}.{region}\"), or a content template ID (\"{entity_type}.{bundle}.{view_mode}\").",
+          "type": "string"
+        },
+        "target_type": {
+          "description": "Which target to discard: \"page\", \"page_variant\" (a page template), \"page_region\" (a theme region; drupal/canvas 1.10 and earlier only), or \"content_template\".",
+          "enum": [
+            "page",
+            "page_variant",
+            "page_region",
+            "content_template"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_type",
+        "target_id"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_discard_auto_save",
+    "title": "Discard Canvas auto-save"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Describe a Drupal Canvas component: its props and slots. &quot;props&quot; is a map of prop name to {&quot;schema&quot;: &lt;JSON schema&gt;, &quot;required&quot;: &lt;bool&gt;} \u2014 the values canvas_update_component_props accepts. &quot;slots&quot; is a map of slot name to its definition \u2014 the places canvas_add_component can nest a child by passing parent_uuid and slot. Call this before setting props or nesting components so you know the exact names and shapes.",
+    "inputSchema": {
+      "properties": {
+        "component_id": {
+          "description": "The component config entity ID, e.g. \"sdc.byte_theme.card\". Use canvas_list_components to discover IDs.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component_id"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_get_component_schema",
+    "title": "Get Canvas component schema"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Read the current layout of a Drupal Canvas target \u2014 a page, a page template (page_variant), a theme region (page_region), or a content template. Returns the working copy, so it reflects pending auto-save changes. &quot;tree&quot; is a flat list of component instances, each a map with &quot;uuid&quot;, &quot;component_id&quot;, &quot;component_version&quot;, &quot;parent_uuid&quot;, &quot;slot&quot;, and &quot;label&quot;; &quot;parent_uuid&quot; and &quot;slot&quot; describe the nesting, so a root component has neither. &quot;has_auto_save&quot; tells you whether unpublished draft changes exist; when it does, &quot;data_hash&quot; identifies that draft version \u2014 pass it to canvas_publish_auto_saves to guard against publishing a draft that changed after you read it. Use this to find a component instance UUID before moving, deleting, or setting props on it.",
+    "inputSchema": {
+      "properties": {
+        "target_id": {
+          "description": "ID of the target: a numeric page ID, a page variant machine name, a region ID (\"{theme}.{region}\"), or a content template ID (\"{entity_type}.{bundle}.{view_mode}\").",
+          "type": "string"
+        },
+        "target_type": {
+          "description": "Which target to read: \"page\", \"page_variant\" (a page template), \"page_region\" (a theme region; drupal/canvas 1.10 and earlier only), or \"content_template\".",
+          "enum": [
+            "page",
+            "page_variant",
+            "page_region",
+            "content_template"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_type",
+        "target_id"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_get_page_tree",
+    "title": "Get Canvas component tree"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "List every pending Drupal Canvas auto-save draft \u2014 the unpublished changes canvas_publish_auto_saves would commit. Each entry is a map with &quot;target_type&quot; and &quot;target_id&quot; (ready to pass to the other tools; NULL for entity types the tools do not address), &quot;entity_type&quot;, &quot;entity_id&quot;, &quot;label&quot;, &quot;updated&quot; (Unix timestamp of the last draft change), and &quot;data_hash&quot;. Pass an entry&#039;s data_hash to canvas_publish_auto_saves to reject the publish if the draft changed after you read it. Use this to review what would be published before publishing.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "name": "tool_api__canvas_list_auto_saves",
+    "title": "List Canvas auto-saves"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "List every Drupal Canvas component that the layout tools can place. Each component is a map with &quot;id&quot; (the component_id to pass to canvas_add_component, e.g. &quot;sdc.byte_theme.card&quot;), &quot;label&quot;, &quot;status&quot; (whether it is enabled), and &quot;source&quot; (the component source plugin). Use canvas_get_component_schema to inspect a component&#039;s props and slots.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "name": "tool_api__canvas_list_components",
+    "title": "List Canvas components"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "List every Drupal Canvas layout you can edit: pages, page templates (page_variant), theme regions (page_region) and content templates. The canvas_ tools only ever touch Canvas layouts. Articles, news, events, nodes of the Page content type, taxonomy terms and media are not Canvas targets - use demo_entity_list and the other demo_ tools for those. Each row is a map with type (pass it as target_type), id (pass it as target_id), label and status, ready for the other canvas_ tools; page_variant rows also carry is_default. Once a default page template is set, theme regions never render and are left out of the list.",
+    "inputSchema": {
+      "properties": {
+        "limit": {
+          "description": "The maximum number of targets to return, from 1 to 100. Defaults to 50.",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "description": "The number of targets to skip. Defaults to 0.",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "target_type": {
+          "description": "Which targets to list: \"page\", \"page_variant\" (a page template; drupal/canvas 1.11 and later), \"page_region\" (a theme region; drupal/canvas 1.10 and earlier only), or \"content_template\".",
+          "enum": [
+            "page",
+            "page_variant",
+            "page_region",
+            "content_template"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_type"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_list_targets",
+    "title": "List Canvas targets"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Move a component instance (and everything nested inside it) to a new parent, slot, and/or position within a Drupal Canvas target: a page, a page template (page_variant), a theme region (page_region), or a content template. Omit parent_uuid and slot to move it to the root. Changes go to the auto-save store and are live only after publishing.",
+    "inputSchema": {
+      "properties": {
+        "parent_uuid": {
+          "description": "UUID of the new parent component instance. Omit to move to the root.",
+          "type": "string"
+        },
+        "position": {
+          "description": "Zero-based position among sibling components in the target slot. Omit to append at the end.",
+          "type": "integer"
+        },
+        "slot": {
+          "description": "Slot name in the new parent. Required when parent_uuid is given.",
+          "type": "string"
+        },
+        "target_id": {
+          "description": "ID of the target: a numeric page ID, a page variant machine name, a region ID (\"{theme}.{region}\"), or a content template ID (\"{entity_type}.{bundle}.{view_mode}\").",
+          "type": "string"
+        },
+        "target_type": {
+          "description": "Which target to edit: \"page\", \"page_variant\" (a page template), \"page_region\" (a theme region; drupal/canvas 1.10 and earlier only), or \"content_template\".",
+          "enum": [
+            "page",
+            "page_variant",
+            "page_region",
+            "content_template"
+          ],
+          "type": "string"
+        },
+        "uuid": {
+          "description": "The UUID of the component instance to move.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_type",
+        "target_id",
+        "uuid"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_move_component",
+    "title": "Move component on Canvas page"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Publish pending Drupal Canvas auto-save changes, committing drafts to the live site. Only call it when the user explicitly asks for the work to go live. Always pass target_type and target_id so exactly one page, page template, theme region or content template is published: omitting both publishes every pending draft on the site, including drafts other people left behind. Pass the data_hash that canvas_get_page_tree returned to be refused if the draft changed after you read it.",
+    "inputSchema": {
+      "properties": {
+        "data_hash": {
+          "description": "Optional. The data_hash of the auto-save entry from canvas_get_page_tree (has_auto_save) or the auto-save list. When provided, the publish is rejected if the stored hash does not match, preventing a stale publish.",
+          "type": "string"
+        },
+        "target_id": {
+          "description": "Optional. ID of a single target to publish. Omit to publish all pending auto-saves.",
+          "type": "string"
+        },
+        "target_type": {
+          "description": "Optional. Type of the single target to publish: \"page\" (default), \"page_variant\" (a page template), \"page_region\" (a theme region; drupal/canvas 1.10 and earlier only), or \"content_template\". Only used when target_id is given.",
+          "enum": [
+            "page",
+            "page_variant",
+            "page_region",
+            "content_template"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "name": "tool_api__canvas_publish_auto_saves",
+    "title": "Publish Canvas auto-saves"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Make a Drupal Canvas page template (page_variant) the site default: it renders every route that has no explicit selection of its own. This takes effect immediately, exactly like the editor&#039;s &quot;Set as default&quot; action; it is a site setting, not a draft, so there is nothing to publish. The template must exist and be enabled. Requires drupal/canvas 1.11.0 or later.",
+    "inputSchema": {
+      "properties": {
+        "page_variant_id": {
+          "description": "Machine name of the page template to make the default, as listed by canvas_list_targets.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "page_variant_id"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_set_default_page_variant",
+    "title": "Set default Canvas page template"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Set a Drupal Canvas page as the site homepage, the same way the Canvas editor does. The change is staged in the auto-save store (it does not edit system.site directly), so it goes live together with the page the next time auto-saves are published. Pass the page ID.",
+    "inputSchema": {
+      "properties": {
+        "page_id": {
+          "description": "The ID of the Canvas page to make the homepage.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "page_id"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_set_homepage",
+    "title": "Set Canvas page as homepage"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Set static prop values on a component instance in a Drupal Canvas target: a page, a page template (page_variant), a theme region (page_region), or a content template. Provide props as a map of prop name to value, e.g. {&quot;heading_text&quot;: &quot;Welcome&quot;, &quot;level&quot;: 2}. A prop that canvas_get_component_schema reports with a &quot;reference&quot; (an entity-reference prop, e.g. an image or media prop) takes an existing entity ID, not the {src, alt, ...} object its raw schema implies \u2014 find one with tool_belt:entity_list filtered to the reference&#039;s target type and bundles, e.g. {&quot;media&quot;: 3}. Only the props you provide are changed; the rest keep their current values. Changes go to the auto-save store and are live only after publishing.",
+    "inputSchema": {
+      "properties": {
+        "props": {
+          "description": "Map of prop name to static value to set on the component.",
+          "type": "object"
+        },
+        "target_id": {
+          "description": "ID of the target: a numeric page ID, a page variant machine name, a region ID (\"{theme}.{region}\"), or a content template ID (\"{entity_type}.{bundle}.{view_mode}\").",
+          "type": "string"
+        },
+        "target_type": {
+          "description": "Which target to edit: \"page\", \"page_variant\" (a page template), \"page_region\" (a theme region; drupal/canvas 1.10 and earlier only), or \"content_template\".",
+          "enum": [
+            "page",
+            "page_variant",
+            "page_region",
+            "content_template"
+          ],
+          "type": "string"
+        },
+        "uuid": {
+          "description": "The UUID of the component instance whose props to update.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_type",
+        "target_id",
+        "uuid",
+        "props"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_update_component_props",
+    "title": "Update Canvas component props"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Select which Drupal Canvas page template (page_variant) renders the pages of a content template, without touching its component tree. Only the &quot;full&quot; view mode&#039;s template drives the page chrome. The change is written to the auto-save store and goes live when the template&#039;s auto-save is published. Requires drupal/canvas 1.11.0 or later.",
+    "inputSchema": {
+      "properties": {
+        "page_variant": {
+          "description": "Machine name of the page template that renders this template's pages, or \"\" to clear the selection and use the site default. Disabled page templates cannot be selected.",
+          "type": "string"
+        },
+        "template_id": {
+          "description": "ID of the content template (\"{entity_type}.{bundle}.{view_mode}\", e.g. \"node.article.full\").",
+          "type": "string"
+        }
+      },
+      "required": [
+        "template_id",
+        "page_variant"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_update_content_template",
+    "title": "Update Canvas content template"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Update the title, path, description, published status, and/or page template selection of a Drupal Canvas page without modifying its component tree. Changes are written to the auto-save store and only go live when auto-saves are published. Only the fields you provide are changed.",
+    "inputSchema": {
+      "properties": {
+        "description": {
+          "description": "New meta description. Leave unset to keep the current description.",
+          "type": "string"
+        },
+        "page_id": {
+          "description": "The ID of the Canvas page to update.",
+          "type": "integer"
+        },
+        "page_variant": {
+          "description": "Machine name of the page template (page_variant) that renders this page, or \"\" to clear the selection and use the site default. Disabled page templates cannot be selected. Leave unset to keep the current selection. Requires drupal/canvas 1.11.0 or later.",
+          "type": "string"
+        },
+        "path": {
+          "description": "New URL path alias, e.g. \"/about\". A leading slash is added if missing. Leave unset to keep the current path.",
+          "type": "string"
+        },
+        "published": {
+          "description": "Set the published status that takes effect on publish: TRUE to publish, FALSE to unpublish. Leave unset to keep the current status.",
+          "type": "boolean"
+        },
+        "title": {
+          "description": "New page title. Leave unset to keep the current title.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "page_id"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_update_page_metadata",
+    "title": "Update Canvas page metadata"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Stage a change to the site name through the Canvas auto-save store; it goes live the next time auto-saves are published. This renames the whole demo site, so use it only when the user explicitly asks to rename the site, never as a step while building a page. It requires administer site configuration, so it runs for administrator accounts only.",
+    "inputSchema": {
+      "properties": {
+        "site_name": {
+          "description": "The new site name.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "site_name"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__canvas_update_site_settings",
+    "title": "Update site settings"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Field schema for an entity type and bundle: every base field and configured field with its type, cardinality, whether it is required, and the exact value shape demo_field_set_value expects. Call it with entity_type_id node and bundle article before creating an article, and whenever you are unsure how to write a field. demo_field_set_value takes the item as one object: formatted text fields take value plus format (content_format on this site); entity references take target_id.",
+    "inputSchema": {
+      "properties": {
+        "bundle": {
+          "description": "The bundle name (e.g., article, page for nodes).",
+          "type": "string"
+        },
+        "entity_type_id": {
+          "description": "The entity type ID (e.g., node, user, taxonomy_term).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity_type_id",
+        "bundle"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__demo_entity_field_value_definitions",
+    "title": "Get field value definitions"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Read the field values of a loaded entity (pass its handle token). Leave fields empty to get every field. Formatted text fields such as body come back as HTML strings only, without their text format: when you write such a field back with demo_field_set_value you must supply the format again (content_format on this site). Read an entity before editing it so you can keep its existing HTML structure.",
+    "inputSchema": {
+      "properties": {
+        "entity": {
+          "description": "Entity objects should be passed using an artifact token (e.g. {{entity:*}}) provided by a previous tool call. The entity to get field values from.",
+          "type": "string"
+        },
+        "fields": {
+          "description": "Array of field names to retrieve. Leave empty to get all fields.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__demo_entity_field_values",
+    "title": "Get field values"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "List content entities of one type, optionally filtered by bundle and sorted. Use it to list articles (entity_type_id node, bundle article, sort_field changed, sort_order DESC) when the user wants the latest ones or the search index is unavailable, and to find a tag for a new article (entity_type_id taxonomy_term, bundle content_classification). Returns ids and labels only; load an entity with demo_entity_load_by_id to work with it.",
+    "inputSchema": {
+      "properties": {
+        "amount": {
+          "description": "The amount of entities to fetch. 0 means all.",
+          "type": "integer"
+        },
+        "bundle": {
+          "description": "The name of the bundle type to filter entities by.",
+          "type": "string"
+        },
+        "entity_type_id": {
+          "description": "The machine name of the entity type to filter entities by.",
+          "type": "string"
+        },
+        "fields": {
+          "description": "The fields to include in the output. Leave empty to include title, id, and bundle.",
+          "type": "string"
+        },
+        "offset": {
+          "description": "The offset of entities to fetch.",
+          "type": "integer"
+        },
+        "sort_field": {
+          "description": "The field to sort by.",
+          "type": "string"
+        },
+        "sort_order": {
+          "description": "The sort order (ASC or DESC).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity_type_id"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__demo_entity_list",
+    "title": "List entities"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Load one content entity by type and id, for example a node found through demo_search_index or demo_entity_list. Returns a handle token like {{entity:abc123}} together with the entity type, bundle, id and revision id. Pass the token unchanged as the entity input of demo_entity_field_values, demo_entity_revision_add and demo_field_set_value.",
+    "inputSchema": {
+      "properties": {
+        "entity_id": {
+          "description": "The numeric ID of the entity to load.",
+          "type": "integer"
+        },
+        "entity_type_id": {
+          "description": "The entity type machine name (e.g., node, user, taxonomy_term).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity_type_id",
+        "entity_id"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__demo_entity_load_by_id",
+    "title": "Load entity by ID"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Entity type, bundle, id, language and revision metadata for a loaded entity (pass the handle token) or for an entity type id plus entity id. The handle token returned by the other tools already carries this metadata, so this is rarely needed.",
+    "inputSchema": {
+      "properties": {
+        "entity": {
+          "description": "Entity objects should be passed using an artifact token (e.g. {{entity:*}}) provided by a previous tool call. The entity to get metadata from.",
+          "type": "string"
+        },
+        "entity_id": {
+          "description": "The numeric ID of the entity. Required if entity is not provided.",
+          "type": "integer"
+        },
+        "entity_type_id": {
+          "description": "The entity type machine name (e.g., node, user, taxonomy_term). Required if entity is not provided.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "name": "tool_api__demo_entity_metadata",
+    "title": "Get entity metadata"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Start a new unsaved revision of a loaded entity. Always call this before changing existing content, passing the handle token, a revision_log that summarises the change, and default set to false so the revision is stored behind the current one and the version the site shows stays as it is. Returns a new handle token to use with demo_field_set_value and demo_entity_save. For content under a moderation workflow (article) also set moderation_state to draft with demo_field_set_value, because there the workflow state decides which revision is current.",
+    "inputSchema": {
+      "properties": {
+        "default": {
+          "description": "Whether the new revision becomes the default revision when saved. Set to FALSE to keep the current revision as the one the site shows and store the new one as a pending revision behind it. Entities under a content moderation workflow derive this from their moderation state instead.",
+          "type": "boolean"
+        },
+        "entity": {
+          "description": "Entity objects should be passed using an artifact token (e.g. {{entity:*}}) provided by a previous tool call. The entity to create a new revision for.",
+          "type": "string"
+        },
+        "revision_log": {
+          "description": "Description of the changes made in this revision.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__demo_entity_revision_add",
+    "title": "Add new entity revision"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Save an entity handle token: a new entity from demo_entity_stub, or a revision started with demo_entity_revision_add. Existing content must go through demo_entity_revision_add first and have moderation_state set to draft, so the save creates a pending draft and does not publish. A brand-new article needs at least one field_content_tags term before this first save (the site auto-tagger cannot run on an unsaved node; find a term with demo_entity_list on taxonomy_term, bundle content_classification). The result carries id and revision_id: always show the user the revision URL https://HOST/node/ID/revisions/REVISION_ID/view and the URL to make it the current version - https://HOST/node/ID/edit for articles and other moderated content (the form opens the latest revision and its state control publishes it through the workflow), https://HOST/node/ID/revisions/REVISION_ID/revert for content without a workflow - where HOST is the host this MCP server runs on.",
+    "inputSchema": {
+      "properties": {
+        "entity": {
+          "description": "Entity objects should be passed using an artifact token (e.g. {{entity:*}}) provided by a previous tool call. The entity to save.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__demo_entity_save",
+    "title": "Save entity"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Create a new, unsaved entity. For an article pass entity_type_id node, bundle article and base_fields holding title and moderation_state set to draft, so it is saved unpublished. Returns a handle token: fill the remaining fields with demo_field_set_value (body needs format content_format; a new article also needs at least one field_content_tags term before its first save, see demo_entity_save), then save with demo_entity_save. Do not use this for existing content - load it and use demo_entity_revision_add instead.",
+    "inputSchema": {
+      "properties": {
+        "base_fields": {
+          "description": "An associative array of base field values to set on the new entity.",
+          "type": "object"
+        },
+        "bundle": {
+          "description": "The bundle of the entity to create.",
+          "type": "string"
+        },
+        "entity_type_id": {
+          "description": "The machine name of the entity type to create.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity_type_id",
+        "bundle"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__demo_entity_stub",
+    "title": "Create unsaved entity"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Set one field on an entity handle token; returns a new token, always use the newest one. value is one object holding the field item (not an array). Formatted text fields (body, and any field that came back as HTML) take value (the HTML) and format: always pass format content_format, the editor format on this site, otherwise the text renders escaped. If the site answers not a valid choice for the format, ask the user which text format editors use - never guess another one such as basic_html or full_html. Keep the existing HTML structure and change only what the user asked for. title takes value only. moderation_state takes value draft to keep a change unpublished; never set it to published, or status to true, unless the user explicitly asks to publish. Entity references such as field_content_tags take target_id. If the result says Invalid state transition, the workflow does not allow that state from the current one: stop and tell the user instead of saving.",
+    "inputSchema": {
+      "properties": {
+        "entity": {
+          "description": "Entity objects should be passed using an artifact token (e.g. {{entity:*}}) provided by a previous tool call. The entity to modify.",
+          "type": "string"
+        },
+        "field_name": {
+          "description": "The machine name of the field to set.",
+          "type": "string"
+        },
+        "value": {
+          "description": "The values to set for the field, as an array holding one value object per field item. A single-value field takes a one-item array. Each item should follow the field definition schema.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "entity",
+        "field_name"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__demo_field_set_value",
+    "title": "Set field value"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Search site content by normal text. To find an article, pass index content_vector and the words the user gave in search_words; it is a semantic search over articles, news and pages the account may view. Each result id has the form entity:node/NID:LANGCODE:CHUNK - the number after node/ is the node id to pass to demo_entity_load_by_id. A node can appear more than once when several of its passages match. Other indexes: image_database_index_vector (semantic search over the image library - describe the picture; results carry media name, alt text and file path) and programs (keyword search over study programs).",
+    "inputSchema": {
+      "properties": {
+        "amount": {
+          "description": "The maximum number of results to return per page.",
+          "type": "integer"
+        },
+        "check_access": {
+          "description": "When TRUE (default), results the current user may not view are excluded. Set to FALSE only when the index has its own access control or results are non-sensitive.",
+          "type": "boolean"
+        },
+        "conjunction": {
+          "description": "How to combine multiple search words: \"OR\" matches any word (default), \"AND\" requires all words.",
+          "type": "string"
+        },
+        "fields": {
+          "description": "In markdown output, only show these indexed fields, by their machine name (data name). Leave empty to show every indexed field.",
+          "type": "string"
+        },
+        "index": {
+          "description": "The machine name of the Search API index to search in.",
+          "type": "string"
+        },
+        "min_score": {
+          "description": "The minimum relevance score a result must have to be included.",
+          "type": "number"
+        },
+        "output_format": {
+          "description": "Either \"markdown\" or \"rendered\".",
+          "type": "string"
+        },
+        "page": {
+          "description": "The zero-based page of results to return. Page 0 returns the first results, page 1 the next set, and so on. Combine with \"amount\" to page through large result sets.",
+          "type": "integer"
+        },
+        "search_words": {
+          "description": "The words or phrase to search for.",
+          "type": "string"
+        },
+        "view_mode": {
+          "description": "The view mode used to render results when output format is \"rendered\".",
+          "type": "string"
+        }
+      },
+      "required": [
+        "index",
+        "search_words"
+      ],
+      "type": "object"
+    },
+    "name": "tool_api__demo_search_index",
+    "title": "Search index"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Drupal status report: core version, PHP, database, cron and pending updates. Administrator accounts only; other accounts get an access denied result.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "name": "tool_api__demo_system_status",
+    "title": "Get system status"
+  }
+]

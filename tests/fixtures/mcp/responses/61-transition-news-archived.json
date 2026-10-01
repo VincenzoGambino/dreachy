@@ -1,0 +1,28 @@
+{
+  "call": {
+    "arguments": {
+      "entity": "{{entity:c63650}}",
+      "field_name": "moderation_state",
+      "value": {
+        "value": "archived"
+      }
+    },
+    "name": "tool_api__demo_field_set_value"
+  },
+  "result": {
+    "content": [
+      {
+        "text": "{\n    \"success\": false,\n    \"message\": \"Field validation failed: Invalid state transition from &lt;em class=&quot;placeholder&quot;&gt;Draft&lt;/em&gt; to &lt;em class=&quot;placeholder&quot;&gt;Archived&lt;/em&gt;\",\n    \"data\": []\n}",
+        "type": "text"
+      }
+    ],
+    "isError": false,
+    "resultType": "complete",
+    "structuredContent": {
+      "data": [],
+      "message": "Field validation failed: Invalid state transition from &lt;em class=&quot;placeholder&quot;&gt;Draft&lt;/em&gt; to &lt;em class=&quot;placeholder&quot;&gt;Archived&lt;/em&gt;",
+      "success": false
+    }
+  },
+  "seconds": 0.559
+}
