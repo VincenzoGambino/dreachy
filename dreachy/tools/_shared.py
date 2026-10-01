@@ -12,6 +12,7 @@ import threading
 from dreachy.backend import Backend
 from dreachy.client import JsonApiBackend
 from dreachy.config import Config
+from dreachy.mcp_backend import McpBackend
 
 _client: Backend | None = None
 # The settings threadpool and the watcher can both ask right after a reset;
@@ -33,7 +34,9 @@ def get_client() -> Backend:
         if _client is None:
             # Discovery only once a real site is configured: the placeholder
             # base_url would send it to example.com.
-            _client = JsonApiBackend(Config.from_env(), auto_discover=bool(os.environ.get("DREACHY_BASE_URL")))
+            config = Config.from_env()
+            backend = McpBackend if config.backend == "mcp" else JsonApiBackend  # R4: DREACHY_BACKEND
+            _client = backend(config, auto_discover=bool(os.environ.get("DREACHY_BASE_URL")))
         return _client
 
 

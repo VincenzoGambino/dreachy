@@ -177,7 +177,7 @@
 		</fieldset>
 
 		<details id="advanced">
-			<summary>Advanced: site login</summary>
+			<summary>Advanced: site login and backend</summary>
 			<fieldset>
 				<label for="auth_mode">Login</label>
 				<select id="auth_mode">
@@ -211,6 +211,38 @@
 				</select>
 				<p class="hint" id="editorial_status"></p>
 			</fieldset>
+			<fieldset>
+				<label for="backend">Talk to the site through</label>
+				<select id="backend">
+					<option value="jsonapi">JSON:API (default)</option>
+					<option value="mcp">The site's MCP server</option>
+				</select>
+				<p class="hint">MCP needs the site login above and the <code>mcp_server</code> module on the site; it
+					searches by meaning rather than by title. Tools change only when Dreachy next starts.</p>
+			</fieldset>
+			<fieldset class="mcp-only">
+				<label for="mcp_endpoint">MCP endpoint (optional)</label>
+				<input type="url" id="mcp_endpoint" placeholder="The site address + /mcp" />
+				<p class="hint">Must be on the site's own address: Dreachy's site login goes with every request.</p>
+			</fieldset>
+			<fieldset class="mcp-only">
+				<label for="mcp_search_index">Search index</label>
+				<input type="text" id="mcp_search_index" autocomplete="off" placeholder="e.g. content_vector" />
+				<p class="hint">The Search API index the site's MCP search tool should use for content.</p>
+			</fieldset>
+			<fieldset class="mcp-only">
+				<label for="mcp_bundles">Content types (optional)</label>
+				<input type="text" id="mcp_bundles" autocomplete="off" placeholder="All types that have content" />
+				<p class="hint">Machine names, comma-separated. Left blank, Dreachy finds the types that have content —
+					a type with none yet is invisible until it has some.</p>
+			</fieldset>
+			<fieldset class="mcp-only">
+				<label for="mcp_extra_tools">Extra site actions (optional)</label>
+				<input type="text" id="mcp_extra_tools" autocomplete="off" placeholder="None" />
+				<p class="hint">MCP tool names Dreachy may use on request, comma-separated. Anything that publishes,
+					sets the homepage, deletes or discards is never used, whatever is listed here.</p>
+			</fieldset>
+			<p class="hint" id="backend_status"></p>
 			<p class="hint" id="auth_status"></p>
 		</details>
 
@@ -326,6 +358,62 @@
 			if (!resp.ok) throw new Error("couldn't save the editing settings");
 		}
 
+		const backendInput = document.getElementById("backend");
+		const mcpEndpointInput = document.getElementById("mcp_endpoint");
+		const mcpSearchIndexInput = document.getElementById("mcp_search_index");
+		const mcpBundlesInput = document.getElementById("mcp_bundles");
+		const mcpExtraToolsInput = document.getElementById("mcp_extra_tools");
+		const backendStatusEl = document.getElementById("backend_status");
+		let backendLoaded = false;
+
+		function splitNames(value) {
+			return value.split(",").map((name) => name.trim()).filter(Boolean);
+		}
+
+		function showMcpFields() {
+			for (const el of document.querySelectorAll(".mcp-only")) el.hidden = backendInput.value !== "mcp";
+		}
+		backendInput.addEventListener("change", showMcpFields);
+
+		async function loadBackend() {
+			backendLoaded = false;
+			try {
+				const data = await (await fetch("/api/backend")).json();
+				backendInput.value = data.backend;
+				mcpEndpointInput.value = data.mcp_endpoint;
+				mcpSearchIndexInput.value = data.mcp_search_index;
+				mcpBundlesInput.value = data.mcp_bundles.join(", ");
+				mcpExtraToolsInput.value = data.mcp_extra_tools.join(", ");
+				showMcpFields();
+				backendStatusEl.textContent = data.active === "mcp"
+					? "Dreachy is reading the site through its MCP server."
+					: "Dreachy is reading the site through JSON:API.";
+				if (data.backend === "mcp") document.getElementById("advanced").open = true;
+				backendLoaded = true;
+			} catch (e) {
+				backendStatusEl.textContent = "Couldn't load the backend settings.";
+			}
+		}
+
+		async function saveBackend() {
+			if (!backendLoaded) return; // never send fields that didn't load
+			const resp = await fetch("/api/backend", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					backend: backendInput.value,
+					mcp_endpoint: mcpEndpointInput.value,
+					mcp_search_index: mcpSearchIndexInput.value,
+					mcp_bundles: splitNames(mcpBundlesInput.value),
+					mcp_extra_tools: splitNames(mcpExtraToolsInput.value),
+				}),
+			});
+			if (!resp.ok) {
+				const data = await resp.json().catch(() => ({}));
+				throw new Error(data.detail || "couldn't save the backend settings");
+			}
+		}
+
 		async function loadTypes() {
 			typesFromSite = false;
 			try {
@@ -408,6 +496,8 @@
 				if (!resp.ok) throw new Error(data.detail || "Save failed");
 				await saveAuth();
 				await loadAuth();
+				await saveBackend();
+				await loadBackend();
 				await saveEditorial();
 				await loadEditorial();
 				if (data.login_cleared) {
@@ -431,6 +521,7 @@
 
 		loadConfig();
 		loadAuth();
+		loadBackend();
 		loadEditorial();
 		loadTypes();
 	</script>

@@ -24,11 +24,12 @@ from pathlib import Path
 from typing import Literal
 
 import dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
 
-from dreachy.config import Config, parse_types
+from dreachy.config import Config, parse_types, same_site
+from dreachy.mcp_backend import McpBackend
 from dreachy.tools._shared import get_client, reset_client
 
 logger = logging.getLogger(__name__)
@@ -180,6 +181,28 @@ class _EditorialPayload(BaseModel):
     note_type: str | None = None
 
 
+class _BackendPayload(BaseModel):
+    # None = field absent: leave the saved value alone.
+    backend: Literal["jsonapi", "mcp"] | None = None
+    mcp_endpoint: str | None = None
+    mcp_search_index: str | None = None
+    mcp_bundles: list[str] | None = None
+    mcp_extra_tools: list[str] | None = None
+
+
+def _backend_status() -> dict:
+    config = Config.from_env()
+    return {
+        "backend": config.backend,
+        # What the tools use right now: a settings save swaps it at once.
+        "active": "mcp" if isinstance(get_client(), McpBackend) else "jsonapi",
+        "mcp_endpoint": config.mcp_endpoint,
+        "mcp_search_index": config.mcp_search_index,
+        "mcp_bundles": list(config.mcp_bundles),
+        "mcp_extra_tools": list(config.mcp_extra_tools),
+    }
+
+
 def _editorial_status() -> dict:
     return {"available": _editorial_enabled, "note_type": os.environ.get("DREACHY_NOTE_TYPE", "")}
 
@@ -211,8 +234,8 @@ def _auth_status() -> dict:
 def _register_settings_routes(settings_app: FastAPI) -> None:
     """Wire the settings page's routes onto the app's own FastAPI instance.
 
-    GET/POST /api/config, GET /api/schema, GET /api/status, GET/POST /api/auth
-    and GET/POST /api/editorial.
+    GET/POST /api/config, GET /api/schema, GET /api/status, GET/POST /api/auth,
+    GET/POST /api/editorial and GET/POST /api/backend.
     """
 
     @settings_app.get("/api/config")
@@ -289,6 +312,31 @@ def _register_settings_routes(settings_app: FastAPI) -> None:
             _set_env("DREACHY_NOTE_TYPE", note_type)
             reset_client()  # the next note is saved as this type
         return _editorial_status()
+
+    @settings_app.get("/api/backend")
+    def get_backend() -> dict:
+        return _backend_status()
+
+    @settings_app.post("/api/backend")
+    def save_backend(payload: _BackendPayload) -> dict:
+        endpoint = payload.mcp_endpoint.strip() if payload.mcp_endpoint is not None else None
+        if endpoint and not same_site(endpoint, os.environ.get("DREACHY_BASE_URL", "")):
+            # The site's access token goes with every MCP request.
+            raise HTTPException(status_code=400, detail="The MCP endpoint must be on the site's own address.")
+        updates = {
+            "DREACHY_BACKEND": payload.backend,
+            "DREACHY_MCP_ENDPOINT": endpoint,
+            "DREACHY_MCP_SEARCH_INDEX": payload.mcp_search_index.strip() if payload.mcp_search_index is not None else None,
+            "DREACHY_MCP_BUNDLES": ",".join(parse_types(",".join(payload.mcp_bundles))) if payload.mcp_bundles is not None else None,
+            "DREACHY_MCP_EXTRA_TOOLS": (
+                ",".join(parse_types(",".join(payload.mcp_extra_tools))) if payload.mcp_extra_tools is not None else None
+            ),
+        }
+        for key, value in updates.items():
+            if value is not None:
+                _set_env(key, value)
+        reset_client()  # the next request uses the chosen backend
+        return _backend_status()
 
     @settings_app.post("/api/config")
     def save_config(payload: _ConfigPayload) -> dict:

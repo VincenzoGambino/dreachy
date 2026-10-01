@@ -4,14 +4,17 @@ All call sites import from here; nothing is hard-coded in client.py or the
 tools built on top of it.
 """
 
+import json
 import logging
 import os
 from dataclasses import dataclass, field
+from urllib.parse import urlsplit
 
 
 logger = logging.getLogger(__name__)
 
 AUTH_MODES = ("none", "oauth")
+BACKENDS = ("jsonapi", "mcp")
 
 
 @dataclass
@@ -134,9 +137,46 @@ class Config:
         config.oauth_scope = os.environ.get("DREACHY_OAUTH_SCOPE", "").strip()
         if auth == "oauth" and not config.uses_oauth:
             logger.warning("OAuth is selected but the client ID or secret is missing; using anonymous access")
+        _read_backend(config)
         if config.uses_oauth and config.base_url.startswith("http://"):
             logger.warning("The site login sends Dreachy's client secret over plain http; use https")
         return config
+
+
+def _read_backend(config: Config) -> None:
+    """The R4 backend settings (DREACHY_BACKEND and DREACHY_MCP_*)."""
+    backend = os.environ.get("DREACHY_BACKEND", "").strip().lower() or "jsonapi"
+    if backend not in BACKENDS:
+        logger.warning("Unknown DREACHY_BACKEND %r; using JSON:API", backend)
+        backend = "jsonapi"
+    config.backend = backend
+    endpoint = os.environ.get("DREACHY_MCP_ENDPOINT", "").strip()
+    if endpoint and not same_site(endpoint, config.base_url):
+        # The site's access token goes with every MCP request: never to another host.
+        logger.warning("Ignoring DREACHY_MCP_ENDPOINT %s: it isn't on the site's own address", endpoint)
+        endpoint = ""
+    config.mcp_endpoint = endpoint
+    config.mcp_search_index = os.environ.get("DREACHY_MCP_SEARCH_INDEX", "").strip()
+    raw_mapping = os.environ.get("DREACHY_MCP_MAPPING", "").strip()
+    if raw_mapping:
+        try:
+            mapping = json.loads(raw_mapping)
+        except ValueError:
+            mapping = None
+        if isinstance(mapping, dict):
+            config.mcp_mapping = mapping
+        else:
+            logger.warning("Ignoring DREACHY_MCP_MAPPING: it isn't a JSON object")
+    config.mcp_bundles = parse_types(os.environ.get("DREACHY_MCP_BUNDLES", ""))
+    config.mcp_extra_tools = parse_types(os.environ.get("DREACHY_MCP_EXTRA_TOOLS", ""))
+    if backend == "mcp" and not config.uses_oauth:
+        logger.warning("The MCP backend needs the site login (OAuth client credentials); set it on the settings page")
+
+
+def same_site(url: str, base_url: str) -> bool:
+    """Same scheme and host as the site: where the site's token may go."""
+    a, b = urlsplit(url), urlsplit(base_url)
+    return bool(a.netloc) and (a.scheme, a.netloc.lower()) == (b.scheme, b.netloc.lower())
 
 
 def parse_types(value: str) -> tuple[str, ...]:
