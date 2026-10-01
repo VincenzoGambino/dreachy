@@ -141,8 +141,9 @@ object, can name the site's tools when their names don't follow the usual patter
   type that needs the fewest extra fields. A type whose workflow can't save a new item as a
   draft refuses notes the same way.
 - **It's slower.** Each MCP call takes 0.5–3.5 seconds on the sandbox. Dreachy keeps one
-  connection open for reads and makes at most three calls at a time, but reading an article
-  aloud still takes several seconds.
+  connection open for reads and makes at most three calls at a time; measured on the sandbox,
+  "what's new" takes about 5 seconds, reading aloud 5–6, a search 7–8 and saving a note about
+  9 (the watcher's background check about 1).
 
 ## Known issues
 

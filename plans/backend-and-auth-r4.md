@@ -68,6 +68,13 @@ Still proposed, not yet ruled: the R4.2 and R4.3 spec amendments (divergences 1 
 
 **Correction found at Task 2 start:** `mcp` 2.0.0 is built on **`httpx2`** (2.10.0), a separate package from `httpx`. The SDK's client injection, the test `MockTransport` and the exceptions to catch all come from `httpx2`, and its `create_mcp_http_client(headers=, timeout=, auth=)` builds clients with MCP-friendly timeouts. The Task 2 code below is written against `httpx2` accordingly.
 
+**Rulings after Task 1 (Vincenzo, 2026-10-01):**
+- **A:** content types come from one listing of all nodes, or an explicit settings list. A type with no content yet is invisible (documented).
+- **B:** draft-only is checked *before* saving: set draft if the stub isn't, and refuse with nothing saved if that fails. The check after saving stays.
+- **C, amended by E:** required text fields get the note's text. Dreachy never invents any other value: the site fills its defaults, and a rejected save names the field aloud and saves nothing. Discovery prefers the types with the fewest extra required fields.
+- **Deny-list:** extended to `destructiveHint`, `discard` and `set_default`. The entity write tools are never extras. Extras never ask to go live. The MCP endpoint must be on the site's own address.
+- **Latency:** reads share a long-lived session with reconnect-on-failure; writes keep one session per chain. Node dicts are built from list calls, not per-item loads.
+
 ## Corrections from Task 1 (2026-10-01)
 
 Task 1's recordings (`tests/fixtures/mcp/`, findings "Verified from Dreachy") overrule the provisional text below wherever they disagree:
